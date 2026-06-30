@@ -118,19 +118,20 @@ export default function Home() {
 
           <div className="max-w-xl space-y-3 lg:-mt-2">
             <h1 className="text-3xl font-bold leading-tight text-[#120f17] sm:text-4xl">
-              We&apos;ll find you hidden discounted tickets for your Walt Disney World visit.
+              Let our team of insiders connect you with hidden discounted tickets for your Walt
+              Disney World visit.
             </h1>
             <p className="text-lg font-medium leading-8 text-[#3e304d]">
               We track discounted Disney World ticket sales that aren&apos;t advertised to the public,
-              so you can save BIG on your Disney trip. Enter your dates and details to see if your
-              trip qualifies.
+              so you can save BIG on your Disney trip. Enter your dates and details to see if we
+              can save money on your Disney visit!
             </p>
           </div>
         </div>
 
         <div className="grid content-center gap-5">
-          <p className="rounded-full bg-[#fff7de]/90 px-4 py-2 text-sm font-bold text-[#5d45b5]">
-            Group and convention rate tickets, opened up to everyone.
+          <p className="rounded-full bg-[#fff7de]/90 px-4 py-2 text-center text-sm font-bold text-[#5d45b5]">
+            Group and convention rate tickets, open to everyone.
           </p>
 
           <form
@@ -321,7 +322,7 @@ export default function Home() {
             </section>
           )}
 
-          <p className="rounded-full bg-[#fff7de]/80 px-4 py-2 text-xs font-semibold leading-5 text-[#3e304d]">
+          <p className="rounded-full bg-[#fff7de]/80 px-4 py-2 text-center text-xs font-semibold leading-5 text-[#3e304d]">
             Secret Mouse Tickets is an independent service and is not affiliated with Disney.
           </p>
         </div>
