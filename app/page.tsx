@@ -106,7 +106,7 @@ export default function Home() {
   return (
     <main className="brand-page min-h-screen text-[#120f17]">
       <section className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-5 py-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:px-8">
-        <div className="flex flex-col justify-center gap-3 px-1 pb-4 pt-1 sm:px-4 lg:self-center lg:pb-0 lg:pt-0">
+        <div className="flex flex-col items-center justify-center gap-3 px-1 pb-4 pt-1 text-center sm:px-4 lg:self-center lg:pb-0 lg:pt-0">
           <Image
             src="/secret-mouse-tickets-logo.png"
             alt="Secret Mouse Tickets"
@@ -124,7 +124,7 @@ export default function Home() {
             <p className="text-lg font-medium leading-8 text-[#3e304d]">
               We track discounted Disney World ticket sales that aren&apos;t advertised to the public,
               so you can save BIG on your Disney trip. Enter your dates and details to see if we
-              can save money on your Disney visit!
+              can save you money on your Walt Disney World visit!
             </p>
           </div>
         </div>
