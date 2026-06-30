@@ -105,18 +105,18 @@ export default function Home() {
 
   return (
     <main className="brand-page min-h-screen text-[#120f17]">
-      <section className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-5 py-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
-        <div className="flex flex-col justify-center gap-7 px-1 py-4 sm:px-4 lg:py-0">
+      <section className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-5 py-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:px-8">
+        <div className="flex flex-col justify-center gap-3 px-1 pb-4 pt-1 sm:px-4 lg:self-center lg:pb-0 lg:pt-0">
           <Image
-            src="/secret-mouse-tickets-logo.jpg"
+            src="/secret-mouse-tickets-logo.png"
             alt="Secret Mouse Tickets"
-            width={1024}
-            height={1024}
+            width={705}
+            height={607}
             priority
-            className="h-auto w-full max-w-[520px] object-contain"
+            className="h-auto w-full max-w-[500px] object-contain"
           />
 
-          <div className="max-w-xl space-y-4">
+          <div className="max-w-xl space-y-3 lg:-mt-2">
             <h1 className="text-3xl font-bold leading-tight text-[#120f17] sm:text-4xl">
               Find eligible group and convention ticket access for your Walt Disney World visit.
             </h1>

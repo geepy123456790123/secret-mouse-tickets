@@ -12,8 +12,8 @@ export const metadata: Metadata = {
   title: "Secret Mouse Tickets",
   description: "Find eligible group and convention ticket access for your Walt Disney World visit dates.",
   icons: {
-    icon: "/secret-mouse-tickets-logo.jpg",
-    shortcut: "/secret-mouse-tickets-logo.jpg",
+    icon: "/secret-mouse-tickets-logo.png",
+    shortcut: "/secret-mouse-tickets-logo.png",
   },
 };
 
