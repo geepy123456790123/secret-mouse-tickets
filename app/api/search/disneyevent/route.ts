@@ -16,6 +16,7 @@ type SerperResponse = {
 const DEFAULT_QUERY = "site:disneyevent.com";
 const DEFAULT_GOOGLE_SEARCH_URL =
   "https://www.google.com/search?q=site:disneyevent.com&client=safari&sca_esv=2802dad21c2aa82f&sca_upv=1&hl=en-us&prmd=bsivn&sxsrf=ACQVn09cFK7nJ-G_9_qmduXCndQf3zYNyw:1709145310580&filter=0&biw=393&bih=741&dpr=3#ip=1";
+const DEFAULT_RESULT_PAGES = 15;
 const SERPER_SEARCH_URL = "https://google.serper.dev/search";
 
 export async function GET(request: Request) {
@@ -31,8 +32,15 @@ export async function GET(request: Request) {
   };
 
   const requestUrl = new URL(request.url);
-  const num = clampNumber(requestUrl.searchParams.get("num"), 10, 100, 100);
-  const page = clampNumber(requestUrl.searchParams.get("page"), 1, 10, 1);
+  const pageParam = requestUrl.searchParams.get("page");
+  const num = clampNumber(requestUrl.searchParams.get("num"), 10, 100, 10);
+  const page = clampNumber(pageParam, 1, DEFAULT_RESULT_PAGES, 1);
+  const pages = clampNumber(
+    requestUrl.searchParams.get("pages"),
+    1,
+    DEFAULT_RESULT_PAGES,
+    pageParam ? 1 : DEFAULT_RESULT_PAGES
+  );
   const googleSearchUrl = buildGoogleSearchUrl({
     value:
       requestUrl.searchParams.get("googleUrl") ??
@@ -52,10 +60,18 @@ export async function GET(request: Request) {
   );
 
   if (provider === "serper") {
-    return searchWithSerper({ runtime, query, num, page, filter, googleSearchUrl });
+    return searchWithSerper({
+      runtime,
+      query,
+      num,
+      page,
+      pages,
+      filter,
+      googleSearchUrl,
+    });
   }
 
-  return searchGoogleHtml({ googleSearchUrl, query, filter });
+  return searchGoogleHtml({ googleSearchUrl, query, num, page, pages, filter });
 }
 
 async function searchWithSerper({
@@ -63,6 +79,7 @@ async function searchWithSerper({
   query,
   num,
   page,
+  pages,
   filter,
   googleSearchUrl,
 }: {
@@ -70,6 +87,7 @@ async function searchWithSerper({
   query: string;
   num: number;
   page: number;
+  pages: number;
   filter: string;
   googleSearchUrl: URL;
 }) {
@@ -80,38 +98,54 @@ async function searchWithSerper({
     );
   }
 
-  const response = await fetch(SERPER_SEARCH_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-API-KEY": runtime.SERPER_API_KEY,
-    },
-    body: JSON.stringify({
-      q: query,
-      gl: "us",
-      hl: "en",
-      num,
-      page,
-      filter,
-    }),
-  });
+  const payloads: SerperResponse[] = [];
 
-  const payload = (await response.json().catch(() => ({}))) as SerperResponse;
-
-  if (!response.ok) {
-    return Response.json(
-      {
-        error:
-          payload.message ??
-          payload.error ??
-          `Serper returned status ${response.status}.`,
+  for (
+    let currentPage = page;
+    currentPage < page + pages && currentPage <= DEFAULT_RESULT_PAGES;
+    currentPage++
+  ) {
+    const response = await fetch(SERPER_SEARCH_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-KEY": runtime.SERPER_API_KEY,
       },
-      { status: 502 }
-    );
+      body: JSON.stringify({
+        q: query,
+        gl: "us",
+        hl: "en",
+        num,
+        page: currentPage,
+        filter,
+      }),
+    });
+
+    const payload = (await response.json().catch(() => ({}))) as SerperResponse;
+
+    if (!response.ok) {
+      return Response.json(
+        {
+          error:
+            payload.message ??
+            payload.error ??
+            `Serper returned status ${response.status}.`,
+          page: currentPage,
+        },
+        { status: 502 }
+      );
+    }
+
+    payloads.push(payload);
+
+    if (!payload.organic?.length) {
+      break;
+    }
   }
 
   const items = dedupeLinks(
-    (payload.organic ?? [])
+    payloads
+      .flatMap((payload) => payload.organic ?? [])
       .map((result) => result.link)
       .filter((link): link is string => isDisneyEventUrl(link))
   ).map((link) => ({ link }));
@@ -121,6 +155,8 @@ async function searchWithSerper({
     sourceUrl: googleSearchUrl.toString(),
     query,
     filter,
+    page,
+    pages: payloads.length,
     items,
     count: items.length,
   });
@@ -129,30 +165,49 @@ async function searchWithSerper({
 async function searchGoogleHtml({
   googleSearchUrl,
   query,
+  num,
+  page,
+  pages,
   filter,
 }: {
   googleSearchUrl: URL;
   query: string;
+  num: number;
+  page: number;
+  pages: number;
   filter: string;
 }) {
-  const response = await fetch(googleSearchUrl, {
-    headers: {
-      "Accept-Language": "en-US,en;q=0.9",
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
-    },
-  });
+  const links: string[] = [];
 
-  const html = await response.text();
+  for (
+    let currentPage = page;
+    currentPage < page + pages && currentPage <= DEFAULT_RESULT_PAGES;
+    currentPage++
+  ) {
+    const pageUrl = new URL(googleSearchUrl);
+    pageUrl.searchParams.set("start", String((currentPage - 1) * num));
 
-  if (!response.ok) {
-    return Response.json(
-      { error: `Google returned status ${response.status}.` },
-      { status: 502 }
-    );
+    const response = await fetch(pageUrl, {
+      headers: {
+        "Accept-Language": "en-US,en;q=0.9",
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
+      },
+    });
+
+    const html = await response.text();
+
+    if (!response.ok) {
+      return Response.json(
+        { error: `Google returned status ${response.status}.`, page: currentPage },
+        { status: 502 }
+      );
+    }
+
+    links.push(...parseGoogleResultLinks(html));
   }
 
-  const items = parseGoogleResultLinks(html).map((link) => ({ link }));
+  const items = dedupeLinks(links).map((link) => ({ link }));
   const warnings: string[] = [];
 
   if (!items.length) {
@@ -166,6 +221,8 @@ async function searchGoogleHtml({
     sourceUrl: googleSearchUrl.toString(),
     query,
     filter,
+    page,
+    pages,
     items,
     count: items.length,
     ...(warnings.length ? { warnings } : {}),
