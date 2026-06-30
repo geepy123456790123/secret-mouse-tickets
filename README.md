@@ -23,17 +23,19 @@ Copy `.env.example` to `.env.local` for local work. In production, configure the
 - `RESEND_API_KEY`
 - `FROM_EMAIL`
 - `SERPER_API_KEY`
+- `GOOGLE_SEARCH_URL`
+- `SEARCH_NORMALIZER_PROVIDER`
 
 When Square credentials are absent, checkout uses a local demo confirmation page. When Square credentials are present, `/api/checkout` creates a Square hosted checkout link.
 
 ## Event ingestion
 
-The ingestion script intentionally expects either explicit event URLs or a licensed/authorized search provider endpoint. It does not scrape Google HTML results.
+The ingestion script expects either explicit event URLs or a search normalizer endpoint. The default normalizer URL is the Google results URL with omitted results included via `filter=0`.
 
 ```bash
 SEARCH_PROVIDER_ENDPOINT="http://localhost:3003/api/search/disneyevent" npm run ingest:events
 ```
 
-The `/api/search/disneyevent` endpoint calls Serper, normalizes `organic[].link` results into `items[].link`, and only returns `https://disneyevent.com/` URLs. In production, this endpoint is protected by `ADMIN_INGEST_TOKEN`.
+The `/api/search/disneyevent` endpoint defaults to fetching the configured Google Search URL, parsing result links, normalizing them into `items[].link`, and only returning `https://disneyevent.com/` URLs. It forces `filter=0` so omitted similar results are included. Direct Google HTML can be blocked or changed by Google, so the endpoint also supports `provider=serper` if the Serper account allows the needed `site:` query pattern. In production, this endpoint is protected by `ADMIN_INGEST_TOKEN`.
 
 Parsed events are posted to `INGEST_ENDPOINT` when set, usually `/api/admin/events`. Duplicate event URLs are upserted. Expired events and pages with the excluded brochure image are deleted/ignored.
