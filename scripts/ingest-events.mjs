@@ -98,7 +98,13 @@ async function discoverCandidateUrls() {
   }
 
   if (process.env.SEARCH_PROVIDER_ENDPOINT) {
-    const response = await fetch(process.env.SEARCH_PROVIDER_ENDPOINT);
+    const response = await fetch(process.env.SEARCH_PROVIDER_ENDPOINT, {
+      headers: {
+        ...(process.env.ADMIN_INGEST_TOKEN
+          ? { Authorization: `Bearer ${process.env.ADMIN_INGEST_TOKEN}` }
+          : {}),
+      },
+    });
     if (!response.ok) {
       throw new Error(`Search provider returned ${response.status}`);
     }
