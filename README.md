@@ -1,0 +1,36 @@
+# Secret Mouse Savers
+
+Full-stack prototype for checking Walt Disney World group/convention ticket access windows, routing eligible visitors to checkout, and sending a confirmation email after payment.
+
+## Local development
+
+```bash
+npm install
+npm run dev
+```
+
+Open the local URL printed by the dev server. The app seeds one future demo event so the default form values produce a match.
+
+## Environment
+
+Copy `.env.example` to `.env.local` for local work. In production, configure these as hosted runtime secrets:
+
+- `ADMIN_INGEST_TOKEN`
+- `DAILY_PURCHASE_LIMIT`
+- `SQUARE_ENVIRONMENT`
+- `SQUARE_ACCESS_TOKEN`
+- `SQUARE_LOCATION_ID`
+- `RESEND_API_KEY`
+- `FROM_EMAIL`
+
+When Square credentials are absent, checkout uses a local demo confirmation page. When Square credentials are present, `/api/checkout` creates a Square hosted checkout link.
+
+## Event ingestion
+
+The ingestion script intentionally expects either explicit event URLs or a licensed/authorized search provider endpoint. It does not scrape Google HTML results.
+
+```bash
+EVENT_URLS="https://disneyevent.com/example" npm run ingest:events
+```
+
+Parsed events are posted to `INGEST_ENDPOINT` when set, usually `/api/admin/events`. Duplicate event URLs are upserted. Expired events and pages with the excluded brochure image are deleted/ignored.
