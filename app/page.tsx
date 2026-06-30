@@ -3,13 +3,10 @@
 import Image from "next/image";
 import {
   BadgeCheck,
-  CalendarDays,
   Hotel,
   Mail,
   Search,
   ShoppingCart,
-  Ticket,
-  Users,
 } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { formatDate } from "@/lib/dates";
@@ -109,54 +106,25 @@ export default function Home() {
   return (
     <main className="brand-page min-h-screen text-[#120f17]">
       <section className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-5 py-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
-        <div className="cartoon-panel flex flex-col justify-between gap-7 rounded-[24px] bg-[#fff7de] p-5 sm:p-7">
-          <div>
-            <header className="flex items-start justify-between gap-4">
-              <Image
-                src="/secret-mouse-tickets-logo.jpg"
-                alt="Secret Mouse Tickets"
-                width={1024}
-                height={1024}
-                priority
-                className="h-auto w-44 rounded-[20px] border-4 border-[#120f17] object-cover sm:w-52"
-              />
-              <span className="rounded-full border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2 text-sm font-bold text-[#120f17] shadow-[4px_4px_0_#120f17]">
-                Private beta
-              </span>
-            </header>
+        <div className="flex flex-col justify-center gap-7 px-1 py-4 sm:px-4 lg:py-0">
+          <Image
+            src="/secret-mouse-tickets-logo.jpg"
+            alt="Secret Mouse Tickets"
+            width={1024}
+            height={1024}
+            priority
+            className="h-auto w-full max-w-[520px] object-contain"
+          />
 
-            <div className="mt-8 space-y-5">
-              <p className="inline-flex items-center gap-2 rounded-full border-[3px] border-[#120f17] bg-[#fff] px-4 py-2 text-sm font-bold text-[#5d45b5] shadow-[4px_4px_0_#120f17]">
-                <Ticket size={17} aria-hidden="true" />
-                Group & convention ticket access
-              </p>
-              <div>
-                <p className="brand-text-shadow text-4xl font-bold leading-none text-[#8f72f2] sm:text-5xl">
-                  Secret
-                </p>
-                <h1 className="brand-text-shadow mt-1 max-w-xl text-4xl font-bold leading-none text-[#ffbd38] sm:text-6xl">
-                  Mouse Tickets
-                </h1>
-              </div>
-              <p className="max-w-xl text-lg font-medium leading-7 text-[#3e304d]">
-                Check your Walt Disney World visit dates for active event-window ticket access.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid gap-3 text-sm sm:grid-cols-3">
-            <div className="cartoon-panel-soft rounded-[18px] bg-white p-4">
-              <CalendarDays className="mb-3 text-[#8f72f2]" size={24} aria-hidden="true" />
-              <p className="font-bold">Date-window matching</p>
-            </div>
-            <div className="cartoon-panel-soft rounded-[18px] bg-[#ffe08c] p-4">
-              <Users className="mb-3 text-[#bf7c3d]" size={24} aria-hidden="true" />
-              <p className="font-bold">Party details checked</p>
-            </div>
-            <div className="cartoon-panel-soft rounded-[18px] bg-[#ffdfe7] p-4">
-              <Hotel className="mb-3 text-[#5d45b5]" size={24} aria-hidden="true" />
-              <p className="font-bold">Hotel bonus detected</p>
-            </div>
+          <div className="max-w-xl space-y-4">
+            <h1 className="text-3xl font-bold leading-tight text-[#120f17] sm:text-4xl">
+              Find eligible group and convention ticket access for your Walt Disney World visit.
+            </h1>
+            <p className="text-lg font-medium leading-8 text-[#3e304d]">
+              Secret Mouse Tickets checks your trip dates against active event ticket windows. If
+              your visit qualifies, you can purchase access and receive the direct Disney event
+              ticket link, plus any available hotel booking link.
+            </p>
           </div>
         </div>
 

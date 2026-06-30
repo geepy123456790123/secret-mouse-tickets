@@ -56,11 +56,3 @@ select:focus-visible {
   border: 3px solid var(--brand-black);
   box-shadow: 6px 6px 0 var(--brand-black);
 }
-
-.brand-text-shadow {
-  text-shadow:
-    3px 3px 0 var(--brand-black),
-    -1px 1px 0 var(--brand-black),
-    1px -1px 0 var(--brand-black),
-    -1px -1px 0 var(--brand-black);
-}
