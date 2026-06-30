@@ -118,17 +118,21 @@ export default function Home() {
 
           <div className="max-w-xl space-y-3 lg:-mt-2">
             <h1 className="text-3xl font-bold leading-tight text-[#120f17] sm:text-4xl">
-              Find eligible group and convention ticket access for your Walt Disney World visit.
+              We&apos;ll find you hidden discounted tickets for your Walt Disney World visit.
             </h1>
             <p className="text-lg font-medium leading-8 text-[#3e304d]">
-              Secret Mouse Tickets checks your trip dates against active event ticket windows. If
-              your visit qualifies, you can purchase access and receive the direct Disney event
-              ticket link, plus any available hotel booking link.
+              We track discounted Disney World ticket sales that aren&apos;t advertised to the public,
+              so you can save BIG on your Disney trip. Enter your dates and details to see if your
+              trip qualifies.
             </p>
           </div>
         </div>
 
         <div className="grid content-center gap-5">
+          <p className="rounded-full bg-[#fff7de]/90 px-4 py-2 text-sm font-bold text-[#5d45b5]">
+            Group and convention rate tickets, opened up to everyone.
+          </p>
+
           <form
             onSubmit={submitForm}
             className="cartoon-panel rounded-[24px] bg-white p-5 sm:p-6"
