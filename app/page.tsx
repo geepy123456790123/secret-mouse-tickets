@@ -113,11 +113,11 @@ export default function Home() {
             width={705}
             height={607}
             priority
-            className="h-auto w-full max-w-[500px] object-contain"
+            className="h-auto w-full max-w-[400px] object-contain"
           />
 
           <div className="max-w-xl space-y-3 lg:-mt-2">
-            <h1 className="text-3xl font-bold leading-tight text-[#120f17] sm:text-4xl">
+            <h1 className="text-2xl font-bold leading-tight text-[#120f17] sm:text-3xl">
               Let our team of insiders connect you with hidden discounted tickets for your Walt
               Disney World visit.
             </h1>
