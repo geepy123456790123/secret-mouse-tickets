@@ -107,50 +107,55 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f4ed] text-[#17211d]">
-      <section className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-5 py-6 lg:grid-cols-[0.94fr_1.06fr] lg:px-8">
-        <div className="flex flex-col justify-between gap-8 rounded-lg border border-[#d8d0c0] bg-[#fffaf0] p-5 sm:p-7">
+    <main className="brand-page min-h-screen text-[#120f17]">
+      <section className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-5 py-6 lg:grid-cols-[0.92fr_1.08fr] lg:px-8">
+        <div className="cartoon-panel flex flex-col justify-between gap-7 rounded-[24px] bg-[#fff7de] p-5 sm:p-7">
           <div>
-            <header className="flex items-center justify-between gap-4">
+            <header className="flex items-start justify-between gap-4">
               <Image
-                src="/secret-mouse-savers-logo.svg"
-                alt="Secret Mouse Savers"
-                width={188}
-                height={60}
+                src="/secret-mouse-tickets-logo.jpg"
+                alt="Secret Mouse Tickets"
+                width={1024}
+                height={1024}
                 priority
-                className="h-auto w-44"
+                className="h-auto w-44 rounded-[20px] border-4 border-[#120f17] object-cover sm:w-52"
               />
-              <span className="rounded-md bg-[#dcefe6] px-3 py-2 text-xs font-semibold text-[#1d604f]">
+              <span className="rounded-full border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2 text-sm font-bold text-[#120f17] shadow-[4px_4px_0_#120f17]">
                 Private beta
               </span>
             </header>
 
-            <div className="mt-12 space-y-5">
-              <p className="inline-flex items-center gap-2 rounded-md border border-[#dfb561] bg-[#fff3d3] px-3 py-2 text-sm font-semibold text-[#76550d]">
+            <div className="mt-8 space-y-5">
+              <p className="inline-flex items-center gap-2 rounded-full border-[3px] border-[#120f17] bg-[#fff] px-4 py-2 text-sm font-bold text-[#5d45b5] shadow-[4px_4px_0_#120f17]">
                 <Ticket size={17} aria-hidden="true" />
                 Group & convention ticket access
               </p>
-              <h1 className="max-w-xl text-4xl font-semibold leading-tight sm:text-5xl">
-                Check your Walt Disney World visit dates.
-              </h1>
-              <p className="max-w-xl text-base leading-7 text-[#586159]">
-                Enter your trip details to see whether an active event window overlaps your visit.
+              <div>
+                <p className="brand-text-shadow text-4xl font-bold leading-none text-[#8f72f2] sm:text-5xl">
+                  Secret
+                </p>
+                <h1 className="brand-text-shadow mt-1 max-w-xl text-4xl font-bold leading-none text-[#ffbd38] sm:text-6xl">
+                  Mouse Tickets
+                </h1>
+              </div>
+              <p className="max-w-xl text-lg font-medium leading-7 text-[#3e304d]">
+                Check your Walt Disney World visit dates for active event-window ticket access.
               </p>
             </div>
           </div>
 
           <div className="grid gap-3 text-sm sm:grid-cols-3">
-            <div className="rounded-lg border border-[#e1dacb] bg-white p-4">
-              <CalendarDays className="mb-3 text-[#2f8068]" size={22} aria-hidden="true" />
-              <p className="font-semibold">Date-window matching</p>
+            <div className="cartoon-panel-soft rounded-[18px] bg-white p-4">
+              <CalendarDays className="mb-3 text-[#8f72f2]" size={24} aria-hidden="true" />
+              <p className="font-bold">Date-window matching</p>
             </div>
-            <div className="rounded-lg border border-[#e1dacb] bg-white p-4">
-              <Users className="mb-3 text-[#be5b3f]" size={22} aria-hidden="true" />
-              <p className="font-semibold">Party details checked</p>
+            <div className="cartoon-panel-soft rounded-[18px] bg-[#ffe08c] p-4">
+              <Users className="mb-3 text-[#bf7c3d]" size={24} aria-hidden="true" />
+              <p className="font-bold">Party details checked</p>
             </div>
-            <div className="rounded-lg border border-[#e1dacb] bg-white p-4">
-              <Hotel className="mb-3 text-[#5f6e9a]" size={22} aria-hidden="true" />
-              <p className="font-semibold">Hotel bonus detected</p>
+            <div className="cartoon-panel-soft rounded-[18px] bg-[#ffdfe7] p-4">
+              <Hotel className="mb-3 text-[#5d45b5]" size={24} aria-hidden="true" />
+              <p className="font-bold">Hotel bonus detected</p>
             </div>
           </div>
         </div>
@@ -158,35 +163,37 @@ export default function Home() {
         <div className="grid content-center gap-5">
           <form
             onSubmit={submitForm}
-            className="rounded-lg border border-[#d8d0c0] bg-white p-5 shadow-sm sm:p-6"
+            className="cartoon-panel rounded-[24px] bg-white p-5 sm:p-6"
           >
             <div className="mb-5 flex items-center justify-between gap-4">
-              <h2 className="text-xl font-semibold">Visit Details</h2>
-              <span className="text-sm font-medium text-[#60706a]">{totalGuests} guests</span>
+              <h2 className="text-2xl font-bold">Visit Details</h2>
+              <span className="rounded-full border-[3px] border-[#120f17] bg-[#d8c6ff] px-3 py-1 text-sm font-bold">
+                {totalGuests} guests
+              </span>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <label className="grid gap-2 text-sm font-semibold">
+              <label className="grid gap-2 text-sm font-bold">
                 Visit Start Date
                 <input
                   type="date"
                   required
                   value={form.visitStartDate}
                   onChange={(event) => setForm({ ...form, visitStartDate: event.target.value })}
-                  className="h-12 rounded-md border border-[#cfc7b8] px-3 text-base"
+                  className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-3 text-base font-semibold"
                 />
               </label>
-              <label className="grid gap-2 text-sm font-semibold">
+              <label className="grid gap-2 text-sm font-bold">
                 Visit End Date
                 <input
                   type="date"
                   required
                   value={form.visitEndDate}
                   onChange={(event) => setForm({ ...form, visitEndDate: event.target.value })}
-                  className="h-12 rounded-md border border-[#cfc7b8] px-3 text-base"
+                  className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-3 text-base font-semibold"
                 />
               </label>
-              <label className="grid gap-2 text-sm font-semibold">
+              <label className="grid gap-2 text-sm font-bold">
                 Theme Park Days
                 <input
                   type="number"
@@ -196,23 +203,23 @@ export default function Home() {
                   onChange={(event) =>
                     setForm({ ...form, themeParkDays: Number(event.target.value) })
                   }
-                  className="h-12 rounded-md border border-[#cfc7b8] px-3 text-base"
+                  className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-3 text-base font-semibold"
                 />
               </label>
-              <label className="grid gap-2 text-sm font-semibold">
+              <label className="grid gap-2 text-sm font-bold">
                 Park Hopper Option
                 <select
                   value={form.parkHopper ? "yes" : "no"}
                   onChange={(event) =>
                     setForm({ ...form, parkHopper: event.target.value === "yes" })
                   }
-                  className="h-12 rounded-md border border-[#cfc7b8] px-3 text-base"
+                  className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-3 text-base font-semibold"
                 >
                   <option value="no">No</option>
                   <option value="yes">Yes</option>
                 </select>
               </label>
-              <label className="grid gap-2 text-sm font-semibold">
+              <label className="grid gap-2 text-sm font-bold">
                 Guests Ages 10+
                 <input
                   type="number"
@@ -222,10 +229,10 @@ export default function Home() {
                   onChange={(event) =>
                     setForm({ ...form, guests10Plus: Number(event.target.value) })
                   }
-                  className="h-12 rounded-md border border-[#cfc7b8] px-3 text-base"
+                  className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-3 text-base font-semibold"
                 />
               </label>
-              <label className="grid gap-2 text-sm font-semibold">
+              <label className="grid gap-2 text-sm font-bold">
                 Guests Ages 3-9
                 <input
                   type="number"
@@ -235,27 +242,27 @@ export default function Home() {
                   onChange={(event) =>
                     setForm({ ...form, guests3To9: Number(event.target.value) })
                   }
-                  className="h-12 rounded-md border border-[#cfc7b8] px-3 text-base"
+                  className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-3 text-base font-semibold"
                 />
               </label>
-              <label className="grid gap-2 text-sm font-semibold">
+              <label className="grid gap-2 text-sm font-bold">
                 Florida Resident Discount
                 <select
                   value={form.floridaResident ? "yes" : "no"}
                   onChange={(event) =>
                     setForm({ ...form, floridaResident: event.target.value === "yes" })
                   }
-                  className="h-12 rounded-md border border-[#cfc7b8] px-3 text-base"
+                  className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-3 text-base font-semibold"
                 >
                   <option value="no">No</option>
                   <option value="yes">Yes</option>
                 </select>
               </label>
-              <label className="grid gap-2 text-sm font-semibold">
+              <label className="grid gap-2 text-sm font-bold">
                 Email
                 <span className="relative">
                   <Mail
-                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#78847f]"
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#5d45b5]"
                     size={18}
                     aria-hidden="true"
                   />
@@ -264,7 +271,7 @@ export default function Home() {
                     required
                     value={form.email}
                     onChange={(event) => setForm({ ...form, email: event.target.value })}
-                    className="h-12 w-full rounded-md border border-[#cfc7b8] px-10 text-base"
+                    className="h-12 w-full rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-10 text-base font-semibold"
                     placeholder="you@example.com"
                   />
                 </span>
@@ -274,58 +281,58 @@ export default function Home() {
             <button
               type="submit"
               disabled={status === "checking"}
-              className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-[#2f8068] px-5 font-semibold text-white transition hover:bg-[#236b57] disabled:cursor-not-allowed disabled:opacity-70"
+              className="mt-5 inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-[16px] border-4 border-[#120f17] bg-[#ffbd38] px-5 text-lg font-bold text-[#120f17] shadow-[5px_5px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[7px_7px_0_#120f17] disabled:cursor-not-allowed disabled:opacity-70"
             >
-              <Search size={18} aria-hidden="true" />
+              <Search size={20} aria-hidden="true" />
               {status === "checking" ? "Checking dates..." : "Check My Dates"}
             </button>
           </form>
 
           {error && (
-            <p className="rounded-lg border border-[#ebc1b4] bg-[#fff1ed] px-4 py-3 text-sm font-semibold text-[#8a3927]">
+            <p className="rounded-[18px] border-4 border-[#120f17] bg-[#ffdfe7] px-4 py-3 text-sm font-bold text-[#120f17] shadow-[5px_5px_0_#120f17]">
               {error}
             </p>
           )}
 
           {result?.outcome === "not_found" && (
-            <section className="rounded-lg border border-[#d8d0c0] bg-white p-5">
-              <p className="text-lg font-semibold">{result.message}</p>
+            <section className="rounded-[20px] border-4 border-[#120f17] bg-white p-5 shadow-[6px_6px_0_#120f17]">
+              <p className="text-lg font-bold">{result.message}</p>
             </section>
           )}
 
           {result?.outcome === "matched" && (
-            <section className="rounded-lg border border-[#bdd6ca] bg-[#f4fff9] p-5">
-              <p className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-[#236b57]">
+            <section className="rounded-[24px] border-4 border-[#120f17] bg-[#efe8ff] p-5 shadow-[8px_8px_0_#120f17]">
+              <p className="inline-flex items-center gap-2 rounded-full border-[3px] border-[#120f17] bg-white px-3 py-2 text-sm font-bold text-[#5d45b5]">
                 <BadgeCheck size={17} aria-hidden="true" />
                 Match found
               </p>
-              <h2 className="mt-4 text-2xl font-semibold leading-tight">
-                We Found Secret Mouse Saver Discounts For Your Walt Disney World Visit Dates!
+              <h2 className="mt-4 text-2xl font-bold leading-tight">
+                We found Secret Mouse Tickets access for your Walt Disney World visit dates!
               </h2>
-              <p className="mt-3 text-base font-semibold">
+              <p className="mt-3 text-base font-bold">
                 Walt Disney World&reg; Discounted Group & Convention Theme Park Tickets & Passes
               </p>
-              <p className="mt-3 text-sm leading-6 text-[#4c5c56]">
+              <p className="mt-3 text-sm font-semibold leading-6 text-[#3e304d]">
                 Valid for {form.themeParkDays} days from {formatDate(result.event.validStartDate)} to{" "}
                 {formatDate(result.event.validEndDate)}.
               </p>
-              <p className="mt-3 text-sm font-semibold text-[#76550d]">
+              <p className="mt-3 text-sm font-bold text-[#7b4b00]">
                 PLUS: An added bonus with multi-day tickets.
               </p>
               {result.event.hotelSpecialRateAvailable && result.event.hotelName && (
-                <p className="mt-3 inline-flex items-center gap-2 rounded-md border border-[#d8d0c0] bg-white px-3 py-2 text-sm font-semibold">
+                <p className="mt-3 inline-flex items-center gap-2 rounded-[16px] border-[3px] border-[#120f17] bg-[#ffe08c] px-3 py-2 text-sm font-bold">
                   <Hotel size={17} aria-hidden="true" />
                   Discounted rates at {result.event.hotelName} during your visit.
                 </p>
               )}
 
               <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
-                <label className="grid gap-2 text-sm font-semibold">
+                <label className="grid gap-2 text-sm font-bold">
                   Coupon or Access Code
                   <input
                     value={couponCode}
                     onChange={(event) => setCouponCode(event.target.value)}
-                    className="h-12 rounded-md border border-[#bdd6ca] bg-white px-3 text-base uppercase"
+                    className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-white px-3 text-base font-semibold uppercase"
                     placeholder="Optional"
                   />
                 </label>
@@ -333,7 +340,7 @@ export default function Home() {
                   type="button"
                   onClick={startCheckout}
                   disabled={status === "checkout"}
-                  className="inline-flex h-12 items-center justify-center gap-2 self-end rounded-md bg-[#17211d] px-5 font-semibold text-white transition hover:bg-[#2c3833] disabled:cursor-not-allowed disabled:opacity-70"
+                  className="inline-flex h-12 items-center justify-center gap-2 self-end rounded-[16px] border-4 border-[#120f17] bg-[#8f72f2] px-5 font-bold text-white shadow-[5px_5px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[7px_7px_0_#120f17] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   <ShoppingCart size={18} aria-hidden="true" />
                   {status === "checkout" ? "Opening..." : "Purchase For $99"}
@@ -342,8 +349,8 @@ export default function Home() {
             </section>
           )}
 
-          <p className="text-xs leading-5 text-[#68736e]">
-            Secret Mouse Savers is an independent service and is not affiliated with Disney.
+          <p className="rounded-full bg-[#fff7de]/80 px-4 py-2 text-xs font-semibold leading-5 text-[#3e304d]">
+            Secret Mouse Tickets is an independent service and is not affiliated with Disney.
           </p>
         </div>
       </section>

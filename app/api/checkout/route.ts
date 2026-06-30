@@ -147,7 +147,7 @@ async function createSquareCheckoutLink({
     body: JSON.stringify({
       idempotency_key: orderId,
       quick_pay: {
-        name: "Secret Mouse Saver",
+        name: "Secret Mouse Tickets",
         price_money: {
           amount: amountCents,
           currency: "USD",
@@ -157,7 +157,7 @@ async function createSquareCheckoutLink({
       checkout_options: {
         redirect_url: redirectUrl,
       },
-      payment_note: `Secret Mouse Saver order ${orderId}`,
+      payment_note: `Secret Mouse Tickets order ${orderId}`,
     }),
   });
 

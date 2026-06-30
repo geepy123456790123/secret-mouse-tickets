@@ -1,4 +1,4 @@
-# Secret Mouse Savers
+# Secret Mouse Tickets
 
 Full-stack prototype for checking Walt Disney World group/convention ticket access windows, routing eligible visitors to checkout, and sending a confirmation email after payment.
 

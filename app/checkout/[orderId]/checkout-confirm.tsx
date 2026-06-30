@@ -37,12 +37,12 @@ export function CheckoutConfirm({ orderId }: { orderId: string }) {
 
   if (status === "done") {
     return (
-      <div className="rounded-lg border border-[#bdd6ca] bg-[#f4fff9] p-5">
-        <p className="inline-flex items-center gap-2 font-semibold text-[#236b57]">
+      <div className="rounded-[20px] border-4 border-[#120f17] bg-[#efe8ff] p-5">
+        <p className="inline-flex items-center gap-2 font-bold text-[#5d45b5]">
           <CheckCircle2 size={19} aria-hidden="true" />
           Confirmation email ready
         </p>
-        <pre className="mt-4 max-h-72 overflow-auto whitespace-pre-wrap rounded-md bg-white p-4 text-sm leading-6 text-[#17211d]">
+        <pre className="mt-4 max-h-72 overflow-auto whitespace-pre-wrap rounded-[16px] border-[3px] border-[#120f17] bg-white p-4 text-sm leading-6 text-[#120f17]">
           {message}
         </pre>
       </div>
@@ -52,7 +52,7 @@ export function CheckoutConfirm({ orderId }: { orderId: string }) {
   return (
     <div className="grid gap-3">
       {error && (
-        <p className="rounded-lg border border-[#ebc1b4] bg-[#fff1ed] px-4 py-3 text-sm font-semibold text-[#8a3927]">
+        <p className="rounded-[18px] border-4 border-[#120f17] bg-[#ffdfe7] px-4 py-3 text-sm font-bold text-[#120f17]">
           {error}
         </p>
       )}
@@ -60,7 +60,7 @@ export function CheckoutConfirm({ orderId }: { orderId: string }) {
         type="button"
         onClick={confirmPayment}
         disabled={status === "working"}
-        className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-[#2f8068] px-5 font-semibold text-white transition hover:bg-[#236b57] disabled:cursor-not-allowed disabled:opacity-70"
+        className="inline-flex h-12 items-center justify-center gap-2 rounded-[16px] border-4 border-[#120f17] bg-[#ffbd38] px-5 font-bold text-[#120f17] shadow-[5px_5px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[7px_7px_0_#120f17] disabled:cursor-not-allowed disabled:opacity-70"
       >
         <Mail size={18} aria-hidden="true" />
         {status === "working" ? "Sending..." : "Mark Test Purchase Paid"}

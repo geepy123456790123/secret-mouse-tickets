@@ -1,20 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f4ed;
-  --foreground: #17211d;
+  --background: #d8c6ff;
+  --foreground: #120f17;
+  --brand-lavender: #d8c6ff;
+  --brand-purple: #8f72f2;
+  --brand-purple-dark: #5d45b5;
+  --brand-yellow: #ffbd38;
+  --brand-yellow-soft: #ffe08c;
+  --brand-pink: #ff7f98;
+  --brand-tan: #bf7c3d;
+  --brand-black: #120f17;
+  --brand-cream: #fff7de;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-fredoka);
+  --font-mono: var(--font-fredoka);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+  font-family: var(--font-fredoka), Arial, Helvetica, sans-serif;
 }
 
 input,
@@ -26,6 +36,31 @@ button {
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 3px solid #2f8068;
+  outline: 4px solid var(--brand-purple);
   outline-offset: 2px;
+}
+
+.brand-page {
+  background:
+    radial-gradient(circle at 18px 18px, rgba(255, 255, 255, 0.48) 0 2px, transparent 3px),
+    linear-gradient(180deg, #dfd0ff 0%, #d8c6ff 42%, #ffe8a8 100%);
+  background-size: 36px 36px, auto;
+}
+
+.cartoon-panel {
+  border: 4px solid var(--brand-black);
+  box-shadow: 10px 10px 0 var(--brand-black);
+}
+
+.cartoon-panel-soft {
+  border: 3px solid var(--brand-black);
+  box-shadow: 6px 6px 0 var(--brand-black);
+}
+
+.brand-text-shadow {
+  text-shadow:
+    3px 3px 0 var(--brand-black),
+    -1px 1px 0 var(--brand-black),
+    1px -1px 0 var(--brand-black),
+    -1px -1px 0 var(--brand-black);
 }

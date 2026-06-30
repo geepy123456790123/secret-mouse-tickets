@@ -41,7 +41,7 @@ async function main() {
       const response = await fetch(url, {
         headers: {
           "User-Agent":
-            "SecretMouseSaversBot/0.1 authorized event indexing contact=hello@secretmousesavers.com",
+            "SecretMouseTicketsBot/0.1 authorized event indexing contact=hello@secretmousetickets.com",
         },
       });
 

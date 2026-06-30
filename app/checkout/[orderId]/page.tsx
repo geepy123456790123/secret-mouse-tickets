@@ -35,24 +35,24 @@ export default async function CheckoutPage({
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f4ed] px-5 py-8 text-[#17211d]">
-      <section className="mx-auto grid max-w-2xl gap-5 rounded-lg border border-[#d8d0c0] bg-white p-5 sm:p-7">
+    <main className="brand-page min-h-screen px-5 py-8 text-[#120f17]">
+      <section className="cartoon-panel mx-auto grid max-w-2xl gap-5 rounded-[24px] bg-white p-5 sm:p-7">
         <Image
-          src="/secret-mouse-savers-logo.svg"
-          alt="Secret Mouse Savers"
-          width={190}
-          height={60}
+          src="/secret-mouse-tickets-logo.jpg"
+          alt="Secret Mouse Tickets"
+          width={1024}
+          height={1024}
           priority
-          className="h-auto w-44"
+          className="h-auto w-44 rounded-[20px] border-4 border-[#120f17] object-cover"
         />
         <div className="grid gap-2">
-          <p className="text-sm font-semibold uppercase text-[#60706a]">Demo checkout</p>
-          <h1 className="text-3xl font-semibold">Secret Mouse Saver</h1>
-          <p className="text-lg font-semibold">${(order.amount_cents / 100).toFixed(2)}</p>
+          <p className="text-sm font-bold uppercase text-[#5d45b5]">Demo checkout</p>
+          <h1 className="text-3xl font-bold">Secret Mouse Tickets</h1>
+          <p className="text-lg font-bold">${(order.amount_cents / 100).toFixed(2)}</p>
         </div>
 
-        <div className="rounded-lg border border-[#e1dacb] bg-[#fffaf0] p-4 text-sm leading-6">
-          <p className="font-semibold">{order.info_banner_first}</p>
+        <div className="rounded-[18px] border-[3px] border-[#120f17] bg-[#fff7de] p-4 text-sm font-semibold leading-6">
+          <p className="font-bold">{order.info_banner_first}</p>
           <p>
             Valid from {formatDate(order.valid_start_date)} to {formatDate(order.valid_end_date)}
           </p>

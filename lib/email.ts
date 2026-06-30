@@ -15,7 +15,7 @@ export function buildConfirmationEmail(input: ConfirmationEmailInput) {
       ? `\n\nBONUS: To book discounted room rates at ${input.event.hotel_name}, click here or copy and paste this URL in your browser: ${input.event.hotel_booking_url}`
       : "";
 
-  const bodyText = `Secret Mouse Saver Confirmation #: ${input.confirmationNumber}
+  const bodyText = `Secret Mouse Tickets Confirmation #: ${input.confirmationNumber}
 
 You're on your way to saving BIG on your visit to the Most Magical Place On Earth!
 
@@ -23,12 +23,12 @@ To purchase discounted Walt Disney World Group & Convention Theme Park Tickets f
 
 The tickets available through this link are valid from ${formatDate(input.event.valid_start_date)} to ${formatDate(input.event.valid_end_date)}.${hotelLine}
 
-Secret Mouse Savers
-www.secretmousesavers.com`;
+Secret Mouse Tickets
+www.secretmousetickets.com`;
 
-  const html = `<div style="font-family:Arial,sans-serif;line-height:1.55;color:#17211d">
-    <img src="${input.origin}/secret-mouse-savers-logo.svg" alt="Secret Mouse Savers" width="180" style="margin-bottom:20px" />
-    <p><strong>Secret Mouse Saver Confirmation #:</strong> ${escapeHtml(input.confirmationNumber)}</p>
+  const html = `<div style="font-family:Arial,sans-serif;line-height:1.55;color:#120f17">
+    <img src="${input.origin}/secret-mouse-tickets-logo.jpg" alt="Secret Mouse Tickets" width="180" style="margin-bottom:20px;border-radius:18px" />
+    <p><strong>Secret Mouse Tickets Confirmation #:</strong> ${escapeHtml(input.confirmationNumber)}</p>
     <p>You're on your way to saving BIG on your visit to the Most Magical Place On Earth!</p>
     <p>To purchase discounted Walt Disney World Group & Convention Theme Park Tickets for your visit directly from Disney, use this URL:<br /><a href="${escapeHtml(input.event.event_page_url)}">${escapeHtml(input.event.event_page_url)}</a></p>
     <p>The tickets available through this link are valid from ${formatDate(input.event.valid_start_date)} to ${formatDate(input.event.valid_end_date)}.</p>
@@ -37,11 +37,11 @@ www.secretmousesavers.com`;
         ? `<p><strong>BONUS:</strong> To book discounted room rates at ${escapeHtml(input.event.hotel_name)}, use this URL:<br /><a href="${escapeHtml(input.event.hotel_booking_url)}">${escapeHtml(input.event.hotel_booking_url)}</a></p>`
         : ""
     }
-    <p>Secret Mouse Savers<br />www.secretmousesavers.com</p>
+    <p>Secret Mouse Tickets<br />www.secretmousetickets.com</p>
   </div>`;
 
   return {
-    subject: "Secret Mouse Saver Confirmation",
+    subject: "Secret Mouse Tickets Confirmation",
     bodyText,
     html,
   };
@@ -74,7 +74,7 @@ export async function sendEmail({
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: runtime.FROM_EMAIL ?? "Secret Mouse Savers <hello@secretmousesavers.com>",
+      from: runtime.FROM_EMAIL ?? "Secret Mouse Tickets <hello@secretmousetickets.com>",
       to,
       subject,
       text,
