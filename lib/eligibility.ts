@@ -4,10 +4,8 @@ export type EligibilityInput = {
   visitStartDate: string;
   visitEndDate: string;
   themeParkDays: number;
-  parkHopper: boolean;
   guests10Plus: number;
   guests3To9: number;
-  floridaResident: boolean;
   email: string;
 };
 
@@ -20,9 +18,6 @@ export type EventRecord = {
   event_end_date: string;
   valid_start_date: string;
   valid_end_date: string;
-  hotel_special_rate_available: number;
-  hotel_name: string | null;
-  hotel_booking_url: string | null;
 };
 
 export type ValidationResult =
@@ -39,10 +34,8 @@ export function parseEligibilityInput(payload: unknown): ValidationResult {
     visitStartDate: String(body.visitStartDate ?? ""),
     visitEndDate: String(body.visitEndDate ?? ""),
     themeParkDays: Number(body.themeParkDays),
-    parkHopper: Boolean(body.parkHopper),
     guests10Plus: Number(body.guests10Plus),
     guests3To9: Number(body.guests3To9),
-    floridaResident: Boolean(body.floridaResident),
     email: String(body.email ?? "").trim().toLowerCase(),
   };
 
@@ -81,10 +74,6 @@ export function disqualificationReason(input: EligibilityInput, matchedEvent: Ev
   const totalGuests = input.guests10Plus + input.guests3To9;
 
   if (input.themeParkDays < 3 && totalGuests < 2) {
-    return "Sorry, we couldn't find any savings for your visit.";
-  }
-
-  if (input.floridaResident) {
     return "Sorry, we couldn't find any savings for your visit.";
   }
 

@@ -119,7 +119,6 @@ async function main() {
           infoBannerFirst: event.infoBannerFirst,
           eventStartDate: event.eventStartDate,
           eventEndDate: event.eventEndDate,
-          hotelSpecialRateAvailable: event.hotelSpecialRateAvailable,
         })),
         sampleSkipped: skipped.slice(0, 10),
       },
@@ -176,7 +175,6 @@ function parseEventPage(url, html) {
       eventEndDate: "1970-01-01",
       validStartDate: "1970-01-01",
       validEndDate: "1970-01-01",
-      hotelSpecialRateAvailable: false,
       excluded: true,
     };
   }
@@ -189,8 +187,6 @@ function parseEventPage(url, html) {
   }
 
   const [eventStartDate, eventEndDate] = parseDateRange(infoBannerSecond);
-  const roomButton = $("button.btn.btn-primary.btn-rooms, a.btn.btn-primary.btn-rooms").first();
-  const hotelBookingUrl = resolveHotelTarget($, roomButton, url);
 
   return {
     eventPageUrl: url,
@@ -200,9 +196,6 @@ function parseEventPage(url, html) {
     eventEndDate,
     validStartDate: addDays(eventStartDate, -7),
     validEndDate: addDays(eventEndDate, 7),
-    hotelSpecialRateAvailable: Boolean(roomButton.length),
-    hotelName: null,
-    hotelBookingUrl,
   };
 }
 
@@ -220,8 +213,6 @@ function parseNextEventPage($, url, html) {
 
   const eventStartDate = isoFromTimestamp(eventStart);
   const eventEndDate = isoFromTimestamp(eventEnd);
-  const roomUrl = extractNextStringField(payload, "roomUrl")?.trim() || null;
-  const hotelName = extractNextStringField(payload, "venueName");
   const infoBannerSecond = formatDateRange(eventStartDate, eventEndDate);
 
   return {
@@ -232,28 +223,7 @@ function parseNextEventPage($, url, html) {
     eventEndDate,
     validStartDate: addDays(eventStartDate, -7),
     validEndDate: addDays(eventEndDate, 7),
-    hotelSpecialRateAvailable: Boolean(roomUrl),
-    hotelName: hotelName ?? null,
-    hotelBookingUrl: roomUrl,
   };
-}
-
-function resolveHotelTarget($, button, pageUrl) {
-  if (!button.length) {
-    return null;
-  }
-
-  const href =
-    button.attr("href") ??
-    button.attr("data-href") ??
-    button.attr("data-url") ??
-    button.closest("form").attr("action");
-
-  if (!href) {
-    return pageUrl;
-  }
-
-  return new URL(href, pageUrl).toString();
 }
 
 function parseDateRange(text) {

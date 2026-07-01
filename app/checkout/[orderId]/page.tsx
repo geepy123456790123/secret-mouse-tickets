@@ -9,11 +9,10 @@ type CheckoutOrder = {
   amount_cents: number;
   status: string;
   recipient_email: string;
+  theme_park_days: number;
   info_banner_first: string;
   valid_start_date: string;
   valid_end_date: string;
-  hotel_special_rate_available: number;
-  hotel_name: string | null;
 };
 
 export default async function CheckoutPage({
@@ -25,7 +24,7 @@ export default async function CheckoutPage({
   await ensureDatabase();
   const order = await getRawDb()
     .prepare(
-      "SELECT orders.id AS order_id, orders.amount_cents, orders.status, leads.email AS recipient_email, events.info_banner_first, events.valid_start_date, events.valid_end_date, events.hotel_special_rate_available, events.hotel_name FROM orders JOIN leads ON leads.id = orders.lead_id JOIN events ON events.id = orders.event_id WHERE orders.id = ? LIMIT 1"
+      "SELECT orders.id AS order_id, orders.amount_cents, orders.status, leads.email AS recipient_email, leads.theme_park_days, events.info_banner_first, events.valid_start_date, events.valid_end_date FROM orders JOIN leads ON leads.id = orders.lead_id JOIN events ON events.id = orders.event_id WHERE orders.id = ? LIMIT 1"
     )
     .bind(orderId)
     .first<CheckoutOrder>();
@@ -56,8 +55,8 @@ export default async function CheckoutPage({
           <p>
             Valid from {formatDate(order.valid_start_date)} to {formatDate(order.valid_end_date)}
           </p>
-          {order.hotel_special_rate_available && order.hotel_name && (
-            <p>Hotel bonus: {order.hotel_name}</p>
+          {order.theme_park_days > 1 && (
+            <p>Included bonus: Extra Water Park Fun & More Visit pass</p>
           )}
           <p>Receipt email: {order.recipient_email}</p>
         </div>

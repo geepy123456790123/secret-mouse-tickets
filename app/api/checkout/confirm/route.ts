@@ -10,6 +10,7 @@ type OrderDetails = EventRecord & {
   amount_cents: number;
   coupon_code: string | null;
   recipient_email: string;
+  theme_park_days: number;
 };
 
 export async function POST(request: Request) {
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
     const db = getRawDb();
     const details = await db
       .prepare(
-        "SELECT orders.id AS order_id, orders.lead_id, orders.status, orders.amount_cents, orders.coupon_code, leads.email AS recipient_email, events.* FROM orders JOIN leads ON leads.id = orders.lead_id JOIN events ON events.id = orders.event_id WHERE orders.id = ? LIMIT 1"
+        "SELECT orders.id AS order_id, orders.lead_id, orders.status, orders.amount_cents, orders.coupon_code, leads.email AS recipient_email, leads.theme_park_days, events.* FROM orders JOIN leads ON leads.id = orders.lead_id JOIN events ON events.id = orders.event_id WHERE orders.id = ? LIMIT 1"
       )
       .bind(orderId)
       .first<OrderDetails>();
@@ -67,6 +68,7 @@ export async function POST(request: Request) {
       recipientEmail: details.recipient_email,
       confirmationNumber,
       event: details,
+      themeParkDays: details.theme_park_days,
       origin,
     });
     const emailResult = await sendEmail({

@@ -6,13 +6,14 @@ type ConfirmationEmailInput = {
   recipientEmail: string;
   confirmationNumber: string;
   event: EventRecord;
+  themeParkDays: number;
   origin: string;
 };
 
 export function buildConfirmationEmail(input: ConfirmationEmailInput) {
-  const hotelLine =
-    input.event.hotel_special_rate_available && input.event.hotel_name && input.event.hotel_booking_url
-      ? `\n\nBONUS: To book discounted room rates at ${input.event.hotel_name}, click here or copy and paste this URL in your browser: ${input.event.hotel_booking_url}`
+  const multiDayBonusText =
+    input.themeParkDays > 1
+      ? "\n\nBONUS: Your multi-day ticket includes an extra Water Park Fun & More Visit pass."
       : "";
 
   const bodyText = `Secret Mouse Tickets Confirmation #: ${input.confirmationNumber}
@@ -21,7 +22,7 @@ You're on your way to saving BIG on your visit to the Most Magical Place On Eart
 
 To purchase discounted Walt Disney World Group & Convention Theme Park Tickets for your visit directly from Disney, click here or copy and paste this URL in your browser: ${input.event.event_page_url}
 
-The tickets available through this link are valid from ${formatDate(input.event.valid_start_date)} to ${formatDate(input.event.valid_end_date)}.${hotelLine}
+The tickets available through this link are valid from ${formatDate(input.event.valid_start_date)} to ${formatDate(input.event.valid_end_date)}.${multiDayBonusText}
 
 Secret Mouse Tickets
 www.secretmousetickets.com`;
@@ -33,8 +34,8 @@ www.secretmousetickets.com`;
     <p>To purchase discounted Walt Disney World Group & Convention Theme Park Tickets for your visit directly from Disney, use this URL:<br /><a href="${escapeHtml(input.event.event_page_url)}">${escapeHtml(input.event.event_page_url)}</a></p>
     <p>The tickets available through this link are valid from ${formatDate(input.event.valid_start_date)} to ${formatDate(input.event.valid_end_date)}.</p>
     ${
-      input.event.hotel_special_rate_available && input.event.hotel_name && input.event.hotel_booking_url
-        ? `<p><strong>BONUS:</strong> To book discounted room rates at ${escapeHtml(input.event.hotel_name)}, use this URL:<br /><a href="${escapeHtml(input.event.hotel_booking_url)}">${escapeHtml(input.event.hotel_booking_url)}</a></p>`
+      input.themeParkDays > 1
+        ? "<p><strong>BONUS:</strong> Your multi-day ticket includes an extra Water Park Fun & More Visit pass.</p>"
         : ""
     }
     <p>Secret Mouse Tickets<br />www.secretmousetickets.com</p>

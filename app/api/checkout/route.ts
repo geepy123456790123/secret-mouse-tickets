@@ -6,6 +6,7 @@ const PRICE_CENTS = 9900;
 type LeadWithEvent = {
   lead_id: string;
   email: string;
+  theme_park_days: number;
   event_id: number;
   event_page_url: string;
 };
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
 
     const lead = await db
       .prepare(
-        "SELECT leads.id AS lead_id, leads.email AS email, events.id AS event_id, events.event_page_url AS event_page_url FROM leads JOIN events ON events.id = leads.matched_event_id WHERE leads.id = ? AND leads.status = 'matched' LIMIT 1"
+        "SELECT leads.id AS lead_id, leads.email AS email, leads.theme_park_days, events.id AS event_id, events.event_page_url AS event_page_url FROM leads JOIN events ON events.id = leads.matched_event_id WHERE leads.id = ? AND leads.status = 'matched' LIMIT 1"
       )
       .bind(leadId)
       .first<LeadWithEvent>();
@@ -62,6 +63,7 @@ export async function POST(request: Request) {
         environment: runtime.SQUARE_ENVIRONMENT ?? "sandbox",
         amountCents,
         orderId,
+        themeParkDays: lead.theme_park_days,
         redirectUrl: `${requestUrl.origin}/checkout/${orderId}`,
       });
       checkoutUrl = square.url;
@@ -123,6 +125,7 @@ async function createSquareCheckoutLink({
   environment,
   amountCents,
   orderId,
+  themeParkDays,
   redirectUrl,
 }: {
   accessToken: string;
@@ -130,6 +133,7 @@ async function createSquareCheckoutLink({
   environment: string;
   amountCents: number;
   orderId: string;
+  themeParkDays: number;
   redirectUrl: string;
 }) {
   const baseUrl =
@@ -147,7 +151,10 @@ async function createSquareCheckoutLink({
     body: JSON.stringify({
       idempotency_key: orderId,
       quick_pay: {
-        name: "Secret Mouse Tickets",
+        name:
+          themeParkDays > 1
+            ? `Secret Mouse Tickets - ${themeParkDays} Day Ticket Access + Water Park Bonus`
+            : "Secret Mouse Tickets - 1 Day Ticket Access",
         price_money: {
           amount: amountCents,
           currency: "USD",

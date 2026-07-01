@@ -38,10 +38,10 @@ export async function POST(request: Request) {
         input.visitStartDate,
         input.visitEndDate,
         input.themeParkDays,
-        input.parkHopper ? 1 : 0,
+        0,
         input.guests10Plus,
         input.guests3To9,
-        input.floridaResident ? 1 : 0,
+        0,
         input.email,
         status,
         event?.id ?? null
@@ -62,8 +62,6 @@ export async function POST(request: Request) {
         eventEndDate: event.event_end_date,
         validStartDate: event.valid_start_date,
         validEndDate: event.valid_end_date,
-        hotelSpecialRateAvailable: Boolean(event.hotel_special_rate_available),
-        hotelName: event.hotel_name,
       },
     });
   } catch (error) {

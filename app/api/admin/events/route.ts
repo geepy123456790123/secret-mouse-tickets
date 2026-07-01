@@ -10,9 +10,6 @@ type IncomingEvent = {
   eventEndDate: string;
   validStartDate: string;
   validEndDate: string;
-  hotelSpecialRateAvailable: boolean;
-  hotelName?: string | null;
-  hotelBookingUrl?: string | null;
   excluded?: boolean;
 };
 
@@ -69,9 +66,9 @@ export async function POST(request: Request) {
         event.eventEndDate,
         event.validStartDate,
         event.validEndDate,
-        event.hotelSpecialRateAvailable ? 1 : 0,
-        event.hotelName ?? null,
-        event.hotelBookingUrl ?? null
+        0,
+        null,
+        null
       )
       .run();
     upserted += 1;

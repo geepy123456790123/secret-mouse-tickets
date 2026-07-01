@@ -21,9 +21,6 @@ type ScrapedEvent = {
   eventEndDate: string;
   validStartDate: string;
   validEndDate: string;
-  hotelSpecialRateAvailable: boolean;
-  hotelName?: string | null;
-  hotelBookingUrl?: string | null;
   excluded?: boolean;
 };
 
@@ -81,8 +78,6 @@ export async function POST(request: Request) {
         infoBannerFirst: event.infoBannerFirst,
         eventStartDate: event.eventStartDate,
         eventEndDate: event.eventEndDate,
-        hotelSpecialRateAvailable: event.hotelSpecialRateAvailable,
-        hotelBookingUrl: event.hotelBookingUrl ?? null,
       })),
       sampleSkipped: skipped.slice(0, 10),
     });
@@ -230,9 +225,9 @@ async function upsertEvents(db: ReturnType<typeof getRawDb>, events: ScrapedEven
         event.eventEndDate,
         event.validStartDate,
         event.validEndDate,
-        event.hotelSpecialRateAvailable ? 1 : 0,
-        event.hotelName ?? null,
-        event.hotelBookingUrl ?? null
+        0,
+        null,
+        null
       )
       .run();
 
@@ -263,7 +258,6 @@ function parseEventPage(url: string, html: string): ScrapedEvent | null {
       eventEndDate: "1970-01-01",
       validStartDate: "1970-01-01",
       validEndDate: "1970-01-01",
-      hotelSpecialRateAvailable: false,
       excluded: true,
     };
   }
@@ -285,8 +279,6 @@ function parseNextEventPage($: ReturnType<typeof load>, url: string, html: strin
 
   const eventStartDate = isoFromTimestamp(eventStart);
   const eventEndDate = isoFromTimestamp(eventEnd);
-  const roomUrl = extractNextStringField(payload, "roomUrl")?.trim() || null;
-  const hotelName = extractNextStringField(payload, "venueName");
   const infoBannerSecond = formatDateRange(eventStartDate, eventEndDate);
 
   return {
@@ -297,9 +289,6 @@ function parseNextEventPage($: ReturnType<typeof load>, url: string, html: strin
     eventEndDate,
     validStartDate: addDays(eventStartDate, -7),
     validEndDate: addDays(eventEndDate, 7),
-    hotelSpecialRateAvailable: Boolean(roomUrl),
-    hotelName: hotelName ?? null,
-    hotelBookingUrl: roomUrl,
   };
 }
 

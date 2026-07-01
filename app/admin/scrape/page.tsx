@@ -17,8 +17,6 @@ type ScrapeResult = {
     infoBannerFirst: string;
     eventStartDate: string;
     eventEndDate: string;
-    hotelSpecialRateAvailable: boolean;
-    hotelBookingUrl: string | null;
   }>;
   sampleSkipped?: Array<{
     url: string;

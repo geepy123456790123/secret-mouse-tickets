@@ -1,13 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import {
-  BadgeCheck,
-  Hotel,
-  Mail,
-  Search,
-  ShoppingCart,
-} from "lucide-react";
+import { BadgeCheck, Mail, Search, ShoppingCart, Sparkles, Waves } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { formatDate } from "@/lib/dates";
 
@@ -18,8 +12,6 @@ type EventSummary = {
   eventEndDate: string;
   validStartDate: string;
   validEndDate: string;
-  hotelSpecialRateAvailable: boolean;
-  hotelName: string | null;
 };
 
 type EligibilityResult =
@@ -37,10 +29,8 @@ const defaultForm = {
   visitStartDate: "2026-09-15",
   visitEndDate: "2026-09-18",
   themeParkDays: 3,
-  parkHopper: false,
   guests10Plus: 2,
   guests3To9: 1,
-  floridaResident: false,
   email: "",
 };
 
@@ -55,6 +45,7 @@ export default function Home() {
     () => Number(form.guests10Plus) + Number(form.guests3To9),
     [form.guests10Plus, form.guests3To9]
   );
+  const hasMultiDayBonus = Number(form.themeParkDays) > 1;
 
   async function submitForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -134,6 +125,31 @@ export default function Home() {
             Group and convention rate tickets, open to everyone.
           </p>
 
+          <section className="cartoon-panel grid gap-3 rounded-[22px] bg-white/95 p-5">
+            <div className="flex gap-3">
+              <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[3px] border-[#120f17] bg-[#ffbd38]">
+                <Sparkles size={18} aria-hidden="true" />
+              </span>
+              <div>
+                <h2 className="text-base font-black">Advance Purchase Savings</h2>
+                <p className="text-sm font-semibold leading-6 text-[#3e304d]">
+                  Save up to 20%* on 1-day and multi-day tickets.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[3px] border-[#120f17] bg-[#d8c6ff]">
+                <Waves size={18} aria-hidden="true" />
+              </span>
+              <div>
+                <h2 className="text-base font-black">Additional Disney Magic</h2>
+                <p className="text-sm font-semibold leading-6 text-[#3e304d]">
+                  Multi-day tickets include an extra Water Park Fun & More Visit pass.
+                </p>
+              </div>
+            </div>
+          </section>
+
           <form
             onSubmit={submitForm}
             className="cartoon-panel rounded-[24px] bg-white p-5 sm:p-6"
@@ -180,19 +196,6 @@ export default function Home() {
                 />
               </label>
               <label className="grid gap-2 text-sm font-bold">
-                Park Hopper Option
-                <select
-                  value={form.parkHopper ? "yes" : "no"}
-                  onChange={(event) =>
-                    setForm({ ...form, parkHopper: event.target.value === "yes" })
-                  }
-                  className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-3 text-base font-semibold"
-                >
-                  <option value="no">No</option>
-                  <option value="yes">Yes</option>
-                </select>
-              </label>
-              <label className="grid gap-2 text-sm font-bold">
                 Guests Ages 10+
                 <input
                   type="number"
@@ -217,19 +220,6 @@ export default function Home() {
                   }
                   className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-3 text-base font-semibold"
                 />
-              </label>
-              <label className="grid gap-2 text-sm font-bold">
-                Florida Resident Discount
-                <select
-                  value={form.floridaResident ? "yes" : "no"}
-                  onChange={(event) =>
-                    setForm({ ...form, floridaResident: event.target.value === "yes" })
-                  }
-                  className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-3 text-base font-semibold"
-                >
-                  <option value="no">No</option>
-                  <option value="yes">Yes</option>
-                </select>
               </label>
               <label className="grid gap-2 text-sm font-bold">
                 Email
@@ -289,13 +279,10 @@ export default function Home() {
                 Valid for {form.themeParkDays} days from {formatDate(result.event.validStartDate)} to{" "}
                 {formatDate(result.event.validEndDate)}.
               </p>
-              <p className="mt-3 text-sm font-bold text-[#7b4b00]">
-                PLUS: An added bonus with multi-day tickets.
-              </p>
-              {result.event.hotelSpecialRateAvailable && result.event.hotelName && (
-                <p className="mt-3 inline-flex items-center gap-2 rounded-[16px] border-[3px] border-[#120f17] bg-[#ffe08c] px-3 py-2 text-sm font-bold">
-                  <Hotel size={17} aria-hidden="true" />
-                  Discounted rates at {result.event.hotelName} during your visit.
+              {hasMultiDayBonus && (
+                <p className="mt-3 rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] px-3 py-2 text-sm font-bold text-[#7b4b00]">
+                  Your cart includes an extra Water Park Fun & More Visit pass with this multi-day
+                  ticket.
                 </p>
               )}
 
@@ -324,6 +311,10 @@ export default function Home() {
 
           <p className="rounded-full bg-[#fff7de]/80 px-4 py-2 text-center text-xs font-semibold leading-5 text-[#3e304d]">
             Secret Mouse Tickets is an independent service and is not affiliated with Disney.
+          </p>
+          <p className="px-3 text-center text-[11px] font-semibold leading-5 text-[#5a4a69]">
+            *Savings based on the non-discounted price for the same ticket sold at Disney-owned and
+            -operated Guest Service desks in the Central Florida area as of 2/25/25.
           </p>
         </div>
       </section>
