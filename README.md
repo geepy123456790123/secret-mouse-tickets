@@ -39,3 +39,5 @@ SEARCH_PROVIDER_ENDPOINT="http://localhost:3003/api/search/disneyevent" npm run 
 The `/api/search/disneyevent` endpoint defaults to Serper, requests the `site:disneyevent.com` results with `filter=0`, aggregates up to 15 result pages, normalizes links into `items[].link`, and only returns `https://disneyevent.com/` URLs. Direct Google HTML parsing is still available with `provider=google-html`, but it can be blocked or changed by Google. In production, this endpoint is protected by `ADMIN_INGEST_TOKEN`.
 
 Parsed events are posted to `INGEST_ENDPOINT` when set, usually `/api/admin/events`. Duplicate event URLs are upserted. Expired events and pages with the excluded brochure image are deleted/ignored.
+
+Production scrape runs can be triggered from `/admin/scrape`. The page calls `/api/admin/scrape`, which performs Serper discovery, scrapes candidate DisneyEvent pages, parses event metadata, and writes directly to D1 from inside the deployed Worker. The scrape API requires `ADMIN_INGEST_TOKEN`.
