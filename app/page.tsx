@@ -1,7 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { BadgeCheck, Mail, Search, ShoppingCart, Sparkles, Waves } from "lucide-react";
+import {
+  BadgeCheck,
+  Mail,
+  Quote,
+  Search,
+  ShoppingCart,
+  Sparkles,
+  Star,
+  Waves,
+} from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { formatDate } from "@/lib/dates";
 
@@ -33,6 +42,30 @@ const defaultForm = {
   guests3To9: 1,
   email: "",
 };
+
+const testimonials = [
+  {
+    name: "Megan R.",
+    initials: "MR",
+    amount: "$214",
+    text: "Secret Mouse Tickets found discounted Disney World tickets for our family of four. We saved $214 and still got the extra water park visit with our multi-day tickets.",
+    bg: "bg-[#ffbd38]",
+  },
+  {
+    name: "Jason P.",
+    initials: "JP",
+    amount: "$168",
+    text: "I had no idea these group and convention rates were out there. Our May trip dates matched, and we saved $168 before we even bought snacks.",
+    bg: "bg-[#8f72f2]",
+  },
+  {
+    name: "Priya S.",
+    initials: "PS",
+    amount: "$126",
+    text: "We checked our dates on a whim and found ticket access that saved us $126. The process was quick, clear, and totally worth it.",
+    bg: "bg-[#ff7f98]",
+  },
+];
 
 export default function Home() {
   const [form, setForm] = useState(defaultForm);
@@ -316,6 +349,64 @@ export default function Home() {
             *Savings based on the non-discounted price for the same ticket sold at Disney-owned and
             -operated Guest Service desks in the Central Florida area as of 2/25/25.
           </p>
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-7xl px-5 pb-16 pt-4 lg:px-8 lg:pb-20">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="inline-flex rounded-full border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2 text-sm font-black text-[#120f17] shadow-[4px_4px_0_#120f17]">
+            Sample guest stories
+          </p>
+          <h2 className="mt-5 text-3xl font-black leading-tight text-[#120f17] sm:text-4xl">
+            Families use hidden ticket windows to keep more magic money in their pockets.
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm font-semibold leading-6 text-[#4b3c59]">
+            Placeholder testimonials for layout only. Replace with verified customer reviews before
+            public launch.
+          </p>
+        </div>
+
+        <div className="mt-8 grid gap-8 lg:grid-cols-3">
+          {testimonials.map((testimonial) => (
+            <article key={testimonial.name} className="grid gap-7">
+              <div className="cartoon-panel relative min-h-[260px] rounded-[24px] bg-white p-5 sm:p-6">
+                <div className="absolute -bottom-4 left-10 h-8 w-8 rotate-45 border-b-4 border-r-4 border-[#120f17] bg-white" />
+                <div className="relative z-10">
+                  <div className="mb-4 flex items-center gap-2">
+                    <Quote className="text-[#b8afc4]" size={34} aria-hidden="true" />
+                    <div className="flex text-[#f07a22]" aria-label="5 star rating">
+                      {Array.from({ length: 5 }).map((_, index) => (
+                        <Star
+                          key={index}
+                          size={24}
+                          className="fill-current"
+                          aria-hidden="true"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-base font-semibold leading-7 text-[#6a6170]">
+                    &ldquo;{testimonial.text}&rdquo;
+                  </p>
+                  <p className="mt-5 inline-flex rounded-full border-[3px] border-[#120f17] bg-[#fff7de] px-3 py-1 text-sm font-black text-[#5d45b5]">
+                    Saved {testimonial.amount}
+                  </p>
+                </div>
+              </div>
+
+              <div className="ml-8 flex items-center gap-4">
+                <span
+                  className={`inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-4 border-[#120f17] ${testimonial.bg} text-xl font-black text-white shadow-[4px_4px_0_#120f17]`}
+                >
+                  {testimonial.initials}
+                </span>
+                <div>
+                  <h3 className="text-xl font-black text-[#5d45b5]">{testimonial.name}</h3>
+                  <p className="text-sm font-bold text-[#6a6170]">Disney World ticket savings</p>
+                </div>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
     </main>
