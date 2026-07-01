@@ -12,6 +12,9 @@ const { d1, r2 } = hostingConfig;
 const localBindingConfig = {
   main: "./worker/index.ts",
   compatibility_flags: ["nodejs_compat"],
+  triggers: {
+    crons: ["0 10 * * *"],
+  },
   d1_databases: d1
     ? [
         {

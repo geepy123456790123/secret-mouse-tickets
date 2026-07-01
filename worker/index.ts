@@ -5,6 +5,7 @@ import handler from "vinext/server/app-router-entry";
 interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
+  ADMIN_INGEST_TOKEN?: string;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
@@ -18,6 +19,11 @@ interface ExecutionContext {
   waitUntil(promise: Promise<unknown>): void;
   passThroughOnException(): void;
 }
+
+type ScheduledController = {
+  cron: string;
+  scheduledTime: number;
+};
 
 // Image security config. SVG sources with .svg extension auto-skip the
 // optimization endpoint on the client side (served directly, no proxy).
@@ -42,6 +48,47 @@ const worker = {
 
     return handler.fetch(request, env, ctx);
   },
+
+  async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    ctx.waitUntil(runDailyScrape(controller, env, ctx));
+  },
 };
 
 export default worker;
+
+async function runDailyScrape(
+  controller: ScheduledController,
+  env: Env,
+  ctx: ExecutionContext,
+): Promise<void> {
+  const headers = new Headers({ "Content-Type": "application/json" });
+
+  if (env.ADMIN_INGEST_TOKEN) {
+    headers.set("Authorization", `Bearer ${env.ADMIN_INGEST_TOKEN}`);
+  }
+
+  const response = await handler.fetch(
+    new Request("https://secret-mouse-tickets.internal/api/admin/scrape", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ pages: 15 }),
+    }),
+    env,
+    ctx,
+  );
+
+  const payload = await response.text();
+
+  if (!response.ok) {
+    throw new Error(`Daily scrape failed with ${response.status}: ${payload}`);
+  }
+
+  console.log(
+    JSON.stringify({
+      message: "Daily Disney event scrape completed.",
+      cron: controller.cron,
+      scheduledTime: controller.scheduledTime,
+      result: JSON.parse(payload),
+    }),
+  );
+}
