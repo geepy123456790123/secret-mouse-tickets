@@ -43,6 +43,8 @@ export async function POST(request: Request) {
   let upserted = 0;
   let ignored = 0;
 
+  await cleanupNonProductionEvents(db);
+
   for (const event of events) {
     validateIncomingEvent(event);
 
@@ -83,6 +85,15 @@ export async function POST(request: Request) {
     .run();
 
   return Response.json({ ok: true, upserted, ignored });
+}
+
+async function cleanupNonProductionEvents(db: ReturnType<typeof getRawDb>) {
+  await db.batch([
+    db
+      .prepare("DELETE FROM events WHERE event_page_url IN (?, ?)")
+      .bind("https://disneyevent.com/example-convention", "https://disneyevent.com/test-event"),
+    db.prepare("DELETE FROM events WHERE event_page_url LIKE ?").bind("%/know-before-you-go%"),
+  ]);
 }
 
 function authorize(request: Request) {

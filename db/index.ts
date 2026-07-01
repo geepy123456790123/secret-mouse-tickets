@@ -19,11 +19,11 @@ export function getDb() {
 }
 
 export async function ensureDatabase() {
-  setupPromise ??= createSchemaAndSeedDemoEvent();
+  setupPromise ??= createSchema();
   return setupPromise;
 }
 
-async function createSchemaAndSeedDemoEvent() {
+async function createSchema() {
   const db = getRawDb();
 
   await db.batch([
@@ -55,30 +55,4 @@ async function createSchemaAndSeedDemoEvent() {
       "CREATE TABLE IF NOT EXISTS scrape_runs (id INTEGER PRIMARY KEY AUTOINCREMENT, status TEXT NOT NULL, candidate_count INTEGER NOT NULL DEFAULT 0, upserted_count INTEGER NOT NULL DEFAULT 0, ignored_count INTEGER NOT NULL DEFAULT 0, error TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
     ),
   ]);
-
-  const existing = await db
-    .prepare("SELECT COUNT(*) AS count FROM events")
-    .first<{ count: number }>();
-
-  if (!existing || existing.count > 0) {
-    return;
-  }
-
-  await db
-    .prepare(
-      "INSERT INTO events (event_page_url, info_banner_first, info_banner_second, event_start_date, event_end_date, valid_start_date, valid_end_date, hotel_special_rate_available, hotel_name, hotel_booking_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-    )
-    .bind(
-      "https://disneyevent.com/example-convention",
-      "Orlando Creative Conference",
-      "September 12 - 16, 2026",
-      "2026-09-12",
-      "2026-09-16",
-      "2026-09-05",
-      "2026-09-23",
-      1,
-      "Sample Resort Conference Hotel",
-      "https://example.com/sample-hotel-booking"
-    )
-    .run();
 }
