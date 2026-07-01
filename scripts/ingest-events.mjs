@@ -119,6 +119,7 @@ async function main() {
           infoBannerFirst: event.infoBannerFirst,
           eventStartDate: event.eventStartDate,
           eventEndDate: event.eventEndDate,
+          destination: event.destination,
         })),
         sampleSkipped: skipped.slice(0, 10),
       },
@@ -175,6 +176,7 @@ function parseEventPage(url, html) {
       eventEndDate: "1970-01-01",
       validStartDate: "1970-01-01",
       validEndDate: "1970-01-01",
+      destination: "unknown",
       excluded: true,
     };
   }
@@ -187,6 +189,7 @@ function parseEventPage(url, html) {
   }
 
   const [eventStartDate, eventEndDate] = parseDateRange(infoBannerSecond);
+  const destination = classifyDestination(`${html}\n${infoBannerFirst}\n${infoBannerSecond}`);
 
   return {
     eventPageUrl: url,
@@ -196,6 +199,8 @@ function parseEventPage(url, html) {
     eventEndDate,
     validStartDate: addDays(eventStartDate, -7),
     validEndDate: addDays(eventEndDate, 7),
+    destination,
+    excluded: destination !== "disney_world",
   };
 }
 
@@ -214,6 +219,7 @@ function parseNextEventPage($, url, html) {
   const eventStartDate = isoFromTimestamp(eventStart);
   const eventEndDate = isoFromTimestamp(eventEnd);
   const infoBannerSecond = formatDateRange(eventStartDate, eventEndDate);
+  const destination = classifyDestination(`${payload}\n${html}\n${infoBannerFirst}`);
 
   return {
     eventPageUrl: url,
@@ -223,7 +229,55 @@ function parseNextEventPage($, url, html) {
     eventEndDate,
     validStartDate: addDays(eventStartDate, -7),
     validEndDate: addDays(eventEndDate, 7),
+    destination,
+    excluded: destination !== "disney_world",
   };
+}
+
+function classifyDestination(text) {
+  const lower = text.toLowerCase();
+  const disneylandMarkers = [
+    "disneyland.disney.go.com",
+    "disneyland resort",
+    "disneyland park",
+    "disney california adventure",
+    "downtown disney district",
+    "anaheim, california",
+    "bolt_dlr",
+    "dlr_conv",
+  ];
+  const disneyWorldMarkers = [
+    "disneyworld.disney.go.com",
+    "walt disney world",
+    "disney world",
+    "magic kingdom",
+    "epcot",
+    "disney's hollywood studios",
+    "disney hollywood studios",
+    "disney's animal kingdom",
+    "disney animal kingdom",
+    "disney springs",
+    "central florida",
+    "bolt_wdw",
+    "wdw_conv",
+  ];
+
+  const disneylandScore = countMarkers(lower, disneylandMarkers);
+  const disneyWorldScore = countMarkers(lower, disneyWorldMarkers);
+
+  if (disneylandScore > disneyWorldScore) {
+    return "disneyland";
+  }
+
+  if (disneyWorldScore > 0) {
+    return "disney_world";
+  }
+
+  return "unknown";
+}
+
+function countMarkers(text, markers) {
+  return markers.reduce((count, marker) => count + (text.includes(marker) ? 1 : 0), 0);
 }
 
 function parseDateRange(text) {

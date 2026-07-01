@@ -18,6 +18,7 @@ export type EventRecord = {
   event_end_date: string;
   valid_start_date: string;
   valid_end_date: string;
+  destination: "disney_world" | "disneyland" | "unknown";
 };
 
 export type ValidationResult =

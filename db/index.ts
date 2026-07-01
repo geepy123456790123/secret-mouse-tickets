@@ -28,7 +28,7 @@ async function createSchema() {
 
   await db.batch([
     db.prepare(
-      "CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, event_page_url TEXT NOT NULL UNIQUE, info_banner_first TEXT NOT NULL, info_banner_second TEXT NOT NULL, event_start_date TEXT NOT NULL, event_end_date TEXT NOT NULL, valid_start_date TEXT NOT NULL, valid_end_date TEXT NOT NULL, hotel_special_rate_available INTEGER NOT NULL DEFAULT 0, hotel_name TEXT, hotel_booking_url TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
+      "CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, event_page_url TEXT NOT NULL UNIQUE, info_banner_first TEXT NOT NULL, info_banner_second TEXT NOT NULL, event_start_date TEXT NOT NULL, event_end_date TEXT NOT NULL, valid_start_date TEXT NOT NULL, valid_end_date TEXT NOT NULL, destination TEXT NOT NULL DEFAULT 'disney_world', hotel_special_rate_available INTEGER NOT NULL DEFAULT 0, hotel_name TEXT, hotel_booking_url TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
     ),
     db.prepare(
       "CREATE INDEX IF NOT EXISTS events_valid_window_idx ON events (valid_start_date, valid_end_date)"
@@ -55,4 +55,15 @@ async function createSchema() {
       "CREATE TABLE IF NOT EXISTS scrape_runs (id INTEGER PRIMARY KEY AUTOINCREMENT, status TEXT NOT NULL, candidate_count INTEGER NOT NULL DEFAULT 0, upserted_count INTEGER NOT NULL DEFAULT 0, ignored_count INTEGER NOT NULL DEFAULT 0, error TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
     ),
   ]);
+
+  const columns = await db.prepare("PRAGMA table_info(events)").all<{ name: string }>();
+  const hasDestination = columns.results?.some((column) => column.name === "destination");
+
+  if (!hasDestination) {
+    await db
+      .prepare("ALTER TABLE events ADD COLUMN destination TEXT NOT NULL DEFAULT 'disney_world'")
+      .run();
+  }
+
+  await db.prepare("CREATE INDEX IF NOT EXISTS events_destination_idx ON events (destination)").run();
 }

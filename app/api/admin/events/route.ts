@@ -2,6 +2,8 @@ import { env } from "cloudflare:workers";
 import { ensureDatabase, getRawDb } from "@/db";
 import { isIsoDate, todayIso } from "@/lib/dates";
 
+type EventDestination = "disney_world" | "disneyland" | "unknown";
+
 type IncomingEvent = {
   eventPageUrl: string;
   infoBannerFirst: string;
@@ -10,6 +12,7 @@ type IncomingEvent = {
   eventEndDate: string;
   validStartDate: string;
   validEndDate: string;
+  destination?: EventDestination;
   excluded?: boolean;
 };
 
@@ -44,8 +47,9 @@ export async function POST(request: Request) {
 
   for (const event of events) {
     validateIncomingEvent(event);
+    const destination = event.destination ?? "disney_world";
 
-    if (event.excluded || event.eventStartDate <= today) {
+    if (event.excluded || destination !== "disney_world" || event.eventStartDate <= today) {
       await db
         .prepare("DELETE FROM events WHERE event_page_url = ?")
         .bind(event.eventPageUrl)
@@ -56,7 +60,7 @@ export async function POST(request: Request) {
 
     await db
       .prepare(
-        "INSERT INTO events (event_page_url, info_banner_first, info_banner_second, event_start_date, event_end_date, valid_start_date, valid_end_date, hotel_special_rate_available, hotel_name, hotel_booking_url, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP) ON CONFLICT(event_page_url) DO UPDATE SET info_banner_first = excluded.info_banner_first, info_banner_second = excluded.info_banner_second, event_start_date = excluded.event_start_date, event_end_date = excluded.event_end_date, valid_start_date = excluded.valid_start_date, valid_end_date = excluded.valid_end_date, hotel_special_rate_available = excluded.hotel_special_rate_available, hotel_name = excluded.hotel_name, hotel_booking_url = excluded.hotel_booking_url, updated_at = CURRENT_TIMESTAMP"
+        "INSERT INTO events (event_page_url, info_banner_first, info_banner_second, event_start_date, event_end_date, valid_start_date, valid_end_date, destination, hotel_special_rate_available, hotel_name, hotel_booking_url, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP) ON CONFLICT(event_page_url) DO UPDATE SET info_banner_first = excluded.info_banner_first, info_banner_second = excluded.info_banner_second, event_start_date = excluded.event_start_date, event_end_date = excluded.event_end_date, valid_start_date = excluded.valid_start_date, valid_end_date = excluded.valid_end_date, destination = excluded.destination, hotel_special_rate_available = excluded.hotel_special_rate_available, hotel_name = excluded.hotel_name, hotel_booking_url = excluded.hotel_booking_url, updated_at = CURRENT_TIMESTAMP"
       )
       .bind(
         event.eventPageUrl,
@@ -66,6 +70,7 @@ export async function POST(request: Request) {
         event.eventEndDate,
         event.validStartDate,
         event.validEndDate,
+        destination,
         0,
         null,
         null
@@ -124,5 +129,12 @@ function validateIncomingEvent(event: IncomingEvent) {
 
   if (!event.infoBannerFirst || !event.infoBannerSecond) {
     throw new Error("Event banner fields are required.");
+  }
+
+  if (
+    event.destination &&
+    !["disney_world", "disneyland", "unknown"].includes(event.destination)
+  ) {
+    throw new Error("destination must be disney_world, disneyland, or unknown.");
   }
 }

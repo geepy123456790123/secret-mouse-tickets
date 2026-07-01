@@ -12,6 +12,7 @@ export const events = sqliteTable(
     eventEndDate: text("event_end_date").notNull(),
     validStartDate: text("valid_start_date").notNull(),
     validEndDate: text("valid_end_date").notNull(),
+    destination: text("destination").notNull().default("disney_world"),
     hotelSpecialRateAvailable: integer("hotel_special_rate_available")
       .notNull()
       .default(0),
@@ -23,6 +24,7 @@ export const events = sqliteTable(
   (table) => [
     index("events_valid_window_idx").on(table.validStartDate, table.validEndDate),
     index("events_event_start_idx").on(table.eventStartDate),
+    index("events_destination_idx").on(table.destination),
   ]
 );
 

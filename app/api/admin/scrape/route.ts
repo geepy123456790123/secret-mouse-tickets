@@ -13,6 +13,8 @@ type SerperResponse = {
   error?: string;
 };
 
+type EventDestination = "disney_world" | "disneyland" | "unknown";
+
 type ScrapedEvent = {
   eventPageUrl: string;
   infoBannerFirst: string;
@@ -21,6 +23,7 @@ type ScrapedEvent = {
   eventEndDate: string;
   validStartDate: string;
   validEndDate: string;
+  destination: EventDestination;
   excluded?: boolean;
 };
 
@@ -78,6 +81,7 @@ export async function POST(request: Request) {
         infoBannerFirst: event.infoBannerFirst,
         eventStartDate: event.eventStartDate,
         eventEndDate: event.eventEndDate,
+        destination: event.destination,
       })),
       sampleSkipped: skipped.slice(0, 10),
     });
@@ -207,7 +211,7 @@ async function upsertEvents(db: ReturnType<typeof getRawDb>, events: ScrapedEven
   await cleanupNonProductionEvents(db);
 
   for (const event of events) {
-    if (event.excluded || event.eventStartDate <= today) {
+    if (event.excluded || event.destination !== "disney_world" || event.eventStartDate <= today) {
       await db.prepare("DELETE FROM events WHERE event_page_url = ?").bind(event.eventPageUrl).run();
       ignored += 1;
       continue;
@@ -215,7 +219,7 @@ async function upsertEvents(db: ReturnType<typeof getRawDb>, events: ScrapedEven
 
     await db
       .prepare(
-        "INSERT INTO events (event_page_url, info_banner_first, info_banner_second, event_start_date, event_end_date, valid_start_date, valid_end_date, hotel_special_rate_available, hotel_name, hotel_booking_url, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP) ON CONFLICT(event_page_url) DO UPDATE SET info_banner_first = excluded.info_banner_first, info_banner_second = excluded.info_banner_second, event_start_date = excluded.event_start_date, event_end_date = excluded.event_end_date, valid_start_date = excluded.valid_start_date, valid_end_date = excluded.valid_end_date, hotel_special_rate_available = excluded.hotel_special_rate_available, hotel_name = excluded.hotel_name, hotel_booking_url = excluded.hotel_booking_url, updated_at = CURRENT_TIMESTAMP"
+        "INSERT INTO events (event_page_url, info_banner_first, info_banner_second, event_start_date, event_end_date, valid_start_date, valid_end_date, destination, hotel_special_rate_available, hotel_name, hotel_booking_url, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP) ON CONFLICT(event_page_url) DO UPDATE SET info_banner_first = excluded.info_banner_first, info_banner_second = excluded.info_banner_second, event_start_date = excluded.event_start_date, event_end_date = excluded.event_end_date, valid_start_date = excluded.valid_start_date, valid_end_date = excluded.valid_end_date, destination = excluded.destination, hotel_special_rate_available = excluded.hotel_special_rate_available, hotel_name = excluded.hotel_name, hotel_booking_url = excluded.hotel_booking_url, updated_at = CURRENT_TIMESTAMP"
       )
       .bind(
         event.eventPageUrl,
@@ -225,6 +229,7 @@ async function upsertEvents(db: ReturnType<typeof getRawDb>, events: ScrapedEven
         event.eventEndDate,
         event.validStartDate,
         event.validEndDate,
+        event.destination,
         0,
         null,
         null
@@ -258,6 +263,7 @@ function parseEventPage(url: string, html: string): ScrapedEvent | null {
       eventEndDate: "1970-01-01",
       validStartDate: "1970-01-01",
       validEndDate: "1970-01-01",
+      destination: "unknown",
       excluded: true,
     };
   }
@@ -280,6 +286,7 @@ function parseNextEventPage($: ReturnType<typeof load>, url: string, html: strin
   const eventStartDate = isoFromTimestamp(eventStart);
   const eventEndDate = isoFromTimestamp(eventEnd);
   const infoBannerSecond = formatDateRange(eventStartDate, eventEndDate);
+  const destination = classifyDestination(`${payload}\n${html}\n${infoBannerFirst}`);
 
   return {
     eventPageUrl: url,
@@ -289,7 +296,55 @@ function parseNextEventPage($: ReturnType<typeof load>, url: string, html: strin
     eventEndDate,
     validStartDate: addDays(eventStartDate, -7),
     validEndDate: addDays(eventEndDate, 7),
+    destination,
+    excluded: destination !== "disney_world",
   };
+}
+
+function classifyDestination(text: string): EventDestination {
+  const lower = text.toLowerCase();
+  const disneylandMarkers = [
+    "disneyland.disney.go.com",
+    "disneyland resort",
+    "disneyland park",
+    "disney california adventure",
+    "downtown disney district",
+    "anaheim, california",
+    "bolt_dlr",
+    "dlr_conv",
+  ];
+  const disneyWorldMarkers = [
+    "disneyworld.disney.go.com",
+    "walt disney world",
+    "disney world",
+    "magic kingdom",
+    "epcot",
+    "disney's hollywood studios",
+    "disney hollywood studios",
+    "disney's animal kingdom",
+    "disney animal kingdom",
+    "disney springs",
+    "central florida",
+    "bolt_wdw",
+    "wdw_conv",
+  ];
+
+  const disneylandScore = countMarkers(lower, disneylandMarkers);
+  const disneyWorldScore = countMarkers(lower, disneyWorldMarkers);
+
+  if (disneylandScore > disneyWorldScore) {
+    return "disneyland";
+  }
+
+  if (disneyWorldScore > 0) {
+    return "disney_world";
+  }
+
+  return "unknown";
+}
+
+function countMarkers(text: string, markers: string[]) {
+  return markers.reduce((count, marker) => count + (text.includes(marker) ? 1 : 0), 0);
 }
 
 function isoFromTimestamp(value: string) {
