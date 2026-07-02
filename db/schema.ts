@@ -40,6 +40,13 @@ export const leads = sqliteTable("leads", {
   email: text("email").notNull(),
   status: text("status").notNull(),
   matchedEventId: integer("matched_event_id"),
+  utmSource: text("utm_source"),
+  utmMedium: text("utm_medium"),
+  utmCampaign: text("utm_campaign"),
+  utmContent: text("utm_content"),
+  utmTerm: text("utm_term"),
+  landingPage: text("landing_page"),
+  referrer: text("referrer"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 

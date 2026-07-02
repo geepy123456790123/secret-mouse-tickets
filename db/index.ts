@@ -66,4 +66,25 @@ async function createSchema() {
   }
 
   await db.prepare("CREATE INDEX IF NOT EXISTS events_destination_idx ON events (destination)").run();
+
+  const leadColumns = await db.prepare("PRAGMA table_info(leads)").all<{ name: string }>();
+  const existingLeadColumns = new Set(leadColumns.results?.map((column) => column.name) ?? []);
+  const attributionColumns = [
+    ["utm_source", "TEXT"],
+    ["utm_medium", "TEXT"],
+    ["utm_campaign", "TEXT"],
+    ["utm_content", "TEXT"],
+    ["utm_term", "TEXT"],
+    ["landing_page", "TEXT"],
+    ["referrer", "TEXT"],
+  ] as const;
+
+  for (const [name, type] of attributionColumns) {
+    if (!existingLeadColumns.has(name)) {
+      await db.prepare(`ALTER TABLE leads ADD COLUMN ${name} ${type}`).run();
+    }
+  }
+
+  await db.prepare("CREATE INDEX IF NOT EXISTS leads_created_at_idx ON leads (created_at)").run();
+  await db.prepare("CREATE INDEX IF NOT EXISTS orders_created_at_idx ON orders (created_at)").run();
 }

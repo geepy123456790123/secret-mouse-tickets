@@ -35,6 +35,16 @@ type EligibilityResult =
       message: string;
     };
 
+type Attribution = {
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  utmContent: string | null;
+  utmTerm: string | null;
+  landingPage: string | null;
+  referrer: string | null;
+};
+
 const defaultForm = {
   visitStartDate: "2026-09-15",
   visitEndDate: "2026-09-18",
@@ -90,7 +100,7 @@ export default function Home() {
     const response = await fetch("/api/eligibility", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, attribution: getAttribution() }),
     });
 
     const payload = (await response.json()) as EligibilityResult & { error?: string };
@@ -417,4 +427,35 @@ export default function Home() {
       <SupportChat />
     </main>
   );
+}
+
+function getAttribution(): Attribution {
+  if (typeof window === "undefined") {
+    return {
+      utmSource: null,
+      utmMedium: null,
+      utmCampaign: null,
+      utmContent: null,
+      utmTerm: null,
+      landingPage: null,
+      referrer: null,
+    };
+  }
+
+  const params = new URLSearchParams(window.location.search);
+
+  return {
+    utmSource: normalizeAttributionValue(params.get("utm_source")),
+    utmMedium: normalizeAttributionValue(params.get("utm_medium")),
+    utmCampaign: normalizeAttributionValue(params.get("utm_campaign")),
+    utmContent: normalizeAttributionValue(params.get("utm_content")),
+    utmTerm: normalizeAttributionValue(params.get("utm_term")),
+    landingPage: normalizeAttributionValue(`${window.location.pathname}${window.location.search}`),
+    referrer: normalizeAttributionValue(document.referrer),
+  };
+}
+
+function normalizeAttributionValue(value: string | null) {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed.slice(0, 500) : null;
 }

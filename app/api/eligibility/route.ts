@@ -6,17 +6,29 @@ import {
 } from "@/lib/eligibility";
 import { todayIso } from "@/lib/dates";
 
+type AttributionInput = {
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  utmContent: string | null;
+  utmTerm: string | null;
+  landingPage: string | null;
+  referrer: string | null;
+};
+
 export async function POST(request: Request) {
   try {
     await ensureDatabase();
 
-    const parsed = parseEligibilityInput(await request.json());
+    const body = await request.json();
+    const parsed = parseEligibilityInput(body);
     if (!parsed.ok) {
       return Response.json({ error: parsed.error }, { status: 400 });
     }
 
     const db = getRawDb();
     const input = parsed.input;
+    const attribution = parseAttribution(body);
     const today = todayIso();
     const event = await db
       .prepare(
@@ -31,7 +43,7 @@ export async function POST(request: Request) {
 
     await db
       .prepare(
-        "INSERT INTO leads (id, visit_start_date, visit_end_date, theme_park_days, park_hopper, guests_10_plus, guests_3_to_9, florida_resident, email, status, matched_event_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO leads (id, visit_start_date, visit_end_date, theme_park_days, park_hopper, guests_10_plus, guests_3_to_9, florida_resident, email, status, matched_event_id, utm_source, utm_medium, utm_campaign, utm_content, utm_term, landing_page, referrer) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
       )
       .bind(
         leadId,
@@ -44,7 +56,14 @@ export async function POST(request: Request) {
         0,
         input.email,
         status,
-        event?.id ?? null
+        event?.id ?? null,
+        attribution.utmSource,
+        attribution.utmMedium,
+        attribution.utmCampaign,
+        attribution.utmContent,
+        attribution.utmTerm,
+        attribution.landingPage,
+        attribution.referrer
       )
       .run();
 
@@ -68,4 +87,34 @@ export async function POST(request: Request) {
     const message = error instanceof Error ? error.message : "Unexpected error";
     return Response.json({ error: message }, { status: 500 });
   }
+}
+
+function parseAttribution(payload: unknown): AttributionInput {
+  const attribution =
+    payload && typeof payload === "object"
+      ? (payload as { attribution?: unknown }).attribution
+      : null;
+  const record =
+    attribution && typeof attribution === "object"
+      ? (attribution as Record<string, unknown>)
+      : {};
+
+  return {
+    utmSource: normalizeAttribution(record.utmSource),
+    utmMedium: normalizeAttribution(record.utmMedium),
+    utmCampaign: normalizeAttribution(record.utmCampaign),
+    utmContent: normalizeAttribution(record.utmContent),
+    utmTerm: normalizeAttribution(record.utmTerm),
+    landingPage: normalizeAttribution(record.landingPage),
+    referrer: normalizeAttribution(record.referrer),
+  };
+}
+
+function normalizeAttribution(value: unknown) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed ? trimmed.slice(0, 500) : null;
 }
