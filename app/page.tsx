@@ -49,7 +49,7 @@ const testimonials = [
     name: "Megan R.",
     initials: "MR",
     amount: "$327",
-    text: "Secret Mouse Tickets found an incredible discount for our family of four doing four days at WDW. We used their link, bought directly from Disney, and saved $327!",
+    text: "Secret Mouse Tickets found an incredible discount for our family of four doing five days at WDW. We used their link, bought directly from Disney, and saved $327!",
     bg: "bg-[#ffbd38]",
   },
   {
@@ -367,7 +367,7 @@ export default function Home() {
             Real trip savings examples
           </p>
           <h2 className="mt-5 text-3xl font-black leading-tight text-[#120f17] sm:text-4xl">
-            Families use hidden Disney ticket sale pages to keep more magic money in their pockets.
+            Families use Secret Mouse Tickets to keep more magic money in their pockets.
           </h2>
         </div>
 
