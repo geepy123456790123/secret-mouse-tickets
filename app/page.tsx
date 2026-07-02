@@ -352,13 +352,10 @@ export default function Home() {
             </section>
           )}
 
-          <p className="rounded-full bg-[#fff7de]/80 px-4 py-2 text-center text-xs font-semibold leading-5 text-[#3e304d]">
-            Secret Mouse Tickets is an independent service and is not affiliated with Disney. You
-            buy tickets directly from Disney after purchasing access.
-          </p>
-          <p className="px-3 text-center text-[11px] font-semibold leading-5 text-[#5a4a69]">
+          <p className="rounded-[18px] bg-[#fff7de]/80 px-4 py-2 text-center text-xs font-semibold leading-5 text-[#3e304d]">
+            Secret Mouse Tickets is an independent service and is not affiliated with Disney.{" "}
             *Savings based on the non-discounted price for the same ticket sold at Disney-owned and
-            -operated Guest Service desks in the Central Florida area as of 2/25/25.
+            -operated Guest Service desks in the Central Florida area as of 7/1/2026.
           </p>
         </div>
       </section>
@@ -371,10 +368,6 @@ export default function Home() {
           <h2 className="mt-5 text-3xl font-black leading-tight text-[#120f17] sm:text-4xl">
             Families use hidden Disney ticket sale pages to keep more magic money in their pockets.
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm font-semibold leading-6 text-[#4b3c59]">
-            See how families can use eligible Disney discount pages to save on tickets before they
-            ever enter the parks.
-          </p>
         </div>
 
         <div className="mt-8 grid gap-8 lg:grid-cols-3">
