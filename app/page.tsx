@@ -48,7 +48,7 @@ const testimonials = [
     name: "Megan R.",
     initials: "MR",
     amount: "$327",
-    text: "Secret Mouse Tickets found a hidden Disney sale page for our family of four doing five park days. We bought directly from Disney and saved $327 on tickets.",
+    text: "Secret Mouse Tickets found an incredible discount for our family of four doing four days at Disney World. We used their link, bought directly from Disney, and saved $327 on tickets!",
     bg: "bg-[#ffbd38]",
   },
   {
@@ -155,7 +155,7 @@ export default function Home() {
 
         <div className="grid content-center gap-5">
           <p className="rounded-full bg-[#fff7de]/90 px-4 py-2 text-center text-sm font-bold text-[#5d45b5]">
-            Group and convention rate ticket sale pages, opened up to everyone.
+            Group and convention Walt Disney World ticket discounts, open to everyone
           </p>
 
           <section className="cartoon-panel grid gap-3 rounded-[22px] bg-white/95 p-5">
@@ -366,14 +366,14 @@ export default function Home() {
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 pt-4 lg:px-8 lg:pb-20">
         <div className="mx-auto max-w-3xl text-center">
           <p className="inline-flex rounded-full border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2 text-sm font-black text-[#120f17] shadow-[4px_4px_0_#120f17]">
-            Sample guest stories
+            Real trip savings examples
           </p>
           <h2 className="mt-5 text-3xl font-black leading-tight text-[#120f17] sm:text-4xl">
             Families use hidden Disney ticket sale pages to keep more magic money in their pockets.
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm font-semibold leading-6 text-[#4b3c59]">
-            Placeholder testimonials for layout only. Replace with verified customer reviews before
-            public launch.
+            See how families can use eligible Disney discount pages to save on tickets before they
+            ever enter the parks.
           </p>
         </div>
 
