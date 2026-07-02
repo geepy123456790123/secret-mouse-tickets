@@ -49,7 +49,7 @@ const testimonials = [
     name: "Megan R.",
     initials: "MR",
     amount: "$327",
-    text: "Secret Mouse Tickets found an incredible discount for our family of four doing four days at WDW. We used their link, bought directly from Disney, and saved $327, plus got waterpark passes!",
+    text: "Secret Mouse Tickets found an incredible discount for our family of four doing four days at WDW. We used their link, bought directly from Disney, and saved $327!",
     bg: "bg-[#ffbd38]",
   },
   {
@@ -149,7 +149,7 @@ export default function Home() {
             <p className="text-lg font-medium leading-8 text-[#3e304d]">
               We track discounted Disney World ticket sales that aren&apos;t advertised to the public,
               so you can save BIG on your Disney trip. A typical family of 4 doing 5 park days
-              saves over $300 on tickets alone. Access to the discount costs just $57.
+              saves over $300 on tickets alone.
             </p>
           </div>
         </div>
