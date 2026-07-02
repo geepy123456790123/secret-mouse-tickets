@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { formatDate } from "@/lib/dates";
+import { SupportChat } from "./support-chat";
 
 type EventSummary = {
   eventPageUrl: string;
@@ -413,6 +414,7 @@ export default function Home() {
           ))}
         </div>
       </section>
+      <SupportChat />
     </main>
   );
 }
