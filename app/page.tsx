@@ -49,7 +49,7 @@ const testimonials = [
     name: "Megan R.",
     initials: "MR",
     amount: "$327",
-    text: "Secret Mouse Tickets found an incredible discount for our family of four doing four days at Disney World. We used their link, bought directly from Disney, and saved $327 on tickets!",
+    text: "Secret Mouse Tickets found an incredible discount for our family of four doing four days at WDW. We used their link, bought directly from Disney, and saved $327, plus got waterpark passes!",
     bg: "bg-[#ffbd38]",
   },
   {

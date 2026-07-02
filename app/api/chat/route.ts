@@ -11,13 +11,11 @@ type ChatRequestBody = {
   messages?: ChatMessage[];
 };
 
-type OpenAIResponsePayload = {
-  output_text?: string;
-  output?: Array<{
-    content?: Array<{
-      text?: string;
-      type?: string;
-    }>;
+type ChatCompletionPayload = {
+  choices?: Array<{
+    message?: {
+      content?: string;
+    };
   }>;
   error?: {
     message?: string;
@@ -56,6 +54,7 @@ export async function POST(request: Request) {
 
     const runtime = env as typeof env & {
       OPENAI_API_KEY?: string;
+      OPENAI_BASE_URL?: string;
       OPENAI_MODEL?: string;
     };
 
@@ -67,27 +66,27 @@ export async function POST(request: Request) {
       });
     }
 
-    const response = await fetch("https://api.openai.com/v1/responses", {
+    const baseUrl = (runtime.OPENAI_BASE_URL ?? "https://openrouter.ai/api/v1").replace(
+      /\/+$/,
+      ""
+    );
+    const response = await fetch(`${baseUrl}/chat/completions`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${runtime.OPENAI_API_KEY}`,
         "Content-Type": "application/json",
+        "HTTP-Referer": "https://secretmousetickets.com",
+        "X-Title": "Secret Mouse Tickets",
       },
       body: JSON.stringify({
-        model: runtime.OPENAI_MODEL ?? "gpt-5.5",
-        instructions: SUPPORT_PROMPT,
-        input: messages.map((message) => ({
-          role: message.role,
-          content: message.content,
-        })),
-        max_output_tokens: 350,
-        reasoning: { effort: "low" },
-        text: { verbosity: "low" },
-        store: false,
+        model: runtime.OPENAI_MODEL ?? "openai/gpt-4.1-mini",
+        messages: [{ role: "system", content: SUPPORT_PROMPT }, ...messages],
+        max_tokens: 350,
+        temperature: 0.3,
       }),
     });
 
-    const payload = (await response.json().catch(() => ({}))) as OpenAIResponsePayload;
+    const payload = (await response.json().catch(() => ({}))) as ChatCompletionPayload;
 
     if (!response.ok) {
       return Response.json(
@@ -140,17 +139,6 @@ function normalizeMessages(messages: unknown): ChatMessage[] {
     }));
 }
 
-function extractReply(payload: OpenAIResponsePayload) {
-  if (typeof payload.output_text === "string") {
-    return payload.output_text.trim();
-  }
-
-  return (
-    payload.output
-      ?.flatMap((item) => item.content ?? [])
-      .map((content) => content.text)
-      .filter((text): text is string => typeof text === "string")
-      .join("\n")
-      .trim() ?? ""
-  );
+function extractReply(payload: ChatCompletionPayload) {
+  return payload.choices?.[0]?.message?.content?.trim() ?? "";
 }
