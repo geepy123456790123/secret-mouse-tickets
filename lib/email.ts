@@ -13,16 +13,16 @@ type ConfirmationEmailInput = {
 export function buildConfirmationEmail(input: ConfirmationEmailInput) {
   const multiDayBonusText =
     input.themeParkDays > 1
-      ? "\n\nBONUS: Your multi-day ticket includes an extra Water Park Fun & More Visit pass."
+      ? "\n\nBONUS: Multi-day Disney tickets purchased through this sale page include an extra Water Park Fun & More Visit pass."
       : "";
 
   const bodyText = `Secret Mouse Tickets Confirmation #: ${input.confirmationNumber}
 
 You're on your way to saving BIG on your visit to the Most Magical Place On Earth!
 
-To purchase discounted Walt Disney World Group & Convention Theme Park Tickets for your visit directly from Disney, click here or copy and paste this URL in your browser: ${input.event.event_page_url}
+Your purchase gives you access to an eligible Disney discount ticket sale page. Secret Mouse Tickets does not sell the park tickets. To purchase discounted Walt Disney World Group & Convention Theme Park Tickets directly from Disney, click here or copy and paste this URL in your browser: ${input.event.event_page_url}
 
-The tickets available through this link are valid from ${formatDate(input.event.valid_start_date)} to ${formatDate(input.event.valid_end_date)}.${multiDayBonusText}
+The Disney tickets available through this link are valid from ${formatDate(input.event.valid_start_date)} to ${formatDate(input.event.valid_end_date)}.${multiDayBonusText}
 
 Secret Mouse Tickets
 www.secretmousetickets.com`;
@@ -31,11 +31,12 @@ www.secretmousetickets.com`;
     <img src="${input.origin}/secret-mouse-tickets-logo.png" alt="Secret Mouse Tickets" width="180" style="margin-bottom:20px" />
     <p><strong>Secret Mouse Tickets Confirmation #:</strong> ${escapeHtml(input.confirmationNumber)}</p>
     <p>You're on your way to saving BIG on your visit to the Most Magical Place On Earth!</p>
-    <p>To purchase discounted Walt Disney World Group & Convention Theme Park Tickets for your visit directly from Disney, use this URL:<br /><a href="${escapeHtml(input.event.event_page_url)}">${escapeHtml(input.event.event_page_url)}</a></p>
-    <p>The tickets available through this link are valid from ${formatDate(input.event.valid_start_date)} to ${formatDate(input.event.valid_end_date)}.</p>
+    <p>Your purchase gives you access to an eligible Disney discount ticket sale page. Secret Mouse Tickets does not sell the park tickets.</p>
+    <p>To purchase discounted Walt Disney World Group & Convention Theme Park Tickets directly from Disney, use this URL:<br /><a href="${escapeHtml(input.event.event_page_url)}">${escapeHtml(input.event.event_page_url)}</a></p>
+    <p>The Disney tickets available through this link are valid from ${formatDate(input.event.valid_start_date)} to ${formatDate(input.event.valid_end_date)}.</p>
     ${
       input.themeParkDays > 1
-        ? "<p><strong>BONUS:</strong> Your multi-day ticket includes an extra Water Park Fun & More Visit pass.</p>"
+        ? "<p><strong>BONUS:</strong> Multi-day Disney tickets purchased through this sale page include an extra Water Park Fun & More Visit pass.</p>"
         : ""
     }
     <p>Secret Mouse Tickets<br />www.secretmousetickets.com</p>

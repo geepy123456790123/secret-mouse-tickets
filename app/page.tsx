@@ -47,22 +47,22 @@ const testimonials = [
   {
     name: "Megan R.",
     initials: "MR",
-    amount: "$214",
-    text: "Secret Mouse Tickets found discounted Disney World tickets for our family of four. We saved $214 and still got the extra water park visit with our multi-day tickets.",
+    amount: "$327",
+    text: "Secret Mouse Tickets found a hidden Disney sale page for our family of four doing five park days. We bought directly from Disney and saved $327 on tickets.",
     bg: "bg-[#ffbd38]",
   },
   {
     name: "Jason P.",
     initials: "JP",
-    amount: "$168",
-    text: "I had no idea these group and convention rates were out there. Our May trip dates matched, and we saved $168 before we even bought snacks.",
+    amount: "$312",
+    text: "I had no idea these group and convention rates were out there. Our dates matched, the access was $57, and our Disney ticket savings were over $300.",
     bg: "bg-[#8f72f2]",
   },
   {
     name: "Priya S.",
     initials: "PS",
-    amount: "$126",
-    text: "We checked our dates on a whim and found ticket access that saved us $126. The process was quick, clear, and totally worth it.",
+    amount: "$289",
+    text: "We checked our dates on a whim and got the Disney ticket sale link after checkout. The process was clear, and we saved $289 buying from Disney.",
     bg: "bg-[#ff7f98]",
   },
 ];
@@ -147,15 +147,15 @@ export default function Home() {
             </h1>
             <p className="text-lg font-medium leading-8 text-[#3e304d]">
               We track discounted Disney World ticket sales that aren&apos;t advertised to the public,
-              so you can save BIG on your Disney trip. Enter your dates and details to see if we
-              can save you money on your Walt Disney World visit!
+              so you can save BIG on your Disney trip. A typical family of 4 doing 5 park days
+              saves over $300 on tickets alone. Access to the discount costs just $57.
             </p>
           </div>
         </div>
 
         <div className="grid content-center gap-5">
           <p className="rounded-full bg-[#fff7de]/90 px-4 py-2 text-center text-sm font-bold text-[#5d45b5]">
-            Group and convention rate tickets, open to everyone.
+            Group and convention rate ticket sale pages, opened up to everyone.
           </p>
 
           <section className="cartoon-panel grid gap-3 rounded-[22px] bg-white/95 p-5">
@@ -166,7 +166,8 @@ export default function Home() {
               <div>
                 <h2 className="text-base font-black">Advance Purchase Savings</h2>
                 <p className="text-sm font-semibold leading-6 text-[#3e304d]">
-                  Save up to 20%* on 1-day and multi-day tickets.
+                  Save up to 20%* when you buy eligible 1-day and multi-day tickets directly
+                  from Disney.
                 </p>
               </div>
             </div>
@@ -177,9 +178,13 @@ export default function Home() {
               <div>
                 <h2 className="text-base font-black">Additional Disney Magic</h2>
                 <p className="text-sm font-semibold leading-6 text-[#3e304d]">
-                  Multi-day tickets include an extra Water Park Fun & More Visit pass.
+                  Multi-day Disney tickets include an extra Water Park Fun & More Visit pass.
                 </p>
               </div>
+            </div>
+            <div className="rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] px-4 py-3 text-sm font-bold leading-6 text-[#3e304d]">
+              Secret Mouse Tickets sells access to the eligible Disney discount sale page. Your
+              actual theme park tickets are purchased directly from Disney.
             </div>
           </section>
 
@@ -303,7 +308,7 @@ export default function Home() {
                 Match found
               </p>
               <h2 className="mt-4 text-2xl font-bold leading-tight">
-                We found Secret Mouse Tickets access for your Walt Disney World visit dates!
+                We found a hidden Disney discount sale page for your Walt Disney World visit dates!
               </h2>
               <p className="mt-3 text-base font-bold">
                 Walt Disney World&reg; Discounted Group & Convention Theme Park Tickets & Passes
@@ -312,10 +317,15 @@ export default function Home() {
                 Valid for {form.themeParkDays} days from {formatDate(result.event.validStartDate)} to{" "}
                 {formatDate(result.event.validEndDate)}.
               </p>
+              <p className="mt-3 rounded-[16px] border-[3px] border-[#120f17] bg-white px-3 py-2 text-sm font-bold leading-6 text-[#3e304d]">
+                Purchase Secret Mouse Tickets access for $57. After checkout, we&apos;ll send you the
+                eligible Disney sale page so you can buy your discounted tickets directly from
+                Disney.
+              </p>
               {hasMultiDayBonus && (
                 <p className="mt-3 rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] px-3 py-2 text-sm font-bold text-[#7b4b00]">
-                  Your cart includes an extra Water Park Fun & More Visit pass with this multi-day
-                  ticket.
+                  Multi-day Disney tickets purchased through the sale page include an extra Water
+                  Park Fun & More Visit pass.
                 </p>
               )}
 
@@ -336,14 +346,15 @@ export default function Home() {
                   className="inline-flex h-12 items-center justify-center gap-2 self-end rounded-[16px] border-4 border-[#120f17] bg-[#8f72f2] px-5 font-bold text-white shadow-[5px_5px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[7px_7px_0_#120f17] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   <ShoppingCart size={18} aria-hidden="true" />
-                  {status === "checkout" ? "Opening..." : "Purchase For $99"}
+                  {status === "checkout" ? "Opening..." : "Buy Access For $57"}
                 </button>
               </div>
             </section>
           )}
 
           <p className="rounded-full bg-[#fff7de]/80 px-4 py-2 text-center text-xs font-semibold leading-5 text-[#3e304d]">
-            Secret Mouse Tickets is an independent service and is not affiliated with Disney.
+            Secret Mouse Tickets is an independent service and is not affiliated with Disney. You
+            buy tickets directly from Disney after purchasing access.
           </p>
           <p className="px-3 text-center text-[11px] font-semibold leading-5 text-[#5a4a69]">
             *Savings based on the non-discounted price for the same ticket sold at Disney-owned and
@@ -358,7 +369,7 @@ export default function Home() {
             Sample guest stories
           </p>
           <h2 className="mt-5 text-3xl font-black leading-tight text-[#120f17] sm:text-4xl">
-            Families use hidden ticket windows to keep more magic money in their pockets.
+            Families use hidden Disney ticket sale pages to keep more magic money in their pockets.
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm font-semibold leading-6 text-[#4b3c59]">
             Placeholder testimonials for layout only. Replace with verified customer reviews before

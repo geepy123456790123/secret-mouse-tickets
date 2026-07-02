@@ -46,7 +46,7 @@ export default async function CheckoutPage({
         />
         <div className="grid gap-2">
           <p className="text-sm font-bold uppercase text-[#5d45b5]">Demo checkout</p>
-          <h1 className="text-3xl font-bold">Secret Mouse Tickets</h1>
+          <h1 className="text-3xl font-bold">Disney Discount Page Access</h1>
           <p className="text-lg font-bold">${(order.amount_cents / 100).toFixed(2)}</p>
         </div>
 
@@ -56,8 +56,15 @@ export default async function CheckoutPage({
             Valid from {formatDate(order.valid_start_date)} to {formatDate(order.valid_end_date)}
           </p>
           {order.theme_park_days > 1 && (
-            <p>Included bonus: Extra Water Park Fun & More Visit pass</p>
+            <p>
+              Multi-day Disney tickets purchased through the sale page include an extra Water Park
+              Fun & More Visit pass.
+            </p>
           )}
+          <p>
+            This purchase unlocks the eligible Disney ticket sale page. You will buy actual theme
+            park tickets directly from Disney.
+          </p>
           <p>Receipt email: {order.recipient_email}</p>
         </div>
 

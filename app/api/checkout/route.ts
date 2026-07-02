@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { ensureDatabase, getRawDb } from "@/db";
 
-const PRICE_CENTS = 9900;
+const PRICE_CENTS = 5700;
 
 type LeadWithEvent = {
   lead_id: string;
@@ -153,8 +153,8 @@ async function createSquareCheckoutLink({
       quick_pay: {
         name:
           themeParkDays > 1
-            ? `Secret Mouse Tickets - ${themeParkDays} Day Ticket Access + Water Park Bonus`
-            : "Secret Mouse Tickets - 1 Day Ticket Access",
+            ? `Secret Mouse Tickets - Disney Discount Page Access (${themeParkDays} Park Days)`
+            : "Secret Mouse Tickets - Disney Discount Page Access",
         price_money: {
           amount: amountCents,
           currency: "USD",
@@ -164,7 +164,7 @@ async function createSquareCheckoutLink({
       checkout_options: {
         redirect_url: redirectUrl,
       },
-      payment_note: `Secret Mouse Tickets order ${orderId}`,
+      payment_note: `Secret Mouse Tickets access order ${orderId}`,
     }),
   });
 
