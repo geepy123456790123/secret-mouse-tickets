@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 type SquarePaymentFormProps = {
   orderId: string;
   amountCents: number;
+  recipientEmail: string;
   applicationId: string | null;
   locationId: string | null;
   environment: string;
@@ -36,6 +37,7 @@ declare global {
 export function SquarePaymentForm({
   orderId,
   amountCents,
+  recipientEmail,
   applicationId,
   locationId,
   environment,
@@ -103,7 +105,16 @@ export function SquarePaymentForm({
       let sourceId: string | undefined;
 
       if (amountCents > 0) {
-        const tokenResult = await cardRef.current?.tokenize();
+        const tokenResult = await cardRef.current?.tokenize({
+          amount: (amountCents / 100).toFixed(2),
+          billingContact: {
+            email: recipientEmail,
+          },
+          currencyCode: "USD",
+          intent: "CHARGE",
+          customerInitiated: true,
+          sellerKeyedIn: false,
+        });
 
         if (!tokenResult || tokenResult.status !== "OK" || !tokenResult.token) {
           throw new Error(

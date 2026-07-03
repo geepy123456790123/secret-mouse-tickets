@@ -89,6 +89,7 @@ export default async function CheckoutPage({
           <SquarePaymentForm
             orderId={order.order_id}
             amountCents={order.amount_cents}
+            recipientEmail={order.recipient_email}
             applicationId={runtime.SQUARE_APPLICATION_ID ?? null}
             locationId={runtime.SQUARE_LOCATION_ID ?? null}
             environment={runtime.SQUARE_ENVIRONMENT ?? "sandbox"}
