@@ -147,6 +147,7 @@ export default function Home() {
             alt="Secret Mouse Tickets"
             width={705}
             height={607}
+            unoptimized
             priority
             className="h-auto w-full max-w-[400px] object-contain"
           />

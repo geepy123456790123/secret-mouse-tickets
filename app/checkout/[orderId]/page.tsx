@@ -41,6 +41,7 @@ export default async function CheckoutPage({
           alt="Secret Mouse Tickets"
           width={705}
           height={607}
+          unoptimized
           priority
           className="h-auto w-44 object-contain"
         />
