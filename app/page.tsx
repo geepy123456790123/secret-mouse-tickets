@@ -322,19 +322,17 @@ export default function Home() {
                 Match found
               </p>
               <h2 className="mt-4 text-2xl font-bold leading-tight">
-                We found a hidden Disney discount sale page for your Walt Disney World visit dates!
+                We found Walt Disney World&reg; Discounted Group & Convention Theme Park Tickets
+                &amp; Passes that match the date of your visit!
               </h2>
-              <p className="mt-3 text-base font-bold">
-                Walt Disney World&reg; Discounted Group & Convention Theme Park Tickets & Passes
-              </p>
               <p className="mt-3 text-sm font-semibold leading-6 text-[#3e304d]">
                 Valid for {form.themeParkDays} days from {formatDate(result.event.validStartDate)} to{" "}
                 {formatDate(result.event.validEndDate)}.
               </p>
               <p className="mt-3 rounded-[16px] border-[3px] border-[#120f17] bg-white px-3 py-2 text-sm font-bold leading-6 text-[#3e304d]">
-                Purchase Secret Mouse Tickets access for $57. After checkout, we&apos;ll send you the
-                eligible Disney sale page so you can buy your discounted tickets directly from
-                Disney.
+                Purchase Secret Mouse Tickets access below. After checkout, we&apos;ll send you a
+                personalized link to the eligible Disney Group and Convention page so you can buy
+                your discounted tickets directly from Disney.
               </p>
               {hasMultiDayBonus && (
                 <p className="mt-3 rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] px-3 py-2 text-sm font-bold text-[#7b4b00]">
@@ -345,7 +343,7 @@ export default function Home() {
 
               <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
                 <label className="grid gap-2 text-sm font-bold">
-                  Coupon or Access Code
+                  Coupon Code
                   <input
                     value={couponCode}
                     onChange={(event) => setCouponCode(event.target.value)}

@@ -71,30 +71,15 @@ export default async function CheckoutPage({
         <div className="rounded-[18px] border-[3px] border-[#120f17] bg-[#fff7de] p-4 text-sm font-semibold leading-6">
           <p className="font-bold">
             {isPaid
-              ? "We sent the Secret Mouse Tickets confirmation and Disney ticket sale link to "
-              : "After payment, we will send the Secret Mouse Tickets confirmation and Disney ticket sale link to "}
-            {order.recipient_email}.
+              ? "Your confirmation and Disney Group and Convention discounted ticket sale link were sent automatically to "
+              : "Complete the secure payment below, we'll send your confirmation and Disney Group and Convention discounted ticket sale link automatically to "}
+            {order.recipient_email}. Your actual theme park tickets are purchased directly from
+            Disney.
           </p>
-          {!isPaid && amountCentsNeedsPayment(order.amount_cents) && (
-            <p>
-              Complete the secure payment below, then we&apos;ll send your confirmation email and
-              Disney ticket sale link automatically.
-            </p>
-          )}
-          <p className="font-bold">{order.info_banner_first}</p>
           <p>
-            Valid from {formatDate(order.valid_start_date)} to {formatDate(order.valid_end_date)}
-          </p>
-          {order.theme_park_days > 1 && (
-            <p>
-              Multi-day Disney tickets purchased through the sale page include an extra Water Park
-              Fun & More Visit pass.
-            </p>
-          )}
-          <p>
-            Secret Mouse Tickets connects you to a Disney Group &amp; Convention discount ticket sale
-            page when one is available for your visit dates. Your actual theme park tickets are
-            purchased directly from Disney.
+            Disney Tickets available through the link will be valid from{" "}
+            {formatDate(order.valid_start_date)} through {formatDate(order.valid_end_date)}, and
+            includes extra Water Park Fun &amp; More Visit passes for multi-date tickets.
           </p>
         </div>
 
@@ -114,8 +99,4 @@ export default async function CheckoutPage({
       </section>
     </main>
   );
-}
-
-function amountCentsNeedsPayment(amountCents: number) {
-  return amountCents > 0;
 }

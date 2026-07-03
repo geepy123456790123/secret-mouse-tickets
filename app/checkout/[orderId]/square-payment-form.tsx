@@ -71,7 +71,6 @@ export function SquarePaymentForm({
             input: {
               backgroundColor: "#fffaf0",
               color: "#120f17",
-              fontFamily: "Fredoka, sans-serif",
               fontSize: "16px",
               fontWeight: "600",
             },

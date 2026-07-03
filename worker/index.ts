@@ -71,6 +71,9 @@ function withSecurityHeaders(response: Response) {
       "font-src 'self'",
       "connect-src 'self' https://*.squarecdn.com https://*.squareup.com https://*.squareupsandbox.com",
       "frame-src https://*.squarecdn.com https://*.squareup.com https://*.squareupsandbox.com",
+      "child-src https://*.squarecdn.com https://*.squareup.com https://*.squareupsandbox.com",
+      "worker-src 'self' blob:",
+      "form-action 'self' https://*.squareup.com https://*.squareupsandbox.com",
     ].join("; ")
   );
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
