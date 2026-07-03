@@ -68,18 +68,18 @@ export default async function CheckoutPage({
           <p className="text-lg font-bold">${(order.amount_cents / 100).toFixed(2)}</p>
         </div>
 
-        <div className="rounded-[18px] border-[3px] border-[#120f17] bg-[#fff7de] p-4 text-sm font-semibold leading-6">
+        <div className="space-y-3 rounded-[18px] border-[3px] border-[#120f17] bg-[#fff7de] p-4 text-sm font-semibold leading-6">
           <p className="font-bold">
             {isPaid
-              ? "Your confirmation and Disney Group and Convention discounted ticket sale link were sent automatically to "
-              : "Complete the secure payment below, we'll send your confirmation and Disney Group and Convention discounted ticket sale link automatically to "}
-            {order.recipient_email}. Your actual theme park tickets are purchased directly from
-            Disney.
+              ? "Your payment confirmation and Disney Group and Convention discount ticket sale link were sent automatically to "
+              : "Complete the secure payment below, we'll send your payment confirmation and Disney Group and Convention discount ticket sale link automatically to "}
+            {order.recipient_email}. Use the emailed link to purchase your actual theme park
+            tickets directly from Disney.
           </p>
           <p>
-            Disney Tickets available through the link will be valid from{" "}
+            Disney World Tickets available for purchase through the link are valid from{" "}
             {formatDate(order.valid_start_date)} through {formatDate(order.valid_end_date)}, and
-            includes extra Water Park Fun &amp; More Visit passes for multi-date tickets.
+            include extra Water Park Fun &amp; More Visit passes for multi-date tickets.
           </p>
         </div>
 
