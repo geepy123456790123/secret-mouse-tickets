@@ -2,16 +2,14 @@ import { env } from "cloudflare:workers";
 import { load } from "cheerio";
 import { ensureDatabase, getRawDb } from "@/db";
 import { todayIso } from "@/lib/dates";
-
-type SerperOrganicResult = {
-  link?: string;
-};
-
-type SerperResponse = {
-  organic?: SerperOrganicResult[];
-  message?: string;
-  error?: string;
-};
+import {
+  DEFAULT_RESULT_PAGES,
+  SearchProvider,
+  clampNumber,
+  discoverDisneyEventLinks,
+  getSearchProvider,
+  isCandidateEventUrl,
+} from "@/lib/disneyevent-search";
 
 type EventDestination = "disney_world" | "disneyland" | "unknown";
 
@@ -30,12 +28,11 @@ type ScrapedEvent = {
 type SkippedUrl = {
   url: string;
   reason: string;
+  status?: number;
 };
 
-const DEFAULT_QUERY = "site:disneyevent.com";
-const DEFAULT_RESULT_PAGES = 15;
 const DEFAULT_CONCURRENCY = 6;
-const SERPER_SEARCH_URL = "https://google.serper.dev/search";
+const DEFAULT_RESULTS_PER_PAGE = 10;
 const EXCLUDED_BROCHURE_SRC =
   "https://258ade6f769e5102661c-d0ee5722296a6e07a9b11bb4054abd10.ssl.cf2.rackcdn.com/thumbs/yBcDUZZON5KjxryAb3o2uizUnHfloBHeBrochure.png";
 
@@ -53,29 +50,101 @@ export async function POST(request: Request) {
   const options = await request.json().catch(() => ({}));
   const pages = clampNumber(options.pages, 1, DEFAULT_RESULT_PAGES, DEFAULT_RESULT_PAGES);
   const concurrency = clampNumber(options.concurrency, 1, 10, DEFAULT_CONCURRENCY);
-  const query = typeof options.query === "string" && options.query.trim() ? options.query.trim() : DEFAULT_QUERY;
+  const provider = getSearchProvider(options.provider ?? runtime.SEARCH_NORMALIZER_PROVIDER);
+  const query =
+    typeof options.query === "string" && options.query.trim() ? options.query.trim() : undefined;
+  const googleSearchUrl =
+    typeof options.googleSearchUrl === "string" && options.googleSearchUrl.trim()
+      ? options.googleSearchUrl.trim()
+      : runtime.GOOGLE_SEARCH_URL;
 
   await ensureDatabase();
   const db = getRawDb();
+  const runStart = await db
+    .prepare("INSERT INTO scrape_runs (status, provider, query, source_url) VALUES (?, ?, ?, ?)")
+    .bind("running", provider, query ?? null, googleSearchUrl ?? null)
+    .run();
+  const runId = Number(runStart.meta.last_row_id);
 
   try {
-    const urls = await discoverCandidateUrls(runtime.SERPER_API_KEY, query, pages);
+    const discovery = await discoverCandidateUrls({
+      apiKey: runtime.SERPER_API_KEY,
+      provider,
+      query,
+      pages,
+      googleSearchUrl,
+    });
+    const urls = discovery.items.map((item) => item.link);
+    await logRunItems(
+      db,
+      runId,
+      urls.map((url) => ({ url, status: "candidate", reason: null }))
+    );
     const { events, skipped } = await scrapeCandidateUrls(urls, concurrency);
     const ingest = await upsertEvents(db, events);
+    const reasonSummary = summarizeReasons([
+      ...skipped.map((item) => item.reason),
+      ...ingest.ignoredItems.map((item) => item.reason),
+    ]);
+
+    await logRunItems(
+      db,
+      runId,
+      skipped.map((item) => ({
+        url: item.url,
+        status: "skipped",
+        reason: item.reason,
+      }))
+    );
+    await logRunItems(
+      db,
+      runId,
+      ingest.ignoredItems.map((item) => ({
+        url: item.url,
+        status: "ignored",
+        reason: item.reason,
+      }))
+    );
+    await logRunItems(
+      db,
+      runId,
+      ingest.upsertedUrls.map((url) => ({
+        url,
+        status: "upserted",
+        reason: null,
+      }))
+    );
 
     await db
       .prepare(
-        "INSERT INTO scrape_runs (status, candidate_count, upserted_count, ignored_count) VALUES (?, ?, ?, ?)"
+        "UPDATE scrape_runs SET status = ?, provider = ?, query = ?, source_url = ?, candidate_count = ?, parsed_count = ?, skipped_count = ?, upserted_count = ?, ignored_count = ?, error = NULL WHERE id = ?"
       )
-      .bind("completed", urls.length, ingest.upserted, ingest.ignored)
+      .bind(
+        "completed",
+        discovery.provider,
+        discovery.query,
+        discovery.sourceUrl,
+        urls.length,
+        events.length,
+        skipped.length,
+        ingest.upserted,
+        ingest.ignored,
+        runId
+      )
       .run();
 
     return Response.json({
       ok: true,
+      runId,
+      provider: discovery.provider,
+      sourceUrl: discovery.sourceUrl,
+      query: discovery.query,
       discovered: urls.length,
       parsed: events.length,
       skipped: skipped.length,
       ingest,
+      skipReasonSummary: reasonSummary,
+      warnings: discovery.warnings,
       sampleEvents: events.slice(0, 5).map((event) => ({
         eventPageUrl: event.eventPageUrl,
         infoBannerFirst: event.infoBannerFirst,
@@ -88,11 +157,11 @@ export async function POST(request: Request) {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     await db
-      .prepare("INSERT INTO scrape_runs (status, error) VALUES (?, ?)")
-      .bind("failed", message)
+      .prepare("UPDATE scrape_runs SET status = ?, error = ? WHERE id = ?")
+      .bind("failed", message, runId)
       .run();
 
-    return Response.json({ ok: false, error: message }, { status: 500 });
+    return Response.json({ ok: false, runId, error: message }, { status: 500 });
   }
 }
 
@@ -114,48 +183,33 @@ function authorize(request: Request) {
   };
 }
 
-async function discoverCandidateUrls(apiKey: string, query: string, pages: number) {
-  const results = await Promise.all(
-    Array.from({ length: pages }, (_, index) => fetchSerperPage(apiKey, query, index + 1))
-  );
-
-  return dedupeLinks(
-    results
-      .flatMap((payload) => payload.organic ?? [])
-      .map((result) => result.link)
-      .filter((link): link is string => typeof link === "string")
-      .filter((link) => link.startsWith("https://disneyevent.com/"))
-      .map(normalizeEventPageUrl)
-      .filter(isCandidateEventUrl)
-  );
-}
-
-async function fetchSerperPage(apiKey: string, query: string, page: number) {
-  const response = await fetch(SERPER_SEARCH_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-API-KEY": apiKey,
-    },
-    body: JSON.stringify({
-      q: query,
-      gl: "us",
-      hl: "en",
-      num: 10,
-      page,
-      filter: "0",
-    }),
+async function discoverCandidateUrls({
+  apiKey,
+  provider,
+  query,
+  pages,
+  googleSearchUrl,
+}: {
+  apiKey?: string;
+  provider: SearchProvider;
+  query?: string;
+  pages: number;
+  googleSearchUrl?: string;
+}) {
+  const discovery = await discoverDisneyEventLinks({
+    apiKey,
+    provider,
+    query,
+    num: DEFAULT_RESULTS_PER_PAGE,
+    page: 1,
+    pages,
+    googleSearchUrlValue: googleSearchUrl,
   });
 
-  const payload = (await response.json().catch(() => ({}))) as SerperResponse;
-
-  if (!response.ok) {
-    throw new Error(
-      payload.message ?? payload.error ?? `Serper returned status ${response.status} on page ${page}.`
-    );
-  }
-
-  return payload;
+  return {
+    ...discovery,
+    items: discovery.items.filter((item) => isCandidateEventUrl(item.link)),
+  };
 }
 
 async function scrapeCandidateUrls(urls: string[], concurrency: number) {
@@ -177,7 +231,7 @@ async function scrapeCandidateUrls(urls: string[], concurrency: number) {
         });
 
         if (!response.ok) {
-          skipped.push({ url, reason: `HTTP ${response.status}` });
+          skipped.push({ url, reason: `HTTP ${response.status}`, status: response.status });
           continue;
         }
 
@@ -207,13 +261,26 @@ async function upsertEvents(db: ReturnType<typeof getRawDb>, events: ScrapedEven
   const today = todayIso();
   let upserted = 0;
   let ignored = 0;
+  const ignoredItems: SkippedUrl[] = [];
+  const upsertedUrls: string[] = [];
 
   await cleanupNonProductionEvents(db);
 
   for (const event of events) {
-    if (event.excluded || event.destination !== "disney_world" || event.eventStartDate <= today) {
+    let ignoreReason: string | null = null;
+
+    if (event.excluded) {
+      ignoreReason = "Excluded by brochure image or destination filter.";
+    } else if (event.destination !== "disney_world") {
+      ignoreReason = `Destination ${event.destination} is not Disney World.`;
+    } else if (event.eventStartDate <= today) {
+      ignoreReason = `Event start ${event.eventStartDate} is not in the future.`;
+    }
+
+    if (ignoreReason) {
       await db.prepare("DELETE FROM events WHERE event_page_url = ?").bind(event.eventPageUrl).run();
       ignored += 1;
+      ignoredItems.push({ url: event.eventPageUrl, reason: ignoreReason });
       continue;
     }
 
@@ -237,9 +304,10 @@ async function upsertEvents(db: ReturnType<typeof getRawDb>, events: ScrapedEven
       .run();
 
     upserted += 1;
+    upsertedUrls.push(event.eventPageUrl);
   }
 
-  return { ok: true, upserted, ignored };
+  return { ok: true, upserted, ignored, ignoredItems, upsertedUrls };
 }
 
 async function cleanupNonProductionEvents(db: ReturnType<typeof getRawDb>) {
@@ -465,40 +533,6 @@ function decodeEscapedValue(value: string) {
   }
 }
 
-function normalizeEventPageUrl(value: string) {
-  const url = new URL(value);
-
-  url.hash = "";
-
-  for (const key of [...url.searchParams.keys()]) {
-    if (key.startsWith("utm_") || key === "mc_cid" || key === "mc_eid") {
-      url.searchParams.delete(key);
-    }
-  }
-
-  return url.toString();
-}
-
-function isCandidateEventUrl(value: string) {
-  const url = new URL(value);
-
-  return url.hostname === "disneyevent.com" && !url.pathname.endsWith("/know-before-you-go");
-}
-
-function dedupeLinks(links: string[]) {
-  const seen = new Set<string>();
-  const deduped: string[] = [];
-
-  for (const link of links) {
-    if (!seen.has(link)) {
-      seen.add(link);
-      deduped.push(link);
-    }
-  }
-
-  return deduped;
-}
-
 function clampNumber(value: unknown, min: number, max: number, fallback: number) {
   const parsed = Number(value);
   if (!Number.isInteger(parsed)) {
@@ -506,4 +540,35 @@ function clampNumber(value: unknown, min: number, max: number, fallback: number)
   }
 
   return Math.min(max, Math.max(min, parsed));
+}
+
+async function logRunItems(
+  db: ReturnType<typeof getRawDb>,
+  runId: number,
+  items: Array<{ url: string; status: string; reason: string | null }>
+) {
+  if (!items.length) {
+    return;
+  }
+
+  const statements = items.map((item) =>
+    db
+      .prepare("INSERT INTO scrape_run_items (scrape_run_id, url, status, reason) VALUES (?, ?, ?, ?)")
+      .bind(runId, item.url, item.status, item.reason)
+  );
+
+  await db.batch(statements);
+}
+
+function summarizeReasons(reasons: string[]) {
+  const counts = new Map<string, number>();
+
+  for (const reason of reasons) {
+    counts.set(reason, (counts.get(reason) ?? 0) + 1);
+  }
+
+  return [...counts.entries()]
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 10)
+    .map(([reason, count]) => ({ reason, count }));
 }

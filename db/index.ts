@@ -52,7 +52,10 @@ async function createSchema() {
       "CREATE TABLE IF NOT EXISTS email_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, order_id TEXT NOT NULL, recipient_email TEXT NOT NULL, subject TEXT NOT NULL, body_text TEXT NOT NULL, provider_message_id TEXT, status TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
     ),
     db.prepare(
-      "CREATE TABLE IF NOT EXISTS scrape_runs (id INTEGER PRIMARY KEY AUTOINCREMENT, status TEXT NOT NULL, candidate_count INTEGER NOT NULL DEFAULT 0, upserted_count INTEGER NOT NULL DEFAULT 0, ignored_count INTEGER NOT NULL DEFAULT 0, error TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
+      "CREATE TABLE IF NOT EXISTS scrape_runs (id INTEGER PRIMARY KEY AUTOINCREMENT, status TEXT NOT NULL, provider TEXT, query TEXT, source_url TEXT, candidate_count INTEGER NOT NULL DEFAULT 0, parsed_count INTEGER NOT NULL DEFAULT 0, skipped_count INTEGER NOT NULL DEFAULT 0, upserted_count INTEGER NOT NULL DEFAULT 0, ignored_count INTEGER NOT NULL DEFAULT 0, error TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
+    ),
+    db.prepare(
+      "CREATE TABLE IF NOT EXISTS scrape_run_items (id INTEGER PRIMARY KEY AUTOINCREMENT, scrape_run_id INTEGER NOT NULL, url TEXT NOT NULL, status TEXT NOT NULL, reason TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
     ),
   ]);
 
@@ -66,6 +69,25 @@ async function createSchema() {
   }
 
   await db.prepare("CREATE INDEX IF NOT EXISTS events_destination_idx ON events (destination)").run();
+
+  const scrapeRunColumns = await db.prepare("PRAGMA table_info(scrape_runs)").all<{ name: string }>();
+  const existingScrapeRunColumns = new Set(scrapeRunColumns.results?.map((column) => column.name) ?? []);
+  const scrapeRunOptionalColumns = [
+    ["provider", "TEXT"],
+    ["query", "TEXT"],
+    ["source_url", "TEXT"],
+    ["parsed_count", "INTEGER NOT NULL DEFAULT 0"],
+    ["skipped_count", "INTEGER NOT NULL DEFAULT 0"],
+  ] as const;
+
+  for (const [name, type] of scrapeRunOptionalColumns) {
+    if (!existingScrapeRunColumns.has(name)) {
+      await db.prepare(`ALTER TABLE scrape_runs ADD COLUMN ${name} ${type}`).run();
+    }
+  }
+
+  await db.prepare("CREATE INDEX IF NOT EXISTS scrape_run_items_run_idx ON scrape_run_items (scrape_run_id)").run();
+  await db.prepare("CREATE INDEX IF NOT EXISTS scrape_run_items_status_idx ON scrape_run_items (status)").run();
 
   const leadColumns = await db.prepare("PRAGMA table_info(leads)").all<{ name: string }>();
   const existingLeadColumns = new Set(leadColumns.results?.map((column) => column.name) ?? []);

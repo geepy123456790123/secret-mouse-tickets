@@ -102,9 +102,30 @@ export const emailLogs = sqliteTable("email_logs", {
 export const scrapeRuns = sqliteTable("scrape_runs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   status: text("status").notNull(),
+  provider: text("provider"),
+  query: text("query"),
+  sourceUrl: text("source_url"),
   candidateCount: integer("candidate_count").notNull().default(0),
+  parsedCount: integer("parsed_count").notNull().default(0),
+  skippedCount: integer("skipped_count").notNull().default(0),
   upsertedCount: integer("upserted_count").notNull().default(0),
   ignoredCount: integer("ignored_count").notNull().default(0),
   error: text("error"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const scrapeRunItems = sqliteTable(
+  "scrape_run_items",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    scrapeRunId: integer("scrape_run_id").notNull(),
+    url: text("url").notNull(),
+    status: text("status").notNull(),
+    reason: text("reason"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("scrape_run_items_run_idx").on(table.scrapeRunId),
+    index("scrape_run_items_status_idx").on(table.status),
+  ]
+);
