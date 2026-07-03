@@ -66,27 +66,7 @@ export function SquarePaymentForm({
         }
 
         const payments = window.Square.payments(applicationId, locationId);
-        const card = await payments.card({
-          style: {
-            input: {
-              backgroundColor: "#fffaf0",
-              color: "#120f17",
-              fontSize: "16px",
-              fontWeight: "600",
-            },
-            ".input-container": {
-              borderColor: "#120f17",
-              borderRadius: "14px",
-              borderWidth: "3px",
-            },
-            ".input-container.is-focus": {
-              borderColor: "#8f72f2",
-            },
-            ".message-text.is-error": {
-              color: "#8f1d3d",
-            },
-          },
-        });
+        const card = await payments.card();
         await card.attach("#square-card-container");
 
         if (!isMounted) {
