@@ -45,9 +45,20 @@ export default async function CheckoutPage({
     Boolean(runtime.SQUARE_ACCESS_TOKEN && runtime.SQUARE_APPLICATION_ID && runtime.SQUARE_LOCATION_ID) &&
     runtime.SQUARE_ENVIRONMENT === "production";
   const isPaid = order.status === "paid";
+  const heading = isPaid ? (
+    <>
+      <span className="block">Check Your Email</span>
+      <span className="block">For Your Discount Ticket Link</span>
+    </>
+  ) : (
+    <>
+      <span className="block">Complete Your</span>
+      <span className="block">Purchase</span>
+    </>
+  );
 
   return (
-    <main className="brand-page min-h-screen px-3 py-5 text-[#120f17] sm:px-5 sm:py-8">
+    <main className="brand-page min-h-screen px-3 pt-[calc(env(safe-area-inset-top)+1rem)] pb-[calc(env(safe-area-inset-bottom)+5.5rem)] text-[#120f17] sm:px-5 sm:py-8">
       <section className="cartoon-panel mx-auto grid max-w-2xl gap-4 rounded-[20px] bg-white p-4 sm:gap-5 sm:rounded-[24px] sm:p-7">
         <Image
           src="/secret-mouse-tickets-logo.png"
@@ -56,19 +67,19 @@ export default async function CheckoutPage({
           height={607}
           unoptimized
           priority
-          className="h-auto w-32 object-contain sm:w-44"
+          className="h-auto w-28 object-contain sm:w-44"
         />
         <div className="grid gap-1.5 sm:gap-2">
           <p className="text-sm font-bold uppercase text-[#5d45b5]">
             {isPaid ? "Payment received" : "Secure checkout"}
           </p>
-          <h1 className="text-2xl leading-tight font-bold sm:text-3xl">
-            {isPaid ? "Check Your Email For Your Discount Ticket Link" : "Complete Your Purchase"}
+          <h1 className="max-w-[11ch] text-[2rem] leading-[0.95] font-bold sm:max-w-none sm:text-3xl sm:leading-tight">
+            {heading}
           </h1>
           <p className="text-base font-bold sm:text-lg">${(order.amount_cents / 100).toFixed(2)}</p>
         </div>
 
-        <div className="space-y-3 rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] p-3.5 text-[15px] leading-7 font-semibold sm:rounded-[18px] sm:p-4 sm:text-sm sm:leading-6">
+        <div className="space-y-3 rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] p-3.5 text-[15px] leading-7 font-semibold break-words sm:rounded-[18px] sm:p-4 sm:text-sm sm:leading-6">
           <p className="font-bold">
             {isPaid
               ? "Your payment confirmation and Disney Group and Convention discount ticket sale link were sent automatically to "
