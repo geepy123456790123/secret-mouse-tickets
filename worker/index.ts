@@ -46,7 +46,8 @@ const worker = {
       }, allowedWidths);
     }
 
-    return handler.fetch(request, env, ctx);
+    const response = await handler.fetch(request, env, ctx);
+    return withSecurityHeaders(response);
   },
 
   async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
@@ -55,6 +56,32 @@ const worker = {
 };
 
 export default worker;
+
+function withSecurityHeaders(response: Response) {
+  const headers = new Headers(response.headers);
+  headers.set(
+    "Content-Security-Policy",
+    [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "frame-ancestors 'none'",
+      "script-src 'self' 'unsafe-inline' https://*.squarecdn.com https://*.squareupsandbox.com",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https://*.squarecdn.com https://*.squareup.com",
+      "font-src 'self'",
+      "connect-src 'self' https://*.squarecdn.com https://*.squareup.com https://*.squareupsandbox.com",
+      "frame-src https://*.squarecdn.com https://*.squareup.com https://*.squareupsandbox.com",
+    ].join("; ")
+  );
+  headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  headers.set("X-Content-Type-Options", "nosniff");
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
 
 async function runDailyScrape(
   controller: ScheduledController,

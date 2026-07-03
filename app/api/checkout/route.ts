@@ -39,9 +39,6 @@ export async function POST(request: Request) {
       .first<{ count: number }>();
     const runtime = env as typeof env & {
       DAILY_PURCHASE_LIMIT?: string;
-      SQUARE_ACCESS_TOKEN?: string;
-      SQUARE_LOCATION_ID?: string;
-      SQUARE_ENVIRONMENT?: string;
     };
     const dailyLimit = Number(runtime.DAILY_PURCHASE_LIMIT ?? 25);
 
@@ -53,24 +50,7 @@ export async function POST(request: Request) {
     const amountCents = await priceForCoupon(db, couponCode);
     const orderId = crypto.randomUUID();
     const requestUrl = new URL(request.url);
-    let checkoutUrl = `${requestUrl.origin}/checkout/${orderId}`;
-    let squarePaymentLinkId: string | null = null;
-    let squareOrderId: string | null = null;
-
-    if (runtime.SQUARE_ACCESS_TOKEN && runtime.SQUARE_LOCATION_ID) {
-      const square = await createSquareCheckoutLink({
-        accessToken: runtime.SQUARE_ACCESS_TOKEN,
-        locationId: runtime.SQUARE_LOCATION_ID,
-        environment: runtime.SQUARE_ENVIRONMENT ?? "sandbox",
-        amountCents,
-        orderId,
-        themeParkDays: lead.theme_park_days,
-        redirectUrl: `${requestUrl.origin}/checkout/${orderId}`,
-      });
-      checkoutUrl = square.url;
-      squarePaymentLinkId = square.id;
-      squareOrderId = square.orderId;
-    }
+    const checkoutUrl = `${requestUrl.origin}/checkout/${orderId}`;
 
     await db
       .prepare(
@@ -82,8 +62,8 @@ export async function POST(request: Request) {
         lead.event_id,
         amountCents,
         couponCode,
-        squarePaymentLinkId,
-        squareOrderId,
+        null,
+        null,
         checkoutUrl
       )
       .run();
@@ -128,70 +108,4 @@ async function priceForCoupon(
   }
 
   return Math.max(0, PRICE_CENTS - coupon.discount_cents);
-}
-
-async function createSquareCheckoutLink({
-  accessToken,
-  locationId,
-  environment,
-  amountCents,
-  orderId,
-  themeParkDays,
-  redirectUrl,
-}: {
-  accessToken: string;
-  locationId: string;
-  environment: string;
-  amountCents: number;
-  orderId: string;
-  themeParkDays: number;
-  redirectUrl: string;
-}) {
-  const baseUrl =
-    environment === "production"
-      ? "https://connect.squareup.com"
-      : "https://connect.squareupsandbox.com";
-
-  const response = await fetch(`${baseUrl}/v2/online-checkout/payment-links`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-      "Square-Version": "2026-06-18",
-    },
-    body: JSON.stringify({
-      idempotency_key: orderId,
-      quick_pay: {
-        name:
-          themeParkDays > 1
-            ? `Secret Mouse Tickets Access (${themeParkDays} Park Days)`
-            : "Secret Mouse Tickets Access",
-        price_money: {
-          amount: amountCents,
-          currency: "USD",
-        },
-        location_id: locationId,
-      },
-      checkout_options: {
-        redirect_url: redirectUrl,
-      },
-      payment_note: `Secret Mouse Tickets access order ${orderId}`,
-    }),
-  });
-
-  const payload = (await response.json().catch(() => ({}))) as {
-    payment_link?: { id?: string; order_id?: string; url?: string };
-    related_resources?: { orders?: Array<{ id?: string }> };
-    errors?: Array<{ detail?: string }>;
-  };
-
-  if (!response.ok || !payload.payment_link?.url) {
-    throw new Error(payload.errors?.[0]?.detail ?? "Square checkout link could not be created.");
-  }
-
-  return {
-    id: payload.payment_link.id ?? null,
-    orderId: payload.payment_link.order_id ?? payload.related_resources?.orders?.[0]?.id ?? null,
-    url: payload.payment_link.url,
-  };
 }

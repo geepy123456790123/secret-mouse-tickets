@@ -4,6 +4,7 @@ import { env } from "cloudflare:workers";
 import { ensureDatabase, getRawDb } from "@/db";
 import { formatDate } from "@/lib/dates";
 import { CheckoutConfirm } from "./checkout-confirm";
+import { SquarePaymentForm } from "./square-payment-form";
 
 type CheckoutOrder = {
   order_id: string;
@@ -35,12 +36,13 @@ export default async function CheckoutPage({
   }
 
   const runtime = env as typeof env & {
+    SQUARE_APPLICATION_ID?: string;
     SQUARE_ACCESS_TOKEN?: string;
     SQUARE_LOCATION_ID?: string;
     SQUARE_ENVIRONMENT?: string;
   };
   const isSquareProduction =
-    Boolean(runtime.SQUARE_ACCESS_TOKEN && runtime.SQUARE_LOCATION_ID) &&
+    Boolean(runtime.SQUARE_ACCESS_TOKEN && runtime.SQUARE_APPLICATION_ID && runtime.SQUARE_LOCATION_ID) &&
     runtime.SQUARE_ENVIRONMENT === "production";
   const isPaid = order.status === "paid";
 
@@ -58,9 +60,11 @@ export default async function CheckoutPage({
         />
         <div className="grid gap-2">
           <p className="text-sm font-bold uppercase text-[#5d45b5]">
-            {isPaid ? "Payment received" : "Checkout received"}
+            {isPaid ? "Payment received" : "Secure checkout"}
           </p>
-          <h1 className="text-3xl font-bold">Check Your Email For Your Discount Ticket Link</h1>
+          <h1 className="text-3xl font-bold">
+            {isPaid ? "Check Your Email For Your Discount Ticket Link" : "Complete Your Purchase"}
+          </h1>
           <p className="text-lg font-bold">${(order.amount_cents / 100).toFixed(2)}</p>
         </div>
 
@@ -68,13 +72,13 @@ export default async function CheckoutPage({
           <p className="font-bold">
             {isPaid
               ? "We sent the Secret Mouse Tickets confirmation and Disney ticket sale link to "
-              : "We will send the Secret Mouse Tickets confirmation and Disney ticket sale link to "}
+              : "After payment, we will send the Secret Mouse Tickets confirmation and Disney ticket sale link to "}
             {order.recipient_email}.
           </p>
-          {!isPaid && (
+          {!isPaid && amountCentsNeedsPayment(order.amount_cents) && (
             <p>
-              Square is still confirming the payment. Your email will be sent automatically as soon
-              as the payment confirmation finishes.
+              Complete the secure payment below, then we&apos;ll send your confirmation email and
+              Disney ticket sale link automatically.
             </p>
           )}
           <p className="font-bold">{order.info_banner_first}</p>
@@ -94,8 +98,24 @@ export default async function CheckoutPage({
           </p>
         </div>
 
-        <CheckoutConfirm orderId={order.order_id} showTestButton={!isSquareProduction} />
+        {isPaid ? (
+          <CheckoutConfirm orderId={order.order_id} showTestButton={false} />
+        ) : isSquareProduction || order.amount_cents <= 0 ? (
+          <SquarePaymentForm
+            orderId={order.order_id}
+            amountCents={order.amount_cents}
+            applicationId={runtime.SQUARE_APPLICATION_ID ?? null}
+            locationId={runtime.SQUARE_LOCATION_ID ?? null}
+            environment={runtime.SQUARE_ENVIRONMENT ?? "sandbox"}
+          />
+        ) : (
+          <CheckoutConfirm orderId={order.order_id} showTestButton />
+        )}
       </section>
     </main>
   );
+}
+
+function amountCentsNeedsPayment(amountCents: number) {
+  return amountCents > 0;
 }
