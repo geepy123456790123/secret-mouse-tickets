@@ -18,8 +18,11 @@ Copy `.env.example` to `.env.local` for local work. In production, configure the
 - `ADMIN_INGEST_TOKEN`
 - `DAILY_PURCHASE_LIMIT`
 - `SQUARE_ENVIRONMENT`
+- `SQUARE_APPLICATION_ID`
 - `SQUARE_ACCESS_TOKEN`
 - `SQUARE_LOCATION_ID`
+- `SQUARE_WEBHOOK_SIGNATURE_KEY`
+- `SQUARE_WEBHOOK_NOTIFICATION_URL` (optional, use only if Square's configured URL differs from the request URL seen by the app)
 - `RESEND_API_KEY`
 - `FROM_EMAIL`
 - `SERPER_API_KEY`
@@ -27,6 +30,14 @@ Copy `.env.example` to `.env.local` for local work. In production, configure the
 - `SEARCH_NORMALIZER_PROVIDER`
 
 When Square credentials are absent, checkout uses a local demo confirmation page. When Square credentials are present, `/api/checkout` creates a Square hosted checkout link.
+
+Square production webhooks should point to:
+
+```text
+https://secret-mouse-savers.grant-raderm-6472.chatgpt-team.site/api/square/webhook
+```
+
+Subscribe to Square payment events that include completed payment updates, such as `payment.updated`. The webhook verifies Square's HMAC signature, matches the payment to the local order, marks completed payments as paid, logs Square payment details, and sends the confirmation email.
 
 ## Event ingestion
 

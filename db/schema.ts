@@ -74,11 +74,18 @@ export const orders = sqliteTable(
     couponCode: text("coupon_code"),
     squarePaymentLinkId: text("square_payment_link_id"),
     squareOrderId: text("square_order_id"),
+    squarePaymentId: text("square_payment_id"),
+    squarePaymentStatus: text("square_payment_status"),
     checkoutUrl: text("checkout_url"),
     createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
     paidAt: text("paid_at"),
   },
-  (table) => [index("orders_paid_at_idx").on(table.paidAt)]
+  (table) => [
+    index("orders_paid_at_idx").on(table.paidAt),
+    index("orders_square_payment_link_idx").on(table.squarePaymentLinkId),
+    index("orders_square_order_idx").on(table.squareOrderId),
+    index("orders_square_payment_idx").on(table.squarePaymentId),
+  ]
 );
 
 export const emailLogs = sqliteTable("email_logs", {

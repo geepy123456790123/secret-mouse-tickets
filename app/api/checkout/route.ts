@@ -55,6 +55,7 @@ export async function POST(request: Request) {
     const requestUrl = new URL(request.url);
     let checkoutUrl = `${requestUrl.origin}/checkout/${orderId}`;
     let squarePaymentLinkId: string | null = null;
+    let squareOrderId: string | null = null;
 
     if (runtime.SQUARE_ACCESS_TOKEN && runtime.SQUARE_LOCATION_ID) {
       const square = await createSquareCheckoutLink({
@@ -68,13 +69,23 @@ export async function POST(request: Request) {
       });
       checkoutUrl = square.url;
       squarePaymentLinkId = square.id;
+      squareOrderId = square.orderId;
     }
 
     await db
       .prepare(
-        "INSERT INTO orders (id, lead_id, event_id, amount_cents, coupon_code, square_payment_link_id, checkout_url) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO orders (id, lead_id, event_id, amount_cents, coupon_code, square_payment_link_id, square_order_id, checkout_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
       )
-      .bind(orderId, lead.lead_id, lead.event_id, amountCents, couponCode, squarePaymentLinkId, checkoutUrl)
+      .bind(
+        orderId,
+        lead.lead_id,
+        lead.event_id,
+        amountCents,
+        couponCode,
+        squarePaymentLinkId,
+        squareOrderId,
+        checkoutUrl
+      )
       .run();
 
     return Response.json({ checkoutUrl });
@@ -169,7 +180,8 @@ async function createSquareCheckoutLink({
   });
 
   const payload = (await response.json().catch(() => ({}))) as {
-    payment_link?: { id?: string; url?: string };
+    payment_link?: { id?: string; order_id?: string; url?: string };
+    related_resources?: { orders?: Array<{ id?: string }> };
     errors?: Array<{ detail?: string }>;
   };
 
@@ -179,6 +191,7 @@ async function createSquareCheckoutLink({
 
   return {
     id: payload.payment_link.id ?? null,
+    orderId: payload.payment_link.order_id ?? payload.related_resources?.orders?.[0]?.id ?? null,
     url: payload.payment_link.url,
   };
 }
