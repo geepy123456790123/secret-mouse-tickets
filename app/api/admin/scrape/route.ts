@@ -33,39 +33,8 @@ type SkippedUrl = {
 
 const DEFAULT_CONCURRENCY = 6;
 const DEFAULT_RESULTS_PER_PAGE = 10;
-const MAX_PAGES_PER_BATCH = 4;
 const EXCLUDED_BROCHURE_SRC =
   "https://258ade6f769e5102661c-d0ee5722296a6e07a9b11bb4054abd10.ssl.cf2.rackcdn.com/thumbs/yBcDUZZON5KjxryAb3o2uizUnHfloBHeBrochure.png";
-
-type ScrapeResponse = {
-  ok: boolean;
-  runId?: number;
-  provider?: string;
-  sourceUrl?: string;
-  query?: string;
-  discovered?: number;
-  parsed?: number;
-  skipped?: number;
-  ingest?: {
-    ok: boolean;
-    upserted: number;
-    ignored: number;
-    ignoredItems?: SkippedUrl[];
-    upsertedUrls?: string[];
-  };
-  skipReasonSummary?: Array<{ reason: string; count: number }>;
-  warnings?: string[];
-  sampleEvents?: Array<{
-    eventPageUrl: string;
-    infoBannerFirst: string;
-    eventStartDate: string;
-    eventEndDate: string;
-    destination: EventDestination;
-  }>;
-  sampleSkipped?: SkippedUrl[];
-  batchRuns?: number[];
-  error?: string;
-};
 
 export async function POST(request: Request) {
   const auth = authorize(request);
@@ -82,7 +51,6 @@ export async function POST(request: Request) {
   const startPage = clampNumber(options.startPage, 1, DEFAULT_RESULT_PAGES, 1);
   const pages = clampNumber(options.pages, 1, DEFAULT_RESULT_PAGES, DEFAULT_RESULT_PAGES);
   const concurrency = clampNumber(options.concurrency, 1, 10, DEFAULT_CONCURRENCY);
-  const batchChild = Boolean(options.batchChild);
   const provider = getSearchProvider(options.provider ?? runtime.SEARCH_NORMALIZER_PROVIDER);
   const query =
     typeof options.query === "string" && options.query.trim() ? options.query.trim() : undefined;
@@ -90,19 +58,6 @@ export async function POST(request: Request) {
     typeof options.googleSearchUrl === "string" && options.googleSearchUrl.trim()
       ? options.googleSearchUrl.trim()
       : runtime.GOOGLE_SEARCH_URL;
-
-  if (!batchChild && pages > MAX_PAGES_PER_BATCH) {
-    return runScrapeBatches({
-      request,
-      startPage,
-      pages,
-      concurrency,
-      provider,
-      query,
-      googleSearchUrl,
-      adminIngestToken: runtime.ADMIN_INGEST_TOKEN,
-    });
-  }
 
   await ensureDatabase();
   const db = getRawDb();
@@ -186,6 +141,8 @@ export async function POST(request: Request) {
       provider: discovery.provider,
       sourceUrl: discovery.sourceUrl,
       query: discovery.query,
+      startPage,
+      pages: discovery.pages,
       discovered: urls.length,
       parsed: events.length,
       skipped: skipped.length,
@@ -620,94 +577,4 @@ function summarizeReasons(reasons: string[]) {
     .sort((left, right) => right[1] - left[1])
     .slice(0, 10)
     .map(([reason, count]) => ({ reason, count }));
-}
-
-async function runScrapeBatches({
-  request,
-  startPage,
-  pages,
-  concurrency,
-  provider,
-  query,
-  googleSearchUrl,
-  adminIngestToken,
-}: {
-  request: Request;
-  startPage: number;
-  pages: number;
-  concurrency: number;
-  provider: SearchProvider;
-  query?: string;
-  googleSearchUrl?: string;
-  adminIngestToken?: string;
-}) {
-  const batchResponses: ScrapeResponse[] = [];
-  const batchRunIds: number[] = [];
-  const batchCount = Math.ceil(pages / MAX_PAGES_PER_BATCH);
-
-  for (let index = 0; index < batchCount; index++) {
-    const batchStartPage = startPage + index * MAX_PAGES_PER_BATCH;
-    const remainingPages = pages - index * MAX_PAGES_PER_BATCH;
-    const batchPages = Math.min(MAX_PAGES_PER_BATCH, remainingPages);
-    const response = await fetch(new URL("/api/admin/scrape", request.url), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(adminIngestToken ? { Authorization: `Bearer ${adminIngestToken}` } : {}),
-      },
-      body: JSON.stringify({
-        startPage: batchStartPage,
-        pages: batchPages,
-        concurrency,
-        provider,
-        query,
-        googleSearchUrl,
-        batchChild: true,
-      }),
-    });
-    const payload = (await response.json().catch(() => ({}))) as ScrapeResponse;
-
-    if (!response.ok || !payload.ok) {
-      return Response.json(
-        {
-          ok: false,
-          batchRuns: batchRunIds,
-          error: payload.error ?? `Batch scrape failed at page ${batchStartPage}.`,
-        },
-        { status: response.status || 500 }
-      );
-    }
-
-    if (payload.runId) {
-      batchRunIds.push(payload.runId);
-    }
-
-    batchResponses.push(payload);
-  }
-
-  const reasonSummary = summarizeReasons(
-    batchResponses.flatMap((result) =>
-      (result.skipReasonSummary ?? []).flatMap((item) => Array(item.count).fill(item.reason))
-    )
-  );
-
-  return Response.json({
-    ok: true,
-    batchRuns: batchRunIds,
-    provider,
-    sourceUrl: batchResponses[0]?.sourceUrl,
-    query: batchResponses[0]?.query ?? query,
-    discovered: batchResponses.reduce((sum, result) => sum + (result.discovered ?? 0), 0),
-    parsed: batchResponses.reduce((sum, result) => sum + (result.parsed ?? 0), 0),
-    skipped: batchResponses.reduce((sum, result) => sum + (result.skipped ?? 0), 0),
-    ingest: {
-      ok: true,
-      upserted: batchResponses.reduce((sum, result) => sum + (result.ingest?.upserted ?? 0), 0),
-      ignored: batchResponses.reduce((sum, result) => sum + (result.ingest?.ignored ?? 0), 0),
-    },
-    skipReasonSummary: reasonSummary,
-    warnings: [...new Set(batchResponses.flatMap((result) => result.warnings ?? []))],
-    sampleEvents: batchResponses.flatMap((result) => result.sampleEvents ?? []).slice(0, 5),
-    sampleSkipped: batchResponses.flatMap((result) => result.sampleSkipped ?? []).slice(0, 10),
-  });
 }

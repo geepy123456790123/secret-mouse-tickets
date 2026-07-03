@@ -4,6 +4,12 @@ import { FormEvent, useState } from "react";
 
 type ScrapeResult = {
   ok: boolean;
+  runId?: number;
+  startPage?: number;
+  pages?: number;
+  provider?: string;
+  sourceUrl?: string;
+  query?: string;
   discovered?: number;
   parsed?: number;
   skipped?: number;
@@ -12,6 +18,12 @@ type ScrapeResult = {
     upserted: number;
     ignored: number;
   };
+  skipReasonSummary?: Array<{
+    reason: string;
+    count: number;
+  }>;
+  warnings?: string[];
+  batchRuns?: number[];
   sampleEvents?: Array<{
     eventPageUrl: string;
     infoBannerFirst: string;
@@ -29,6 +41,7 @@ export default function AdminScrapePage() {
   const [token, setToken] = useState("");
   const [pages, setPages] = useState(15);
   const [concurrency, setConcurrency] = useState(6);
+  const [startPage, setStartPage] = useState(1);
   const [status, setStatus] = useState<"idle" | "running">("idle");
   const [result, setResult] = useState<ScrapeResult | null>(null);
 
@@ -38,17 +51,13 @@ export default function AdminScrapePage() {
     setResult(null);
 
     try {
-      const response = await fetch("/api/admin/scrape", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ pages, concurrency }),
+      const payload = await runScrapeBatches({
+        token,
+        startPage,
+        pages,
+        concurrency,
       });
-      const payload = (await response.json()) as ScrapeResult;
-
-      setResult(response.ok ? payload : { ...payload, ok: false });
+      setResult(payload);
     } catch (error) {
       setResult({
         ok: false,
@@ -80,6 +89,17 @@ export default function AdminScrapePage() {
           </label>
 
           <div className="grid gap-4 sm:grid-cols-2">
+            <label className="grid gap-2 text-sm font-bold">
+              Start Page
+              <input
+                type="number"
+                min={1}
+                max={15}
+                value={startPage}
+                onChange={(event) => setStartPage(Number(event.target.value))}
+                className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-3 text-base font-semibold"
+              />
+            </label>
             <label className="grid gap-2 text-sm font-bold">
               Search Pages
               <input
@@ -145,4 +165,87 @@ function Metric({ label, value }: { label: string; value: number }) {
       <div className="text-xs font-bold uppercase tracking-wide">{label}</div>
     </div>
   );
+}
+
+async function runScrapeBatches({
+  token,
+  startPage,
+  pages,
+  concurrency,
+}: {
+  token: string;
+  startPage: number;
+  pages: number;
+  concurrency: number;
+}) {
+  const batchSize = 4;
+  const batchCount = Math.ceil(pages / batchSize);
+  const batchRuns: number[] = [];
+  const batchResults: ScrapeResult[] = [];
+
+  for (let index = 0; index < batchCount; index++) {
+    const batchStartPage = startPage + index * batchSize;
+    const remainingPages = pages - index * batchSize;
+    const batchPages = Math.min(batchSize, remainingPages);
+    const response = await fetch("/api/admin/scrape", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ startPage: batchStartPage, pages: batchPages, concurrency }),
+    });
+    const payload = (await response.json()) as ScrapeResult;
+
+    if (!response.ok || !payload.ok) {
+      return {
+        ...payload,
+        ok: false,
+        batchRuns,
+      };
+    }
+
+    if (payload.runId) {
+      batchRuns.push(payload.runId);
+    }
+
+    batchResults.push(payload);
+  }
+
+  return {
+    ok: true,
+    batchRuns,
+    provider: batchResults[0]?.provider,
+    sourceUrl: batchResults[0]?.sourceUrl,
+    query: batchResults[0]?.query,
+    startPage,
+    pages,
+    discovered: batchResults.reduce((sum, item) => sum + (item.discovered ?? 0), 0),
+    parsed: batchResults.reduce((sum, item) => sum + (item.parsed ?? 0), 0),
+    skipped: batchResults.reduce((sum, item) => sum + (item.skipped ?? 0), 0),
+    ingest: {
+      ok: true,
+      upserted: batchResults.reduce((sum, item) => sum + (item.ingest?.upserted ?? 0), 0),
+      ignored: batchResults.reduce((sum, item) => sum + (item.ingest?.ignored ?? 0), 0),
+    },
+    skipReasonSummary: summarizeReasonCounts(batchResults),
+    warnings: [...new Set(batchResults.flatMap((item) => item.warnings ?? []))],
+    sampleEvents: batchResults.flatMap((item) => item.sampleEvents ?? []).slice(0, 5),
+    sampleSkipped: batchResults.flatMap((item) => item.sampleSkipped ?? []).slice(0, 10),
+  } satisfies ScrapeResult;
+}
+
+function summarizeReasonCounts(results: ScrapeResult[]) {
+  const counts = new Map<string, number>();
+
+  for (const result of results) {
+    for (const item of result.skipReasonSummary ?? []) {
+      counts.set(item.reason, (counts.get(item.reason) ?? 0) + item.count);
+    }
+  }
+
+  return [...counts.entries()]
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 10)
+    .map(([reason, count]) => ({ reason, count }));
 }

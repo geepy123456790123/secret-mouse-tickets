@@ -25,6 +25,9 @@ type ScheduledController = {
   scheduledTime: number;
 };
 
+const SCRAPE_BATCH_SIZE = 4;
+const SCRAPE_TOTAL_PAGES = 15;
+
 // Image security config. SVG sources with .svg extension auto-skip the
 // optimization endpoint on the client side (served directly, no proxy).
 // To route SVGs through the optimizer (with security headers), set
@@ -97,20 +100,30 @@ async function runDailyScrape(
     headers.set("Authorization", `Bearer ${env.ADMIN_INGEST_TOKEN}`);
   }
 
-  const response = await handler.fetch(
-    new Request("https://secret-mouse-tickets.internal/api/admin/scrape", {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ pages: 15 }),
-    }),
-    env,
-    ctx,
-  );
+  const batchCount = Math.ceil(SCRAPE_TOTAL_PAGES / SCRAPE_BATCH_SIZE);
+  const batchResults: unknown[] = [];
 
-  const payload = await response.text();
+  for (let index = 0; index < batchCount; index++) {
+    const startPage = 1 + index * SCRAPE_BATCH_SIZE;
+    const remainingPages = SCRAPE_TOTAL_PAGES - index * SCRAPE_BATCH_SIZE;
+    const pages = Math.min(SCRAPE_BATCH_SIZE, remainingPages);
+    const response = await handler.fetch(
+      new Request("https://secret-mouse-tickets.internal/api/admin/scrape", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ startPage, pages }),
+      }),
+      env,
+      ctx,
+    );
 
-  if (!response.ok) {
-    throw new Error(`Daily scrape failed with ${response.status}: ${payload}`);
+    const payload = await response.text();
+
+    if (!response.ok) {
+      throw new Error(`Daily scrape batch ${startPage}-${startPage + pages - 1} failed with ${response.status}: ${payload}`);
+    }
+
+    batchResults.push(JSON.parse(payload));
   }
 
   console.log(
@@ -118,7 +131,7 @@ async function runDailyScrape(
       message: "Daily Disney event scrape completed.",
       cron: controller.cron,
       scheduledTime: controller.scheduledTime,
-      result: JSON.parse(payload),
+      result: batchResults,
     }),
   );
 }
