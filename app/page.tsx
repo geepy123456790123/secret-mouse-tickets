@@ -195,8 +195,10 @@ export default function Home() {
               </div>
             </div>
             <div className="rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] px-4 py-3 text-sm font-bold leading-6 text-[#3e304d]">
-              Secret Mouse Tickets sells access to the eligible Disney discount sale page. Your
-              actual theme park tickets are purchased directly from Disney.
+              Secret Mouse Tickets connects you to a Disney Group &amp; Convention discount ticket
+              sale page (if available for the dates of your WDW visit). Your actual theme park
+              tickets are purchased directly from Disney. Attending a convention or group is NOT
+              required for Group &amp; Convention ticket purchases.
             </div>
           </section>
 

@@ -164,8 +164,8 @@ async function createSquareCheckoutLink({
       quick_pay: {
         name:
           themeParkDays > 1
-            ? `Secret Mouse Tickets - Disney Discount Page Access (${themeParkDays} Park Days)`
-            : "Secret Mouse Tickets - Disney Discount Page Access",
+            ? `Secret Mouse Tickets Access (${themeParkDays} Park Days)`
+            : "Secret Mouse Tickets Access",
         price_money: {
           amount: amountCents,
           currency: "USD",

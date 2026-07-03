@@ -3,7 +3,13 @@
 import { CheckCircle2, Mail } from "lucide-react";
 import { useState } from "react";
 
-export function CheckoutConfirm({ orderId }: { orderId: string }) {
+export function CheckoutConfirm({
+  orderId,
+  showTestButton,
+}: {
+  orderId: string;
+  showTestButton: boolean;
+}) {
   const [status, setStatus] = useState<"idle" | "working" | "done">("idle");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -45,6 +51,20 @@ export function CheckoutConfirm({ orderId }: { orderId: string }) {
         <pre className="mt-4 max-h-72 overflow-auto whitespace-pre-wrap rounded-[16px] border-[3px] border-[#120f17] bg-white p-4 text-sm leading-6 text-[#120f17]">
           {message}
         </pre>
+      </div>
+    );
+  }
+
+  if (!showTestButton) {
+    return (
+      <div className="rounded-[20px] border-4 border-[#120f17] bg-[#efe8ff] p-5 text-sm font-semibold leading-6">
+        <p className="inline-flex items-center gap-2 font-bold text-[#5d45b5]">
+          <Mail size={19} aria-hidden="true" />
+          Confirmation email on the way
+        </p>
+        <p className="mt-2">
+          If you do not see it within a few minutes, check your spam or promotions folder.
+        </p>
       </div>
     );
   }
