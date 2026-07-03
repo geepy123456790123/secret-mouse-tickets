@@ -56,3 +56,13 @@ select:focus-visible {
   border: 3px solid var(--brand-black);
   box-shadow: 6px 6px 0 var(--brand-black);
 }
+
+@media (max-width: 640px) {
+  .cartoon-panel {
+    box-shadow: 6px 6px 0 var(--brand-black);
+  }
+
+  .cartoon-panel-soft {
+    box-shadow: 4px 4px 0 var(--brand-black);
+  }
+}

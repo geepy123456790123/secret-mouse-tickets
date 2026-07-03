@@ -147,14 +147,14 @@ export function SquarePaymentForm({
   const isWorking = status === "loading" || status === "paying" || status === "paid";
 
   return (
-    <div className="rounded-[20px] border-4 border-[#120f17] bg-[#efe8ff] p-5 shadow-[6px_6px_0_#120f17]">
+    <div className="rounded-[18px] border-4 border-[#120f17] bg-[#efe8ff] p-4 shadow-[4px_4px_0_#120f17] sm:rounded-[20px] sm:p-5 sm:shadow-[6px_6px_0_#120f17]">
       <div className="flex items-start gap-3">
-        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-[3px] border-[#120f17] bg-[#ffbd38]">
+        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[3px] border-[#120f17] bg-[#ffbd38] sm:h-10 sm:w-10">
           <CreditCard size={19} aria-hidden="true" />
         </span>
         <div>
-          <h2 className="text-xl font-black">Secure Payment</h2>
-          <p className="mt-1 text-sm font-semibold leading-6 text-[#3e304d]">
+          <h2 className="text-lg font-black sm:text-xl">Secure Payment</h2>
+          <p className="mt-1 text-sm leading-6 font-semibold text-[#3e304d]">
             Pay securely by card. Your card details are handled by Square and are never stored by
             Secret Mouse Tickets.
           </p>
@@ -162,7 +162,7 @@ export function SquarePaymentForm({
       </div>
 
       {amountCents > 0 && (
-        <div className="mt-5 rounded-[18px] border-[3px] border-[#120f17] bg-white p-4">
+        <div className="mt-4 rounded-[16px] border-[3px] border-[#120f17] bg-white p-3.5 sm:mt-5 sm:rounded-[18px] sm:p-4">
           <div id="square-card-container" className="min-h-[90px]" />
           {status === "loading" && (
             <p className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#5d45b5]">
@@ -183,7 +183,7 @@ export function SquarePaymentForm({
         type="button"
         onClick={pay}
         disabled={isWorking || status === "error"}
-        className="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-[16px] border-4 border-[#120f17] bg-[#ffbd38] px-5 font-bold text-[#120f17] shadow-[5px_5px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[7px_7px_0_#120f17] disabled:cursor-not-allowed disabled:opacity-70"
+        className="mt-4 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[16px] border-4 border-[#120f17] bg-[#ffbd38] px-4 py-2 text-center font-bold text-[#120f17] shadow-[4px_4px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#120f17] disabled:cursor-not-allowed disabled:opacity-70 sm:mt-5 sm:px-5 sm:shadow-[5px_5px_0_#120f17] sm:hover:shadow-[7px_7px_0_#120f17]"
       >
         {status === "paying" || status === "paid" ? (
           <Loader2 size={18} className="animate-spin" aria-hidden="true" />

@@ -47,8 +47,8 @@ export default async function CheckoutPage({
   const isPaid = order.status === "paid";
 
   return (
-    <main className="brand-page min-h-screen px-5 py-8 text-[#120f17]">
-      <section className="cartoon-panel mx-auto grid max-w-2xl gap-5 rounded-[24px] bg-white p-5 sm:p-7">
+    <main className="brand-page min-h-screen px-3 py-5 text-[#120f17] sm:px-5 sm:py-8">
+      <section className="cartoon-panel mx-auto grid max-w-2xl gap-4 rounded-[20px] bg-white p-4 sm:gap-5 sm:rounded-[24px] sm:p-7">
         <Image
           src="/secret-mouse-tickets-logo.png"
           alt="Secret Mouse Tickets"
@@ -56,19 +56,19 @@ export default async function CheckoutPage({
           height={607}
           unoptimized
           priority
-          className="h-auto w-44 object-contain"
+          className="h-auto w-32 object-contain sm:w-44"
         />
-        <div className="grid gap-2">
+        <div className="grid gap-1.5 sm:gap-2">
           <p className="text-sm font-bold uppercase text-[#5d45b5]">
             {isPaid ? "Payment received" : "Secure checkout"}
           </p>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-2xl leading-tight font-bold sm:text-3xl">
             {isPaid ? "Check Your Email For Your Discount Ticket Link" : "Complete Your Purchase"}
           </h1>
-          <p className="text-lg font-bold">${(order.amount_cents / 100).toFixed(2)}</p>
+          <p className="text-base font-bold sm:text-lg">${(order.amount_cents / 100).toFixed(2)}</p>
         </div>
 
-        <div className="space-y-3 rounded-[18px] border-[3px] border-[#120f17] bg-[#fff7de] p-4 text-sm font-semibold leading-6">
+        <div className="space-y-3 rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] p-3.5 text-[15px] leading-7 font-semibold sm:rounded-[18px] sm:p-4 sm:text-sm sm:leading-6">
           <p className="font-bold">
             {isPaid
               ? "Your payment confirmation and Disney Group and Convention discount ticket sale link were sent automatically to "
