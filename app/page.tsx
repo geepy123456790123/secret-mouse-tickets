@@ -161,20 +161,20 @@ export default function Home() {
 
           <div className="max-w-xl space-y-3 lg:-mt-2">
             <h1 className="text-2xl font-bold leading-tight text-[#120f17] sm:text-3xl">
-              Let our team of insiders connect you with hidden discounted tickets for your Walt
-              Disney World visit.
+              We help you find Disney Group &amp; Convention ticket offers that may match your Walt
+              Disney World visit dates.
             </h1>
             <p className="text-lg font-medium leading-8 text-[#3e304d]">
-              We track discounted Disney World ticket sales that aren&apos;t advertised to the public,
-              so you can save BIG on your Disney trip. A typical family of 4 doing 5 park days
-              saves over $300 on tickets alone.
+              We monitor Disney Group &amp; Convention ticket offers and check whether your travel
+              dates line up with an available offer. If your dates match, you can review the offer
+              and buy your actual tickets directly from Disney.
             </p>
           </div>
         </div>
 
         <div className="grid content-center gap-5">
           <p className="rounded-full bg-[#fff7de]/90 px-4 py-2 text-center text-sm font-bold text-[#5d45b5]">
-            Group and convention Walt Disney World ticket discounts, open to everyone
+            Secret Mouse Tickets is independent and not affiliated with Disney
           </p>
 
           <section className="cartoon-panel grid gap-3 rounded-[22px] bg-white/95 p-5">
@@ -185,8 +185,8 @@ export default function Home() {
               <div>
                 <h2 className="text-base font-black">Advance Purchase Savings</h2>
                 <p className="text-sm font-semibold leading-6 text-[#3e304d]">
-                  Save up to 20%* when you buy eligible 1-day and multi-day tickets directly
-                  from Disney.
+                  Eligible Disney offers may price below Disney&apos;s standard ticket pricing for the
+                  same dates and ticket types.
                 </p>
               </div>
             </div>
@@ -206,12 +206,12 @@ export default function Home() {
                 <ShieldCheck size={18} aria-hidden="true" />
               </span>
               <div>
-                <h2 className="text-base font-black">Our Guarantee</h2>
+                <h2 className="text-base font-black">Refund Policy</h2>
                 <p className="text-sm font-semibold leading-6 text-[#3e304d]">
-                  Disney uses dynamic ticket pricing, so while we cannot promise an exact savings
-                  amount ahead of time, we guarantee that you&apos;ll save versus Disney&apos;s
-                  non-discounted price for the same tickets after our fee or we&apos;ll refund your
-                  purchase.
+                  Disney uses dynamic ticket pricing, so we do not promise an exact savings amount
+                  in advance. If you do not come out ahead versus Disney&apos;s non-discounted price
+                  for the same tickets after our fee, or if you cannot access the paid link, we
+                  will review your order for a refund.
                 </p>
               </div>
             </div>
@@ -354,6 +354,10 @@ export default function Home() {
                 Purchase Secret Mouse Tickets access below. After checkout, we&apos;ll email you a
                 personalized link to the Disney Group &amp; Convention discount page that matches
                 your dates, so you can purchase your tickets directly from Disney.
+              </p>
+              <p className="mt-3 rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] px-3 py-2 text-sm font-bold leading-6 text-[#3e304d]">
+                Secret Mouse Tickets is an independent service and is not affiliated with, endorsed
+                by, or sponsored by Disney.
               </p>
               <p className="mt-3 text-sm font-semibold leading-6 text-[#3e304d]">
                 Because Disney uses dynamic ticket pricing, we cannot promise an exact savings
