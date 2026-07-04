@@ -200,7 +200,7 @@ export default function Home() {
                 <ShieldCheck size={18} aria-hidden="true" />
               </span>
               <div>
-                <h2 className="text-base font-black">Guaranteed Ticket Savings</h2>
+                <h2 className="text-base font-black">Our Guarantee</h2>
                 <p className="text-sm font-semibold leading-6 text-[#3e304d]">
                   Disney uses dynamic ticket pricing, so while we cannot promise an exact savings
                   amount ahead of time, we guarantee that you&apos;ll save versus Disney&apos;s
