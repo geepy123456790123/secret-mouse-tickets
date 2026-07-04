@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export function SiteFooter({ className = "max-w-7xl" }: { className?: string }) {
+export function SiteFooter({ className = "max-w-4xl" }: { className?: string }) {
   return (
     <footer className={`mx-auto w-full px-5 pb-10 pt-2 text-center lg:px-8 ${className}`}>
       <div className="rounded-[18px] border-[3px] border-[#120f17] bg-white/80 px-4 py-4 text-sm font-semibold text-[#3e304d] shadow-[5px_5px_0_#120f17]">
