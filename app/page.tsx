@@ -415,7 +415,7 @@ export default function Home() {
           ))}
         </div>
       </section>
-      <SiteFooter className="max-w-5xl" />
+      <SiteFooter compact className="max-w-[calc(100%-2.5rem)]" />
       <SupportChat />
     </main>
   );

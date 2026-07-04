@@ -73,8 +73,9 @@ export function disqualificationReason(input: EligibilityInput, matchedEvent: Ev
   }
 
   const totalGuests = input.guests10Plus + input.guests3To9;
+  const totalTicketDays = input.themeParkDays * totalGuests;
 
-  if (input.themeParkDays < 3 && totalGuests < 2) {
+  if (totalTicketDays < 3) {
     return "Sorry, we couldn't find any savings for your visit.";
   }
 
