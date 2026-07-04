@@ -12,6 +12,15 @@ type SummaryRow = {
   average_order_cents: number;
 };
 
+type EventPerformanceRow = {
+  event_name: string;
+  matched_leads: number;
+  checkout_starts: number;
+  paid_orders: number;
+  revenue_cents: number;
+  average_order_cents: number;
+};
+
 type CouponRow = {
   coupon_code: string | null;
   checkout_starts: number;
@@ -53,6 +62,19 @@ type RecentOrderRow = {
   utm_source: string | null;
   utm_campaign: string | null;
   event_name: string;
+};
+
+type TimingRow = {
+  lead_created_at: string;
+  order_created_at: string;
+  paid_at: string | null;
+  status: string;
+};
+
+type CheckoutAgingRow = {
+  under_1_hour: number;
+  over_24_hours: number;
+  over_7_days: number;
 };
 
 export async function GET(request: Request) {
@@ -103,6 +125,26 @@ export async function GET(request: Request) {
       .bind(startDate, endExclusive)
       .all<CouponRow>();
 
+    const eventPerformanceRows = await db
+      .prepare(
+        `SELECT
+          events.info_banner_first AS event_name,
+          COUNT(DISTINCT CASE WHEN leads.status = 'matched' THEN leads.id END) AS matched_leads,
+          COUNT(orders.id) AS checkout_starts,
+          SUM(CASE WHEN orders.status = 'paid' THEN 1 ELSE 0 END) AS paid_orders,
+          SUM(CASE WHEN orders.status = 'paid' THEN orders.amount_cents ELSE 0 END) AS revenue_cents,
+          AVG(CASE WHEN orders.status = 'paid' THEN orders.amount_cents END) AS average_order_cents
+        FROM events
+        JOIN leads ON leads.matched_event_id = events.id
+        LEFT JOIN orders ON orders.lead_id = leads.id
+        WHERE leads.created_at >= ? AND leads.created_at < ?
+        GROUP BY events.id, events.info_banner_first
+        ORDER BY revenue_cents DESC, paid_orders DESC, checkout_starts DESC, matched_leads DESC
+        LIMIT 20`
+      )
+      .bind(startDate, endExclusive)
+      .all<EventPerformanceRow>();
+
     const attributionRows = await db
       .prepare(
         `SELECT
@@ -123,6 +165,19 @@ export async function GET(request: Request) {
       .bind(startDate, endExclusive)
       .all<AttributionRow>();
 
+    const checkoutAging = await db
+      .prepare(
+        `SELECT
+          SUM(CASE WHEN orders.status != 'paid' AND ((julianday('now') - julianday(orders.created_at)) * 24) < 1 THEN 1 ELSE 0 END) AS under_1_hour,
+          SUM(CASE WHEN orders.status != 'paid' AND ((julianday('now') - julianday(orders.created_at)) * 24) >= 24 THEN 1 ELSE 0 END) AS over_24_hours,
+          SUM(CASE WHEN orders.status != 'paid' AND ((julianday('now') - julianday(orders.created_at)) * 24) >= 168 THEN 1 ELSE 0 END) AS over_7_days
+        FROM orders
+        JOIN leads ON leads.id = orders.lead_id
+        WHERE leads.created_at >= ? AND leads.created_at < ?`
+      )
+      .bind(startDate, endExclusive)
+      .first<CheckoutAgingRow>();
+
     const dailyRows = await db
       .prepare(
         `SELECT
@@ -140,6 +195,21 @@ export async function GET(request: Request) {
       )
       .bind(startDate, endExclusive)
       .all<DailyRow>();
+
+    const timingRows = await db
+      .prepare(
+        `SELECT
+          leads.created_at AS lead_created_at,
+          orders.created_at AS order_created_at,
+          orders.paid_at,
+          orders.status
+        FROM orders
+        JOIN leads ON leads.id = orders.lead_id
+        WHERE leads.created_at >= ? AND leads.created_at < ?
+        ORDER BY orders.created_at ASC`
+      )
+      .bind(startDate, endExclusive)
+      .all<TimingRow>();
 
     const recentOrders = await db
       .prepare(
@@ -171,8 +241,11 @@ export async function GET(request: Request) {
       ok: true,
       window: { startDate, endDate },
       summary: normalizeSummary(summary),
+      eventPerformance: (eventPerformanceRows.results ?? []).map(normalizeEventPerformance),
       coupons: (couponRows.results ?? []).map(normalizeCoupon),
       attribution: (attributionRows.results ?? []).map(normalizeAttribution),
+      checkoutAging: normalizeCheckoutAging(checkoutAging),
+      timings: normalizeTimings(timingRows.results ?? []),
       daily: (dailyRows.results ?? []).map(normalizeDaily),
       recentOrders: (recentOrders.results ?? []).map(normalizeRecentOrder),
     });
@@ -238,15 +311,32 @@ function normalizeSummary(row: SummaryRow | null) {
     average_order_cents: 0,
   };
 
+  const totalLeads = Number(summary.total_leads ?? 0);
+  const matchedLeads = Number(summary.matched_leads ?? 0);
+  const revenueCents = Number(summary.revenue_cents ?? 0);
+
   return {
-    totalLeads: Number(summary.total_leads ?? 0),
-    matchedLeads: Number(summary.matched_leads ?? 0),
+    totalLeads,
+    matchedLeads,
     notFoundLeads: Number(summary.not_found_leads ?? 0),
     checkoutStarts: Number(summary.checkout_starts ?? 0),
     paidOrders: Number(summary.paid_orders ?? 0),
     pendingOrders: Number(summary.pending_orders ?? 0),
-    revenueCents: Number(summary.revenue_cents ?? 0),
+    revenueCents,
     averageOrderCents: Math.round(Number(summary.average_order_cents ?? 0)),
+    revenuePerLeadCents: totalLeads ? Math.round(revenueCents / totalLeads) : 0,
+    revenuePerMatchedLeadCents: matchedLeads ? Math.round(revenueCents / matchedLeads) : 0,
+  };
+}
+
+function normalizeEventPerformance(row: EventPerformanceRow) {
+  return {
+    eventName: row.event_name,
+    matchedLeads: Number(row.matched_leads ?? 0),
+    checkoutStarts: Number(row.checkout_starts ?? 0),
+    paidOrders: Number(row.paid_orders ?? 0),
+    revenueCents: Number(row.revenue_cents ?? 0),
+    averageOrderCents: Math.round(Number(row.average_order_cents ?? 0)),
   };
 }
 
@@ -261,14 +351,55 @@ function normalizeCoupon(row: CouponRow) {
 }
 
 function normalizeAttribution(row: AttributionRow) {
+  const leads = Number(row.leads ?? 0);
+  const matchedLeads = Number(row.matched_leads ?? 0);
+  const checkoutStarts = Number(row.checkout_starts ?? 0);
+  const paidOrders = Number(row.paid_orders ?? 0);
+  const revenueCents = Number(row.revenue_cents ?? 0);
+
   return {
     source: row.source,
     campaign: row.campaign,
-    leads: Number(row.leads ?? 0),
-    matchedLeads: Number(row.matched_leads ?? 0),
-    checkoutStarts: Number(row.checkout_starts ?? 0),
-    paidOrders: Number(row.paid_orders ?? 0),
-    revenueCents: Number(row.revenue_cents ?? 0),
+    leads,
+    matchedLeads,
+    checkoutStarts,
+    paidOrders,
+    revenueCents,
+    revenuePerLeadCents: leads ? Math.round(revenueCents / leads) : 0,
+  };
+}
+
+function normalizeCheckoutAging(row: CheckoutAgingRow | null) {
+  return {
+    under1Hour: Number(row?.under_1_hour ?? 0),
+    over24Hours: Number(row?.over_24_hours ?? 0),
+    over7Days: Number(row?.over_7_days ?? 0),
+  };
+}
+
+function normalizeTimings(rows: TimingRow[]) {
+  const leadToCheckoutHours: number[] = [];
+  const checkoutToPaidHours: number[] = [];
+
+  for (const row of rows) {
+    const leadCreatedAt = Date.parse(row.lead_created_at);
+    const orderCreatedAt = Date.parse(row.order_created_at);
+
+    if (Number.isFinite(leadCreatedAt) && Number.isFinite(orderCreatedAt)) {
+      leadToCheckoutHours.push((orderCreatedAt - leadCreatedAt) / 36e5);
+    }
+
+    if (row.status === "paid" && row.paid_at) {
+      const paidAt = Date.parse(row.paid_at);
+      if (Number.isFinite(orderCreatedAt) && Number.isFinite(paidAt)) {
+        checkoutToPaidHours.push((paidAt - orderCreatedAt) / 36e5);
+      }
+    }
+  }
+
+  return {
+    medianLeadToCheckoutHours: median(leadToCheckoutHours),
+    medianCheckoutToPaidHours: median(checkoutToPaidHours),
   };
 }
 
@@ -299,4 +430,23 @@ function normalizeRecentOrder(row: RecentOrderRow) {
     campaign: row.utm_campaign ?? "(none)",
     eventName: row.event_name,
   };
+}
+
+function median(values: number[]) {
+  if (!values.length) {
+    return 0;
+  }
+
+  const sorted = [...values].sort((left, right) => left - right);
+  const middle = Math.floor(sorted.length / 2);
+
+  if (sorted.length % 2 === 0) {
+    return roundHours((sorted[middle - 1] + sorted[middle]) / 2);
+  }
+
+  return roundHours(sorted[middle]);
+}
+
+function roundHours(value: number) {
+  return Math.round(value * 10) / 10;
 }

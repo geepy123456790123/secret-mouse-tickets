@@ -19,7 +19,17 @@ type ConversionData = {
     pendingOrders: number;
     revenueCents: number;
     averageOrderCents: number;
+    revenuePerLeadCents: number;
+    revenuePerMatchedLeadCents: number;
   };
+  eventPerformance: Array<{
+    eventName: string;
+    matchedLeads: number;
+    checkoutStarts: number;
+    paidOrders: number;
+    revenueCents: number;
+    averageOrderCents: number;
+  }>;
   coupons: Array<{
     couponCode: string;
     checkoutStarts: number;
@@ -35,7 +45,17 @@ type ConversionData = {
     checkoutStarts: number;
     paidOrders: number;
     revenueCents: number;
+    revenuePerLeadCents: number;
   }>;
+  checkoutAging: {
+    under1Hour: number;
+    over24Hours: number;
+    over7Days: number;
+  };
+  timings: {
+    medianLeadToCheckoutHours: number;
+    medianCheckoutToPaidHours: number;
+  };
   daily: Array<{
     date: string;
     leads: number;
@@ -178,7 +198,7 @@ export default function AdminConversionsPage() {
 
         {data ? (
           <>
-            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               <MetricCard
                 icon={<Ticket size={22} aria-hidden="true" />}
                 label="Leads"
@@ -202,14 +222,50 @@ export default function AdminConversionsPage() {
               />
               <MetricCard
                 icon={<Percent size={22} aria-hidden="true" />}
+                label="Revenue Per Lead"
+                value={formatMoney(data.summary.revenuePerLeadCents)}
+                detail={`${formatMoney(data.summary.revenuePerMatchedLeadCents)} per matched lead`}
+                bg="bg-[#e7f7d9]"
+              />
+              <MetricCard
+                icon={<Percent size={22} aria-hidden="true" />}
                 label="Checkout Conversion"
                 value={rates.paidRate}
                 detail={`${formatNumber(data.summary.pendingOrders)} pending checkouts`}
                 bg="bg-[#ffdeea]"
               />
+              <MetricCard
+                icon={<ShoppingCart size={22} aria-hidden="true" />}
+                label="Lead To Checkout"
+                value={formatHours(data.timings.medianLeadToCheckoutHours)}
+                detail={`${formatHours(data.timings.medianCheckoutToPaidHours)} checkout-to-paid median`}
+                bg="bg-[#d9f4ff]"
+              />
+              <MetricCard
+                icon={<BarChart3 size={22} aria-hidden="true" />}
+                label="Aged Pending"
+                value={formatNumber(data.checkoutAging.over24Hours)}
+                detail={`${formatNumber(data.checkoutAging.over7Days)} over 7 days, ${formatNumber(data.checkoutAging.under1Hour)} under 1 hour`}
+                bg="bg-[#ffe7cf]"
+              />
             </section>
 
             <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+              <Panel title="Event Performance" subtitle="Which matched offers turn into paid orders.">
+                <DataTable
+                  columns={["Event", "Matched", "Starts", "Paid", "Revenue", "Paid Rate"]}
+                  rows={data.eventPerformance.map((event) => [
+                    event.eventName,
+                    formatNumber(event.matchedLeads),
+                    formatNumber(event.checkoutStarts),
+                    formatNumber(event.paidOrders),
+                    formatMoney(event.revenueCents),
+                    rate(event.paidOrders, event.checkoutStarts),
+                  ])}
+                  empty="No matched-event performance in this window."
+                />
+              </Panel>
+
               <Panel title="Coupon Performance" subtitle="Revenue and paid orders by access code.">
                 <DataTable
                   columns={["Coupon", "Starts", "Paid", "Revenue", "AOV", "Paid Rate"]}
@@ -225,18 +281,44 @@ export default function AdminConversionsPage() {
                 />
               </Panel>
 
-              <Panel title="Source And Campaign" subtitle="New leads now capture UTM attribution.">
+              <Panel title="Source And Campaign" subtitle="Efficiency by source and campaign.">
                 <DataTable
-                  columns={["Source", "Campaign", "Leads", "Matched", "Paid", "Revenue"]}
+                  columns={["Source", "Campaign", "Leads", "Match Rate", "Paid Rate", "Rev/Lead", "Revenue"]}
                   rows={data.attribution.map((item) => [
                     item.source,
                     item.campaign,
                     formatNumber(item.leads),
-                    formatNumber(item.matchedLeads),
-                    formatNumber(item.paidOrders),
+                    rate(item.matchedLeads, item.leads),
+                    rate(item.paidOrders, item.leads),
+                    formatMoney(item.revenuePerLeadCents),
                     formatMoney(item.revenueCents),
                   ])}
                   empty="No lead attribution in this window."
+                />
+              </Panel>
+            </section>
+
+            <section className="grid gap-6 xl:grid-cols-2">
+              <Panel title="Checkout Timing" subtitle="Median time between lead, checkout, and payment.">
+                <DataTable
+                  columns={["Metric", "Value"]}
+                  rows={[
+                    ["Lead to checkout start", formatHours(data.timings.medianLeadToCheckoutHours)],
+                    ["Checkout start to paid", formatHours(data.timings.medianCheckoutToPaidHours)],
+                  ]}
+                  empty="No timing data in this window."
+                />
+              </Panel>
+
+              <Panel title="Pending Checkout Aging" subtitle="Separate fresh checkouts from likely abandonment.">
+                <DataTable
+                  columns={["Bucket", "Count"]}
+                  rows={[
+                    ["Under 1 hour", formatNumber(data.checkoutAging.under1Hour)],
+                    ["24 hours or more", formatNumber(data.checkoutAging.over24Hours)],
+                    ["7 days or more", formatNumber(data.checkoutAging.over7Days)],
+                  ]}
+                  empty="No pending checkout aging in this window."
                 />
               </Panel>
             </section>
@@ -432,4 +514,12 @@ function formatDateTime(value: string) {
     hour: "numeric",
     minute: "2-digit",
   }).format(date);
+}
+
+function formatHours(value: number) {
+  if (!value) {
+    return "0h";
+  }
+
+  return `${value.toFixed(1)}h`;
 }
