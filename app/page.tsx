@@ -210,10 +210,10 @@ export default function Home() {
               </div>
             </div>
             <div className="rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] px-4 py-3 text-sm font-bold leading-6 text-[#3e304d]">
-              Secret Mouse Tickets helps you unlock Disney Group &amp; Convention discount ticket
-              offers that match your Walt Disney World travel dates, when available. You buy your
-              actual theme park tickets directly from Disney, and you do not need to attend a
-              convention or belong to a group to use these offers.
+              Secret Mouse Tickets finds Disney Group &amp; Convention discount ticket offers that
+              match your Walt Disney World visit dates. You buy your actual theme park tickets
+              directly from Disney, and you do not need to attend a convention or belong to a
+              group to use these offers.
             </div>
           </section>
 
