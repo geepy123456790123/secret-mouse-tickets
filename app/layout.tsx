@@ -13,8 +13,8 @@ export const metadata: Metadata = {
   description:
     "We track discounted Disney World ticket sales that are not advertised to the public, so you can save BIG on your Disney trip.",
   icons: {
-    icon: "/secret-mouse-tickets-logo.png",
-    shortcut: "/secret-mouse-tickets-logo.png",
+    icon: "/sparkles-favicon.svg",
+    shortcut: "/sparkles-favicon.svg",
   },
 };
 

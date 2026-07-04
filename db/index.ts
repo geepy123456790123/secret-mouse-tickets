@@ -120,6 +120,13 @@ async function createSchema() {
     }
   }
 
+  await db
+    .prepare(
+      "INSERT INTO coupons (code, discount_cents, active, max_redemptions, expires_at) VALUES (?, ?, 1, NULL, NULL) ON CONFLICT(code) DO UPDATE SET discount_cents = excluded.discount_cents, active = 1, max_redemptions = NULL, expires_at = NULL"
+    )
+    .bind("LAUNCH25", 1425)
+    .run();
+
   await db.prepare("CREATE INDEX IF NOT EXISTS leads_created_at_idx ON leads (created_at)").run();
   await db.prepare("CREATE INDEX IF NOT EXISTS orders_created_at_idx ON orders (created_at)").run();
   await db.prepare("CREATE INDEX IF NOT EXISTS orders_square_payment_link_idx ON orders (square_payment_link_id)").run();

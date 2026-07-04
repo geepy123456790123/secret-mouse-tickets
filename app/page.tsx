@@ -10,6 +10,7 @@ import {
   ShoppingCart,
   Sparkles,
   Star,
+  Waves,
 } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { formatDate } from "@/lib/dates";
@@ -179,6 +180,17 @@ export default function Home() {
                 <p className="text-sm font-semibold leading-6 text-[#3e304d]">
                   Save up to 20%* when you buy eligible 1-day and multi-day tickets directly
                   from Disney.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[3px] border-[#120f17] bg-[#d8c6ff]">
+                <Waves size={18} aria-hidden="true" />
+              </span>
+              <div>
+                <h2 className="text-base font-black">Additional Disney Magic</h2>
+                <p className="text-sm font-semibold leading-6 text-[#3e304d]">
+                  Multi-day Disney tickets include an extra Water Park Fun &amp; More Visit pass.
                 </p>
               </div>
             </div>
