@@ -82,9 +82,9 @@ export function SupportChat() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
+    <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)] right-4 z-50 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
       {isOpen && (
-        <section className="cartoon-panel flex h-[min(620px,calc(100vh-7rem))] w-[min(360px,calc(100vw-2rem))] flex-col overflow-hidden rounded-[24px] border-4 border-[#120f17] bg-white shadow-[8px_8px_0_#120f17]">
+        <section className="cartoon-panel flex h-[min(620px,calc(100dvh-env(safe-area-inset-top)-env(safe-area-inset-bottom)-8.5rem))] w-[min(360px,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-[24px] border-4 border-[#120f17] bg-white shadow-[8px_8px_0_#120f17] sm:h-[min(620px,calc(100dvh-7rem))]">
           <header className="flex items-center justify-between gap-3 border-b-4 border-[#120f17] bg-[#d8c6ff] px-4 py-3">
             <div className="flex items-center gap-3">
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-[#120f17] bg-[#ffbd38]">

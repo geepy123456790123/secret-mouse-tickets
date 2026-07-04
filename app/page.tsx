@@ -140,8 +140,8 @@ export default function Home() {
 
   return (
     <main className="brand-page min-h-screen text-[#120f17]">
-      <section className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-5 py-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:px-8">
-        <div className="flex flex-col items-center justify-center gap-3 px-1 pb-4 pt-1 text-center sm:px-4 lg:self-center lg:pb-0 lg:pt-0">
+      <section className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-5 py-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-start lg:px-8">
+        <div className="flex flex-col items-center justify-center gap-3 px-1 pb-4 pt-1 text-center sm:px-4 lg:self-start lg:justify-start lg:pb-0 lg:pt-6">
           <Image
             src="/secret-mouse-tickets-logo.png"
             alt="Secret Mouse Tickets"
@@ -198,7 +198,10 @@ export default function Home() {
               Secret Mouse Tickets helps you unlock Disney Group &amp; Convention discount ticket
               offers that match your Walt Disney World travel dates, when available. You buy your
               actual theme park tickets directly from Disney, and you do not need to attend a
-              convention or belong to a group to use these offers.
+              convention or belong to a group to use these offers. Disney uses dynamic ticket
+              pricing, so we cannot promise an exact savings amount ahead of time. If you do not
+              come out ahead versus Disney&apos;s non-discounted price for the same tickets after our
+              fee, we&apos;ll refund your Secret Mouse Tickets purchase.
             </div>
           </section>
 
@@ -334,6 +337,12 @@ export default function Home() {
                 personalized link to the Disney Group &amp; Convention discount page that matches
                 your dates, so you can purchase your tickets directly from Disney.
               </p>
+              <p className="mt-3 text-sm font-semibold leading-6 text-[#3e304d]">
+                Because Disney uses dynamic ticket pricing, we cannot promise an exact savings
+                amount in advance. If you do not come out ahead versus Disney&apos;s non-discounted
+                price for the same tickets after our fee, we&apos;ll refund your Secret Mouse Tickets
+                purchase.
+              </p>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
                 <label className="grid gap-2 text-sm font-bold">
@@ -420,14 +429,16 @@ export default function Home() {
                 </span>
                 <div>
                   <h3 className="text-xl font-black text-[#5d45b5]">{testimonial.name}</h3>
-                  <p className="text-sm font-bold text-[#6a6170]">Disney World ticket savings</p>
+                  <p className="text-sm font-bold text-[#6a6170]">Verified Secret Mouse Tickets customer</p>
                 </div>
               </div>
             </article>
           ))}
         </div>
       </section>
-      <SiteFooter compact className="max-w-[calc(100%-2.5rem)]" />
+      <div className="hidden sm:block">
+        <SiteFooter compact className="max-w-[calc(100%-2.5rem)]" />
+      </div>
       <SupportChat />
     </main>
   );

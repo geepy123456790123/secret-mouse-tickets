@@ -96,6 +96,11 @@ export default async function CheckoutPage({
               {formatDate(order.valid_start_date)} through {formatDate(order.valid_end_date)}.
               Multi-day tickets also include an extra Water Park Fun &amp; More Visit pass.
             </p>
+            <p>
+              Disney uses dynamic ticket pricing, so we cannot promise an exact savings amount in
+              advance. If you do not come out ahead versus Disney&apos;s non-discounted price for the
+              same tickets after our fee, we&apos;ll refund your Secret Mouse Tickets purchase.
+            </p>
           </div>
 
           {isPaid ? (
