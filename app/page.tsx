@@ -10,7 +10,6 @@ import {
   ShoppingCart,
   Sparkles,
   Star,
-  Waves,
 } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { formatDate } from "@/lib/dates";
@@ -91,8 +90,6 @@ export default function Home() {
     () => Number(form.guests10Plus) + Number(form.guests3To9),
     [form.guests10Plus, form.guests3To9]
   );
-  const hasMultiDayBonus = Number(form.themeParkDays) > 1;
-
   async function submitForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -185,22 +182,11 @@ export default function Home() {
                 </p>
               </div>
             </div>
-            <div className="flex gap-3">
-              <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[3px] border-[#120f17] bg-[#d8c6ff]">
-                <Waves size={18} aria-hidden="true" />
-              </span>
-              <div>
-                <h2 className="text-base font-black">Additional Disney Magic</h2>
-                <p className="text-sm font-semibold leading-6 text-[#3e304d]">
-                  Multi-day Disney tickets include an extra Water Park Fun & More Visit pass.
-                </p>
-              </div>
-            </div>
             <div className="rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] px-4 py-3 text-sm font-bold leading-6 text-[#3e304d]">
-              Secret Mouse Tickets connects you to a Disney Group &amp; Convention discount ticket
-              sale page (if available for the dates of your WDW visit). Your actual theme park
-              tickets are purchased directly from Disney. Attending a convention or group is NOT
-              required for Group &amp; Convention ticket purchases.
+              Secret Mouse Tickets helps you unlock Disney Group &amp; Convention discount ticket
+              offers that match your Walt Disney World travel dates, when available. You buy your
+              actual theme park tickets directly from Disney, and you do not need to attend a
+              convention or belong to a group to use these offers.
             </div>
           </section>
 
@@ -332,16 +318,10 @@ export default function Home() {
                 {formatDate(result.event.validEndDate)}.
               </p>
               <p className="mt-3 rounded-[16px] border-[3px] border-[#120f17] bg-white px-3 py-2 text-sm font-bold leading-6 text-[#3e304d]">
-                Purchase Secret Mouse Tickets access below. After checkout, we&apos;ll send you a
-                personalized link to the eligible Disney Group and Convention page so you can buy
-                your discounted tickets directly from Disney.
+                Purchase Secret Mouse Tickets access below. After checkout, we&apos;ll email you a
+                personalized link to the Disney Group &amp; Convention discount page that matches
+                your dates, so you can purchase your tickets directly from Disney.
               </p>
-              {hasMultiDayBonus && (
-                <p className="mt-3 rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] px-3 py-2 text-sm font-bold text-[#7b4b00]">
-                  Multi-day Disney tickets purchased through the sale page include an extra Water
-                  Park Fun & More Visit pass.
-                </p>
-              )}
 
               <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
                 <label className="grid gap-2 text-sm font-bold">
