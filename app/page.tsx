@@ -141,6 +141,12 @@ export default function Home() {
 
   return (
     <main className="brand-page min-h-screen text-[#120f17]">
+      <div className="mx-auto w-full max-w-7xl px-5 pt-5 lg:px-8">
+        <div className="rounded-[18px] border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-3 text-center text-sm font-black text-[#120f17] shadow-[5px_5px_0_#120f17]">
+          Save 25% with code <span className="text-[#5d45b5]">LAUNCH25</span>
+        </div>
+      </div>
+
       <section className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-5 py-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-start lg:px-8">
         <div className="flex flex-col items-center justify-center gap-3 px-1 pb-4 pt-1 text-center sm:px-4 lg:self-start lg:justify-start lg:pb-0 lg:pt-6">
           <Image
