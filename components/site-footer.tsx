@@ -21,7 +21,7 @@ export function SiteFooter() {
             className="text-[#5d45b5] underline underline-offset-4"
             href="mailto:hello@secretmousetickets.com"
           >
-            hello@secretmousetickets.com
+            Contact Us
           </a>
         </div>
       </div>

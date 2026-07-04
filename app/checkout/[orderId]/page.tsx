@@ -60,7 +60,7 @@ export default async function CheckoutPage({
 
   return (
     <main className="brand-page min-h-screen px-3 pt-[calc(env(safe-area-inset-top)+1rem)] pb-[calc(env(safe-area-inset-bottom)+5.5rem)] text-[#120f17] sm:px-5 sm:py-8">
-      <section className="mx-auto max-w-2xl">
+      <section className="mx-auto mb-6 max-w-2xl sm:mb-8">
         <section className="cartoon-panel grid gap-4 rounded-[20px] bg-white p-4 sm:gap-5 sm:rounded-[24px] sm:p-7">
           <Image
             src="/secret-mouse-tickets-logo.png"
