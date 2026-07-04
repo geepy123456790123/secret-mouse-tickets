@@ -194,14 +194,25 @@ export default function Home() {
                 </p>
               </div>
             </div>
+            <div className="flex gap-3">
+              <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[3px] border-[#120f17] bg-[#fff7de]">
+                <Sparkles size={18} aria-hidden="true" />
+              </span>
+              <div>
+                <h2 className="text-base font-black">Guaranteed Ticket Savings</h2>
+                <p className="text-sm font-semibold leading-6 text-[#3e304d]">
+                  Disney uses dynamic ticket pricing, so while we cannot promise an exact savings
+                  amount ahead of time, we guarantee that you&apos;ll save versus Disney&apos;s
+                  non-discounted price for the same tickets after our fee or we&apos;ll refund your
+                  Secret Mouse Tickets purchase.
+                </p>
+              </div>
+            </div>
             <div className="rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] px-4 py-3 text-sm font-bold leading-6 text-[#3e304d]">
               Secret Mouse Tickets helps you unlock Disney Group &amp; Convention discount ticket
               offers that match your Walt Disney World travel dates, when available. You buy your
               actual theme park tickets directly from Disney, and you do not need to attend a
-              convention or belong to a group to use these offers. Disney uses dynamic ticket
-              pricing, so we cannot promise an exact savings amount ahead of time. If you do not
-              come out ahead versus Disney&apos;s non-discounted price for the same tickets after our
-              fee, we&apos;ll refund your Secret Mouse Tickets purchase.
+              convention or belong to a group to use these offers.
             </div>
           </section>
 
@@ -429,7 +440,7 @@ export default function Home() {
                 </span>
                 <div>
                   <h3 className="text-xl font-black text-[#5d45b5]">{testimonial.name}</h3>
-                  <p className="text-sm font-bold text-[#6a6170]">Verified Secret Mouse Tickets customer</p>
+                  <p className="text-sm font-bold text-[#6a6170]">Secret Mouse Tickets customer</p>
                 </div>
               </div>
             </article>
