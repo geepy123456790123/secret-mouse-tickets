@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import {
   BadgeCheck,
   Mail,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { formatDate } from "@/lib/dates";
+import { SiteFooter } from "@/components/site-footer";
 import { SupportChat } from "./support-chat";
 
 type EventSummary = {
@@ -367,7 +369,15 @@ export default function Home() {
           <p className="rounded-[18px] bg-[#fff7de]/80 px-4 py-2 text-center text-xs font-semibold leading-5 text-[#3e304d]">
             Secret Mouse Tickets is an independent service and is not affiliated with Disney.{" "}
             *Savings based on the non-discounted price for the same ticket sold at Disney-owned and
-            -operated Guest Service desks in the Central Florida area as of 7/1/2026.
+            -operated Guest Service desks in the Central Florida area as of 7/1/2026. See our{" "}
+            <Link className="text-[#5d45b5] underline underline-offset-2" href="/terms-of-service">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link className="text-[#5d45b5] underline underline-offset-2" href="/privacy-policy">
+              Privacy Policy
+            </Link>
+            .
           </p>
         </div>
       </section>
@@ -425,6 +435,7 @@ export default function Home() {
           ))}
         </div>
       </section>
+      <SiteFooter />
       <SupportChat />
     </main>
   );
