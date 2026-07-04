@@ -114,7 +114,7 @@ export default async function CheckoutPage({
           )}
         </section>
       </section>
-      <SiteFooter />
+      <SiteFooter className="max-w-2xl" />
     </main>
   );
 }
