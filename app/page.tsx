@@ -7,6 +7,7 @@ import {
   Mail,
   Quote,
   Search,
+  ShieldCheck,
   ShoppingCart,
   Sparkles,
   Star,
@@ -196,7 +197,7 @@ export default function Home() {
             </div>
             <div className="flex gap-3">
               <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[3px] border-[#120f17] bg-[#fff7de]">
-                <Sparkles size={18} aria-hidden="true" />
+                <ShieldCheck size={18} aria-hidden="true" />
               </span>
               <div>
                 <h2 className="text-base font-black">Guaranteed Ticket Savings</h2>
@@ -204,7 +205,7 @@ export default function Home() {
                   Disney uses dynamic ticket pricing, so while we cannot promise an exact savings
                   amount ahead of time, we guarantee that you&apos;ll save versus Disney&apos;s
                   non-discounted price for the same tickets after our fee or we&apos;ll refund your
-                  Secret Mouse Tickets purchase.
+                  purchase.
                 </p>
               </div>
             </div>
