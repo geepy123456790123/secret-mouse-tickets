@@ -1,7 +1,7 @@
 "use client";
 
 import { Bot, MessageCircle, Send, X } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -27,6 +27,19 @@ export function SupportChat() {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [draft, setDraft] = useState("");
   const [status, setStatus] = useState<"idle" | "sending">("idle");
+  const messagesRef = useRef<HTMLDivElement | null>(null);
+  const latestMessageRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    latestMessageRef.current?.scrollIntoView({ block: "end" });
+    if (messagesRef.current) {
+      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+    }
+  }, [isOpen, messages, status]);
 
   async function submitMessage(event?: FormEvent<HTMLFormElement>, override?: string) {
     event?.preventDefault();
@@ -105,10 +118,11 @@ export function SupportChat() {
             </button>
           </header>
 
-          <div className="flex-1 space-y-3 overflow-y-auto bg-[#fffaf0] px-4 py-4">
+          <div ref={messagesRef} className="flex-1 space-y-3 overflow-y-auto bg-[#fffaf0] px-4 py-4">
             {messages.map((message, index) => (
               <div
                 key={`${message.role}-${index}`}
+                ref={index === messages.length - 1 ? latestMessageRef : null}
                 className={`max-w-[88%] rounded-[18px] border-[3px] border-[#120f17] px-3 py-2 text-sm font-semibold leading-6 shadow-[3px_3px_0_#120f17] ${
                   message.role === "user"
                     ? "ml-auto bg-[#8f72f2] text-white"
@@ -119,7 +133,10 @@ export function SupportChat() {
               </div>
             ))}
             {status === "sending" && (
-              <div className="mr-auto max-w-[88%] rounded-[18px] border-[3px] border-[#120f17] bg-white px-3 py-2 text-sm font-bold text-[#3e304d] shadow-[3px_3px_0_#120f17]">
+              <div
+                ref={latestMessageRef}
+                className="mr-auto max-w-[88%] rounded-[18px] border-[3px] border-[#120f17] bg-white px-3 py-2 text-sm font-bold text-[#3e304d] shadow-[3px_3px_0_#120f17]"
+              >
                 Thinking...
               </div>
             )}

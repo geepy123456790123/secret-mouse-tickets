@@ -80,12 +80,16 @@ export async function POST(request: Request) {
     }
 
     const faqReply = getFaqReply(latestUserMessage);
+    if (faqReply) {
+      return Response.json({ reply: faqReply });
+    }
+
     if (!runtime.OPENAI_API_KEY) {
-      return Response.json({ configured: false, reply: faqReply ?? defaultFallbackReply() });
+      return Response.json({ configured: false, reply: defaultFallbackReply() });
     }
 
     const modelReply = await askModel(runtime, messages);
-    return Response.json({ reply: modelReply ?? faqReply ?? defaultFallbackReply() });
+    return Response.json({ reply: modelReply ?? defaultFallbackReply() });
   } catch {
     return Response.json(
       { error: "The chat assistant is unavailable right now. Please try again shortly." },
@@ -96,21 +100,33 @@ export async function POST(request: Request) {
 
 async function askModel(runtime: RuntimeEnv, messages: ChatMessage[]) {
   const baseUrl = (runtime.OPENAI_BASE_URL ?? "https://openrouter.ai/api/v1").replace(/\/+$/, "");
-  const response = await fetch(`${baseUrl}/chat/completions`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${runtime.OPENAI_API_KEY}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": "https://secretmousetickets.com",
-      "X-Title": "Secret Mouse Tickets",
-    },
-    body: JSON.stringify({
-      model: runtime.OPENAI_MODEL ?? "openai/gpt-4.1-mini",
-      messages: [{ role: "system", content: SUPPORT_PROMPT }, ...messages],
-      max_tokens: 350,
-      temperature: 0.3,
-    }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+  let response: Response;
+
+  try {
+    response = await fetch(`${baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${runtime.OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://secretmousetickets.com",
+        "X-Title": "Secret Mouse Tickets",
+      },
+      body: JSON.stringify({
+        model: runtime.OPENAI_MODEL ?? "openai/gpt-4.1-mini",
+        messages: [{ role: "system", content: SUPPORT_PROMPT }, ...messages],
+        max_tokens: 350,
+        temperature: 0.3,
+      }),
+      signal: controller.signal,
+    });
+  } catch {
+    return "";
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   const payload = (await response.json().catch(() => ({}))) as ChatCompletionPayload;
 
@@ -287,6 +303,10 @@ function buildMissingDetailsReply(intent: SupportIntent, missingFields: string[]
 
 function getFaqReply(input: string) {
   const text = input.toLowerCase();
+
+  if (/\b(are you there|hello|hi|hey|test)\b/.test(text)) {
+    return "Yes. I can help with Secret Mouse Tickets questions about pricing, what access includes, refund basics, and how the Disney discount link works.";
+  }
 
   if (/\bwhat am i buying|what do i get|what is this\b/.test(text)) {
     return "You are buying Secret Mouse Tickets access to a Disney Group & Convention discount ticket sale page that matches your Walt Disney World visit dates, when one is available. After checkout, we email you the link, and you purchase your actual theme park tickets directly from Disney.";
