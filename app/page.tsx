@@ -13,7 +13,7 @@ import {
   Star,
   Waves,
 } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { formatDate } from "@/lib/dates";
 import { SiteFooter } from "@/components/site-footer";
 import { SupportChat } from "./support-chat";
@@ -39,6 +39,9 @@ type EligibilityResult =
     };
 
 type Attribution = {
+  visitId: string | null;
+  sessionId: string | null;
+  visitorId: string | null;
   utmSource: string | null;
   utmMedium: string | null;
   utmCampaign: string | null;
@@ -46,6 +49,10 @@ type Attribution = {
   utmTerm: string | null;
   landingPage: string | null;
   referrer: string | null;
+  referrerDomain: string | null;
+  gclid: string | null;
+  fbclid: string | null;
+  msclkid: string | null;
 };
 
 const defaultForm = {
@@ -92,6 +99,21 @@ export default function Home() {
     () => Number(form.guests10Plus) + Number(form.guests3To9),
     [form.guests10Plus, form.guests3To9]
   );
+
+  useEffect(() => {
+    const attribution = getAttribution();
+    if (!attribution.visitId) {
+      return;
+    }
+
+    void fetch("/api/visit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(attribution),
+      keepalive: true,
+    }).catch(() => undefined);
+  }, []);
+
   async function submitForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -355,12 +377,6 @@ export default function Home() {
                 personalized link to the Disney Group &amp; Convention discount page that matches
                 your dates, so you can purchase your tickets directly from Disney.
               </p>
-              <p className="mt-3 text-sm font-semibold leading-6 text-[#3e304d]">
-                Because Disney uses dynamic ticket pricing, we cannot promise an exact savings
-                amount in advance. If you do not come out ahead versus Disney&apos;s non-discounted
-                price for the same tickets after our fee, we&apos;ll refund your Secret Mouse Tickets
-                purchase.
-              </p>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
                 <label className="grid gap-2 text-sm font-bold">
@@ -465,6 +481,9 @@ export default function Home() {
 function getAttribution(): Attribution {
   if (typeof window === "undefined") {
     return {
+      visitId: null,
+      sessionId: null,
+      visitorId: null,
       utmSource: null,
       utmMedium: null,
       utmCampaign: null,
@@ -472,23 +491,58 @@ function getAttribution(): Attribution {
       utmTerm: null,
       landingPage: null,
       referrer: null,
+      referrerDomain: null,
+      gclid: null,
+      fbclid: null,
+      msclkid: null,
     };
   }
 
   const params = new URLSearchParams(window.location.search);
+  const referrer = normalizeAttributionValue(document.referrer);
 
   return {
+    visitId: getPersistentId("smt_visit_id", window.sessionStorage),
+    sessionId: getPersistentId("smt_session_id", window.sessionStorage),
+    visitorId: getPersistentId("smt_visitor_id", window.localStorage),
     utmSource: normalizeAttributionValue(params.get("utm_source")),
     utmMedium: normalizeAttributionValue(params.get("utm_medium")),
     utmCampaign: normalizeAttributionValue(params.get("utm_campaign")),
     utmContent: normalizeAttributionValue(params.get("utm_content")),
     utmTerm: normalizeAttributionValue(params.get("utm_term")),
+    gclid: normalizeAttributionValue(params.get("gclid")),
+    fbclid: normalizeAttributionValue(params.get("fbclid")),
+    msclkid: normalizeAttributionValue(params.get("msclkid")),
     landingPage: normalizeAttributionValue(`${window.location.pathname}${window.location.search}`),
-    referrer: normalizeAttributionValue(document.referrer),
+    referrer,
+    referrerDomain: getReferrerDomain(referrer),
   };
 }
 
 function normalizeAttributionValue(value: string | null) {
   const trimmed = value?.trim();
   return trimmed ? trimmed.slice(0, 500) : null;
+}
+
+function getPersistentId(key: string, storage: Storage) {
+  const existing = storage.getItem(key);
+  if (existing) {
+    return existing;
+  }
+
+  const next = crypto.randomUUID();
+  storage.setItem(key, next);
+  return next;
+}
+
+function getReferrerDomain(referrer: string | null) {
+  if (!referrer) {
+    return null;
+  }
+
+  try {
+    return normalizeAttributionValue(new URL(referrer).hostname.replace(/^www\./, ""));
+  } catch {
+    return null;
+  }
 }

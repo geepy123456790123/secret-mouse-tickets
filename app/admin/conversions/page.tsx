@@ -11,6 +11,9 @@ type ConversionData = {
     endDate: string;
   };
   summary: {
+    totalVisits: number;
+    uniqueVisitors: number;
+    uniqueSessions: number;
     totalLeads: number;
     matchedLeads: number;
     notFoundLeads: number;
@@ -21,6 +24,7 @@ type ConversionData = {
     averageOrderCents: number;
     revenuePerLeadCents: number;
     revenuePerMatchedLeadCents: number;
+    leadCaptureRate: number;
   };
   eventPerformance: Array<{
     eventName: string;
@@ -46,6 +50,35 @@ type ConversionData = {
     paidOrders: number;
     revenueCents: number;
     revenuePerLeadCents: number;
+  }>;
+  visitAttribution: Array<{
+    source: string;
+    medium: string;
+    campaign: string;
+    referrerDomain: string;
+    visits: number;
+    visitors: number;
+    leads: number;
+    matchedLeads: number;
+    paidOrders: number;
+    revenueCents: number;
+    leadRate: number;
+    paidRate: number;
+  }>;
+  landingPages: Array<{
+    landingPage: string;
+    visits: number;
+    leads: number;
+    paidOrders: number;
+    revenueCents: number;
+    leadRate: number;
+  }>;
+  searchTerms: Array<{
+    term: string;
+    visits: number;
+    leads: number;
+    paidOrders: number;
+    revenueCents: number;
   }>;
   checkoutAging: {
     under1Hour: number;
@@ -201,9 +234,16 @@ export default function AdminConversionsPage() {
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               <MetricCard
                 icon={<Ticket size={22} aria-hidden="true" />}
+                label="Visits"
+                value={formatNumber(data.summary.totalVisits)}
+                detail={`${formatNumber(data.summary.uniqueVisitors)} visitors, ${formatNumber(data.summary.uniqueSessions)} sessions`}
+                bg="bg-[#d9f4ff]"
+              />
+              <MetricCard
+                icon={<Ticket size={22} aria-hidden="true" />}
                 label="Leads"
                 value={formatNumber(data.summary.totalLeads)}
-                detail={`${formatNumber(data.summary.matchedLeads)} matched, ${rates.matchRate} match rate`}
+                detail={`${formatPercent(data.summary.leadCaptureRate)} visit-to-lead, ${formatNumber(data.summary.matchedLeads)} matched`}
                 bg="bg-[#d8c6ff]"
               />
               <MetricCard
@@ -240,6 +280,13 @@ export default function AdminConversionsPage() {
                 value={formatHours(data.timings.medianLeadToCheckoutHours)}
                 detail={`${formatHours(data.timings.medianCheckoutToPaidHours)} checkout-to-paid median`}
                 bg="bg-[#d9f4ff]"
+              />
+              <MetricCard
+                icon={<Percent size={22} aria-hidden="true" />}
+                label="Match Rate"
+                value={rates.matchRate}
+                detail={`${formatNumber(data.summary.notFoundLeads)} non-matches in this window`}
+                bg="bg-[#e7f7d9]"
               />
               <MetricCard
                 icon={<BarChart3 size={22} aria-hidden="true" />}
@@ -297,6 +344,54 @@ export default function AdminConversionsPage() {
                 />
               </Panel>
             </section>
+
+            <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+              <Panel title="Traffic Sources" subtitle="Visits, lead capture, and paid orders by acquisition source.">
+                <DataTable
+                  columns={["Source", "Medium", "Campaign", "Referrer", "Visits", "Lead Rate", "Paid Rate", "Revenue"]}
+                  rows={data.visitAttribution.map((item) => [
+                    item.source,
+                    item.medium,
+                    item.campaign,
+                    item.referrerDomain,
+                    formatNumber(item.visits),
+                    formatPercent(item.leadRate),
+                    formatPercent(item.paidRate),
+                    formatMoney(item.revenueCents),
+                  ])}
+                  empty="No visit attribution in this window."
+                />
+              </Panel>
+
+              <Panel title="Landing Pages" subtitle="Which entry pages turn visits into leads.">
+                <DataTable
+                  columns={["Landing Page", "Visits", "Leads", "Lead Rate", "Paid", "Revenue"]}
+                  rows={data.landingPages.map((item) => [
+                    item.landingPage,
+                    formatNumber(item.visits),
+                    formatNumber(item.leads),
+                    formatPercent(item.leadRate),
+                    formatNumber(item.paidOrders),
+                    formatMoney(item.revenueCents),
+                  ])}
+                  empty="No landing-page data in this window."
+                />
+              </Panel>
+            </section>
+
+            <Panel title="Search Terms" subtitle="Paid-search or tagged query terms captured through UTM term values.">
+              <DataTable
+                columns={["Term", "Visits", "Leads", "Paid", "Revenue"]}
+                rows={data.searchTerms.map((item) => [
+                  item.term,
+                  formatNumber(item.visits),
+                  formatNumber(item.leads),
+                  formatNumber(item.paidOrders),
+                  formatMoney(item.revenueCents),
+                ])}
+                empty="No tracked search terms in this window. Organic Google queries usually require Search Console."
+              />
+            </Panel>
 
             <section className="grid gap-6 xl:grid-cols-2">
               <Panel title="Checkout Timing" subtitle="Median time between lead, checkout, and payment.">
@@ -492,6 +587,10 @@ function formatMoney(cents: number) {
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat("en-US").format(value || 0);
+}
+
+function formatPercent(value: number) {
+  return `${(value || 0).toFixed(1)}%`;
 }
 
 function rate(numerator = 0, denominator = 0) {

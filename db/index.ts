@@ -40,6 +40,9 @@ async function createSchema() {
       "CREATE TABLE IF NOT EXISTS leads (id TEXT PRIMARY KEY, visit_start_date TEXT NOT NULL, visit_end_date TEXT NOT NULL, theme_park_days INTEGER NOT NULL, park_hopper INTEGER NOT NULL DEFAULT 0, guests_10_plus INTEGER NOT NULL, guests_3_to_9 INTEGER NOT NULL, florida_resident INTEGER NOT NULL DEFAULT 0, email TEXT NOT NULL, status TEXT NOT NULL, matched_event_id INTEGER, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
     ),
     db.prepare(
+      "CREATE TABLE IF NOT EXISTS visits (id TEXT PRIMARY KEY, session_id TEXT, visitor_id TEXT, landing_page TEXT, referrer TEXT, referrer_domain TEXT, utm_source TEXT, utm_medium TEXT, utm_campaign TEXT, utm_content TEXT, utm_term TEXT, gclid TEXT, fbclid TEXT, msclkid TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
+    ),
+    db.prepare(
       "CREATE TABLE IF NOT EXISTS coupons (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT NOT NULL UNIQUE, discount_cents INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1, max_redemptions INTEGER, redemption_count INTEGER NOT NULL DEFAULT 0, expires_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
     ),
     db.prepare(
@@ -92,6 +95,9 @@ async function createSchema() {
   const leadColumns = await db.prepare("PRAGMA table_info(leads)").all<{ name: string }>();
   const existingLeadColumns = new Set(leadColumns.results?.map((column) => column.name) ?? []);
   const attributionColumns = [
+    ["visit_id", "TEXT"],
+    ["session_id", "TEXT"],
+    ["visitor_id", "TEXT"],
     ["utm_source", "TEXT"],
     ["utm_medium", "TEXT"],
     ["utm_campaign", "TEXT"],
@@ -99,6 +105,10 @@ async function createSchema() {
     ["utm_term", "TEXT"],
     ["landing_page", "TEXT"],
     ["referrer", "TEXT"],
+    ["referrer_domain", "TEXT"],
+    ["gclid", "TEXT"],
+    ["fbclid", "TEXT"],
+    ["msclkid", "TEXT"],
   ] as const;
 
   for (const [name, type] of attributionColumns) {
@@ -128,8 +138,15 @@ async function createSchema() {
     .run();
 
   await db.prepare("CREATE INDEX IF NOT EXISTS leads_created_at_idx ON leads (created_at)").run();
+  await db.prepare("CREATE INDEX IF NOT EXISTS leads_visit_id_idx ON leads (visit_id)").run();
+  await db.prepare("CREATE INDEX IF NOT EXISTS leads_session_id_idx ON leads (session_id)").run();
+  await db.prepare("CREATE INDEX IF NOT EXISTS leads_visitor_id_idx ON leads (visitor_id)").run();
   await db.prepare("CREATE INDEX IF NOT EXISTS orders_created_at_idx ON orders (created_at)").run();
   await db.prepare("CREATE INDEX IF NOT EXISTS orders_square_payment_link_idx ON orders (square_payment_link_id)").run();
   await db.prepare("CREATE INDEX IF NOT EXISTS orders_square_order_idx ON orders (square_order_id)").run();
   await db.prepare("CREATE INDEX IF NOT EXISTS orders_square_payment_idx ON orders (square_payment_id)").run();
+  await db.prepare("CREATE INDEX IF NOT EXISTS visits_created_at_idx ON visits (created_at)").run();
+  await db.prepare("CREATE INDEX IF NOT EXISTS visits_session_id_idx ON visits (session_id)").run();
+  await db.prepare("CREATE INDEX IF NOT EXISTS visits_visitor_id_idx ON visits (visitor_id)").run();
+  await db.prepare("CREATE INDEX IF NOT EXISTS visits_source_idx ON visits (utm_source, utm_campaign)").run();
 }

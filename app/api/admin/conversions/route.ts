@@ -12,6 +12,12 @@ type SummaryRow = {
   average_order_cents: number;
 };
 
+type VisitSummaryRow = {
+  total_visits: number;
+  unique_visitors: number;
+  unique_sessions: number;
+};
+
 type EventPerformanceRow = {
   event_name: string;
   matched_leads: number;
@@ -35,6 +41,35 @@ type AttributionRow = {
   leads: number;
   matched_leads: number;
   checkout_starts: number;
+  paid_orders: number;
+  revenue_cents: number;
+};
+
+type VisitAttributionRow = {
+  source: string;
+  medium: string;
+  campaign: string;
+  referrer_domain: string;
+  visits: number;
+  visitors: number;
+  leads: number;
+  matched_leads: number;
+  paid_orders: number;
+  revenue_cents: number;
+};
+
+type LandingPageRow = {
+  landing_page: string;
+  visits: number;
+  leads: number;
+  paid_orders: number;
+  revenue_cents: number;
+};
+
+type SearchTermRow = {
+  term: string;
+  visits: number;
+  leads: number;
   paid_orders: number;
   revenue_cents: number;
 };
@@ -88,6 +123,18 @@ export async function GET(request: Request) {
 
     const { startDate, endDate, endExclusive } = parseDateWindow(request.url);
     const db = getRawDb();
+
+    const visitSummary = await db
+      .prepare(
+        `SELECT
+          COUNT(DISTINCT visits.id) AS total_visits,
+          COUNT(DISTINCT COALESCE(NULLIF(visits.visitor_id, ''), visits.id)) AS unique_visitors,
+          COUNT(DISTINCT COALESCE(NULLIF(visits.session_id, ''), visits.id)) AS unique_sessions
+        FROM visits
+        WHERE visits.created_at >= ? AND visits.created_at < ?`
+      )
+      .bind(startDate, endExclusive)
+      .first<VisitSummaryRow>();
 
     const summary = await db
       .prepare(
@@ -165,6 +212,70 @@ export async function GET(request: Request) {
       .bind(startDate, endExclusive)
       .all<AttributionRow>();
 
+    const visitAttributionRows = await db
+      .prepare(
+        `SELECT
+          COALESCE(NULLIF(visits.utm_source, ''), 'direct') AS source,
+          COALESCE(NULLIF(visits.utm_medium, ''), '(none)') AS medium,
+          COALESCE(NULLIF(visits.utm_campaign, ''), '(none)') AS campaign,
+          COALESCE(NULLIF(visits.referrer_domain, ''), '(direct)') AS referrer_domain,
+          COUNT(DISTINCT visits.id) AS visits,
+          COUNT(DISTINCT COALESCE(NULLIF(visits.visitor_id, ''), visits.id)) AS visitors,
+          COUNT(DISTINCT leads.id) AS leads,
+          COUNT(DISTINCT CASE WHEN leads.status = 'matched' THEN leads.id END) AS matched_leads,
+          COUNT(DISTINCT CASE WHEN orders.status = 'paid' THEN orders.id END) AS paid_orders,
+          SUM(CASE WHEN orders.status = 'paid' THEN orders.amount_cents ELSE 0 END) AS revenue_cents
+        FROM visits
+        LEFT JOIN leads ON leads.visit_id = visits.id
+        LEFT JOIN orders ON orders.lead_id = leads.id
+        WHERE visits.created_at >= ? AND visits.created_at < ?
+        GROUP BY source, medium, campaign, referrer_domain
+        ORDER BY revenue_cents DESC, paid_orders DESC, visits DESC
+        LIMIT 25`
+      )
+      .bind(startDate, endExclusive)
+      .all<VisitAttributionRow>();
+
+    const landingPageRows = await db
+      .prepare(
+        `SELECT
+          COALESCE(NULLIF(visits.landing_page, ''), '/') AS landing_page,
+          COUNT(DISTINCT visits.id) AS visits,
+          COUNT(DISTINCT leads.id) AS leads,
+          COUNT(DISTINCT CASE WHEN orders.status = 'paid' THEN orders.id END) AS paid_orders,
+          SUM(CASE WHEN orders.status = 'paid' THEN orders.amount_cents ELSE 0 END) AS revenue_cents
+        FROM visits
+        LEFT JOIN leads ON leads.visit_id = visits.id
+        LEFT JOIN orders ON orders.lead_id = leads.id
+        WHERE visits.created_at >= ? AND visits.created_at < ?
+        GROUP BY landing_page
+        ORDER BY visits DESC, revenue_cents DESC
+        LIMIT 20`
+      )
+      .bind(startDate, endExclusive)
+      .all<LandingPageRow>();
+
+    const searchTermRows = await db
+      .prepare(
+        `SELECT
+          visits.utm_term AS term,
+          COUNT(DISTINCT visits.id) AS visits,
+          COUNT(DISTINCT leads.id) AS leads,
+          COUNT(DISTINCT CASE WHEN orders.status = 'paid' THEN orders.id END) AS paid_orders,
+          SUM(CASE WHEN orders.status = 'paid' THEN orders.amount_cents ELSE 0 END) AS revenue_cents
+        FROM visits
+        LEFT JOIN leads ON leads.visit_id = visits.id
+        LEFT JOIN orders ON orders.lead_id = leads.id
+        WHERE visits.created_at >= ? AND visits.created_at < ?
+          AND visits.utm_term IS NOT NULL
+          AND trim(visits.utm_term) != ''
+        GROUP BY visits.utm_term
+        ORDER BY revenue_cents DESC, visits DESC
+        LIMIT 20`
+      )
+      .bind(startDate, endExclusive)
+      .all<SearchTermRow>();
+
     const checkoutAging = await db
       .prepare(
         `SELECT
@@ -240,10 +351,13 @@ export async function GET(request: Request) {
     return Response.json({
       ok: true,
       window: { startDate, endDate },
-      summary: normalizeSummary(summary),
+      summary: normalizeSummary(summary, visitSummary),
       eventPerformance: (eventPerformanceRows.results ?? []).map(normalizeEventPerformance),
       coupons: (couponRows.results ?? []).map(normalizeCoupon),
       attribution: (attributionRows.results ?? []).map(normalizeAttribution),
+      visitAttribution: (visitAttributionRows.results ?? []).map(normalizeVisitAttribution),
+      landingPages: (landingPageRows.results ?? []).map(normalizeLandingPage),
+      searchTerms: (searchTermRows.results ?? []).map(normalizeSearchTerm),
       checkoutAging: normalizeCheckoutAging(checkoutAging),
       timings: normalizeTimings(timingRows.results ?? []),
       daily: (dailyRows.results ?? []).map(normalizeDaily),
@@ -299,7 +413,7 @@ function toIsoDate(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
-function normalizeSummary(row: SummaryRow | null) {
+function normalizeSummary(row: SummaryRow | null, visitRow: VisitSummaryRow | null) {
   const summary = row ?? {
     total_leads: 0,
     matched_leads: 0,
@@ -310,12 +424,23 @@ function normalizeSummary(row: SummaryRow | null) {
     revenue_cents: 0,
     average_order_cents: 0,
   };
+  const visits = visitRow ?? {
+    total_visits: 0,
+    unique_visitors: 0,
+    unique_sessions: 0,
+  };
 
   const totalLeads = Number(summary.total_leads ?? 0);
   const matchedLeads = Number(summary.matched_leads ?? 0);
   const revenueCents = Number(summary.revenue_cents ?? 0);
+  const totalVisits = Number(visits.total_visits ?? 0);
+  const uniqueVisitors = Number(visits.unique_visitors ?? 0);
+  const uniqueSessions = Number(visits.unique_sessions ?? 0);
 
   return {
+    totalVisits,
+    uniqueVisitors,
+    uniqueSessions,
     totalLeads,
     matchedLeads,
     notFoundLeads: Number(summary.not_found_leads ?? 0),
@@ -326,6 +451,7 @@ function normalizeSummary(row: SummaryRow | null) {
     averageOrderCents: Math.round(Number(summary.average_order_cents ?? 0)),
     revenuePerLeadCents: totalLeads ? Math.round(revenueCents / totalLeads) : 0,
     revenuePerMatchedLeadCents: matchedLeads ? Math.round(revenueCents / matchedLeads) : 0,
+    leadCaptureRate: totalVisits ? Math.round((totalLeads / totalVisits) * 1000) / 10 : 0,
   };
 }
 
@@ -366,6 +492,52 @@ function normalizeAttribution(row: AttributionRow) {
     paidOrders,
     revenueCents,
     revenuePerLeadCents: leads ? Math.round(revenueCents / leads) : 0,
+  };
+}
+
+function normalizeVisitAttribution(row: VisitAttributionRow) {
+  const visits = Number(row.visits ?? 0);
+  const leads = Number(row.leads ?? 0);
+  const paidOrders = Number(row.paid_orders ?? 0);
+  const revenueCents = Number(row.revenue_cents ?? 0);
+
+  return {
+    source: row.source,
+    medium: row.medium,
+    campaign: row.campaign,
+    referrerDomain: row.referrer_domain,
+    visits,
+    visitors: Number(row.visitors ?? 0),
+    leads,
+    matchedLeads: Number(row.matched_leads ?? 0),
+    paidOrders,
+    revenueCents,
+    leadRate: visits ? Math.round((leads / visits) * 1000) / 10 : 0,
+    paidRate: visits ? Math.round((paidOrders / visits) * 1000) / 10 : 0,
+  };
+}
+
+function normalizeLandingPage(row: LandingPageRow) {
+  const visits = Number(row.visits ?? 0);
+  const leads = Number(row.leads ?? 0);
+
+  return {
+    landingPage: row.landing_page,
+    visits,
+    leads,
+    paidOrders: Number(row.paid_orders ?? 0),
+    revenueCents: Number(row.revenue_cents ?? 0),
+    leadRate: visits ? Math.round((leads / visits) * 1000) / 10 : 0,
+  };
+}
+
+function normalizeSearchTerm(row: SearchTermRow) {
+  return {
+    term: row.term,
+    visits: Number(row.visits ?? 0),
+    leads: Number(row.leads ?? 0),
+    paidOrders: Number(row.paid_orders ?? 0),
+    revenueCents: Number(row.revenue_cents ?? 0),
   };
 }
 

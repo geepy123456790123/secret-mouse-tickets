@@ -7,6 +7,9 @@ import {
 import { todayIso } from "@/lib/dates";
 
 type AttributionInput = {
+  visitId: string | null;
+  sessionId: string | null;
+  visitorId: string | null;
   utmSource: string | null;
   utmMedium: string | null;
   utmCampaign: string | null;
@@ -14,6 +17,10 @@ type AttributionInput = {
   utmTerm: string | null;
   landingPage: string | null;
   referrer: string | null;
+  referrerDomain: string | null;
+  gclid: string | null;
+  fbclid: string | null;
+  msclkid: string | null;
 };
 
 export async function POST(request: Request) {
@@ -43,7 +50,7 @@ export async function POST(request: Request) {
 
     await db
       .prepare(
-        "INSERT INTO leads (id, visit_start_date, visit_end_date, theme_park_days, park_hopper, guests_10_plus, guests_3_to_9, florida_resident, email, status, matched_event_id, utm_source, utm_medium, utm_campaign, utm_content, utm_term, landing_page, referrer) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO leads (id, visit_start_date, visit_end_date, theme_park_days, park_hopper, guests_10_plus, guests_3_to_9, florida_resident, email, status, matched_event_id, visit_id, session_id, visitor_id, utm_source, utm_medium, utm_campaign, utm_content, utm_term, landing_page, referrer, referrer_domain, gclid, fbclid, msclkid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
       )
       .bind(
         leadId,
@@ -57,13 +64,20 @@ export async function POST(request: Request) {
         input.email,
         status,
         event?.id ?? null,
+        attribution.visitId,
+        attribution.sessionId,
+        attribution.visitorId,
         attribution.utmSource,
         attribution.utmMedium,
         attribution.utmCampaign,
         attribution.utmContent,
         attribution.utmTerm,
         attribution.landingPage,
-        attribution.referrer
+        attribution.referrer,
+        attribution.referrerDomain,
+        attribution.gclid,
+        attribution.fbclid,
+        attribution.msclkid
       )
       .run();
 
@@ -100,6 +114,9 @@ function parseAttribution(payload: unknown): AttributionInput {
       : {};
 
   return {
+    visitId: normalizeAttribution(record.visitId),
+    sessionId: normalizeAttribution(record.sessionId),
+    visitorId: normalizeAttribution(record.visitorId),
     utmSource: normalizeAttribution(record.utmSource),
     utmMedium: normalizeAttribution(record.utmMedium),
     utmCampaign: normalizeAttribution(record.utmCampaign),
@@ -107,6 +124,10 @@ function parseAttribution(payload: unknown): AttributionInput {
     utmTerm: normalizeAttribution(record.utmTerm),
     landingPage: normalizeAttribution(record.landingPage),
     referrer: normalizeAttribution(record.referrer),
+    referrerDomain: normalizeAttribution(record.referrerDomain),
+    gclid: normalizeAttribution(record.gclid),
+    fbclid: normalizeAttribution(record.fbclid),
+    msclkid: normalizeAttribution(record.msclkid),
   };
 }
 

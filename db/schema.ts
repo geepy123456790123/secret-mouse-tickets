@@ -40,6 +40,9 @@ export const leads = sqliteTable("leads", {
   email: text("email").notNull(),
   status: text("status").notNull(),
   matchedEventId: integer("matched_event_id"),
+  visitId: text("visit_id"),
+  sessionId: text("session_id"),
+  visitorId: text("visitor_id"),
   utmSource: text("utm_source"),
   utmMedium: text("utm_medium"),
   utmCampaign: text("utm_campaign"),
@@ -47,8 +50,39 @@ export const leads = sqliteTable("leads", {
   utmTerm: text("utm_term"),
   landingPage: text("landing_page"),
   referrer: text("referrer"),
+  referrerDomain: text("referrer_domain"),
+  gclid: text("gclid"),
+  fbclid: text("fbclid"),
+  msclkid: text("msclkid"),
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
+
+export const visits = sqliteTable(
+  "visits",
+  {
+    id: text("id").primaryKey(),
+    sessionId: text("session_id"),
+    visitorId: text("visitor_id"),
+    landingPage: text("landing_page"),
+    referrer: text("referrer"),
+    referrerDomain: text("referrer_domain"),
+    utmSource: text("utm_source"),
+    utmMedium: text("utm_medium"),
+    utmCampaign: text("utm_campaign"),
+    utmContent: text("utm_content"),
+    utmTerm: text("utm_term"),
+    gclid: text("gclid"),
+    fbclid: text("fbclid"),
+    msclkid: text("msclkid"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("visits_created_at_idx").on(table.createdAt),
+    index("visits_session_id_idx").on(table.sessionId),
+    index("visits_visitor_id_idx").on(table.visitorId),
+    index("visits_source_idx").on(table.utmSource, table.utmCampaign),
+  ]
+);
 
 export const coupons = sqliteTable("coupons", {
   id: integer("id").primaryKey({ autoIncrement: true }),
