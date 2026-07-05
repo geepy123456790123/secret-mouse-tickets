@@ -118,7 +118,6 @@ type ConversionData = {
 const defaultWindow = getDefaultWindow();
 
 export default function AdminConversionsPage() {
-  const [token, setToken] = useState("");
   const [startDate, setStartDate] = useState(defaultWindow.startDate);
   const [endDate, setEndDate] = useState(defaultWindow.endDate);
   const [status, setStatus] = useState<"idle" | "loading">("idle");
@@ -142,9 +141,7 @@ export default function AdminConversionsPage() {
 
     try {
       const params = new URLSearchParams({ start: startDate, end: endDate });
-      const response = await fetch(`/api/admin/conversions?${params.toString()}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      });
+      const response = await fetch(`/api/admin/conversions?${params.toString()}`);
       const payload = (await response.json()) as ConversionData;
 
       if (!response.ok) {
@@ -183,18 +180,8 @@ export default function AdminConversionsPage() {
 
         <form
           onSubmit={loadDashboard}
-          className="cartoon-panel grid gap-4 rounded-[24px] bg-white p-5 sm:grid-cols-[1fr_180px_180px_auto] sm:items-end sm:p-6"
+          className="cartoon-panel grid gap-4 rounded-[24px] bg-white p-5 sm:grid-cols-[180px_180px_auto] sm:items-end sm:p-6"
         >
-          <label className="grid gap-2 text-sm font-bold">
-            Admin Token
-            <input
-              type="password"
-              value={token}
-              onChange={(event) => setToken(event.target.value)}
-              className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-3 text-base font-semibold"
-              placeholder="Required when configured"
-            />
-          </label>
           <label className="grid gap-2 text-sm font-bold">
             Start Date
             <input

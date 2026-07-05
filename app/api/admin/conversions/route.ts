@@ -1,4 +1,3 @@
-import { env } from "cloudflare:workers";
 import { ensureDatabase, getRawDb } from "@/db";
 
 type SummaryRow = {
@@ -113,11 +112,6 @@ type CheckoutAgingRow = {
 };
 
 export async function GET(request: Request) {
-  const auth = authorize(request);
-  if (!auth.ok) {
-    return auth.response;
-  }
-
   try {
     await ensureDatabase();
 
@@ -367,24 +361,6 @@ export async function GET(request: Request) {
     const message = error instanceof Error ? error.message : "Unexpected error";
     return Response.json({ error: message }, { status: 500 });
   }
-}
-
-function authorize(request: Request) {
-  const runtime = env as typeof env & { ADMIN_INGEST_TOKEN?: string };
-
-  if (!runtime.ADMIN_INGEST_TOKEN) {
-    return { ok: true as const };
-  }
-
-  const auth = request.headers.get("authorization");
-  if (auth === `Bearer ${runtime.ADMIN_INGEST_TOKEN}`) {
-    return { ok: true as const };
-  }
-
-  return {
-    ok: false as const,
-    response: Response.json({ error: "Unauthorized" }, { status: 401 }),
-  };
 }
 
 function parseDateWindow(url: string) {

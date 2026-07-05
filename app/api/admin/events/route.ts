@@ -1,4 +1,3 @@
-import { env } from "cloudflare:workers";
 import { ensureDatabase, getRawDb } from "@/db";
 import { isIsoDate, todayIso } from "@/lib/dates";
 
@@ -16,12 +15,7 @@ type IncomingEvent = {
   excluded?: boolean;
 };
 
-export async function GET(request: Request) {
-  const auth = authorize(request);
-  if (!auth.ok) {
-    return auth.response;
-  }
-
+export async function GET() {
   await ensureDatabase();
   const rows = await getRawDb()
     .prepare("SELECT * FROM events ORDER BY event_start_date ASC LIMIT 100")
@@ -30,11 +24,6 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const auth = authorize(request);
-  if (!auth.ok) {
-    return auth.response;
-  }
-
   await ensureDatabase();
   const payload = (await request.json()) as IncomingEvent | IncomingEvent[];
   const events = Array.isArray(payload) ? payload : [payload];
@@ -96,24 +85,6 @@ async function cleanupNonProductionEvents(db: ReturnType<typeof getRawDb>) {
       .bind("https://disneyevent.com/example-convention", "https://disneyevent.com/test-event"),
     db.prepare("DELETE FROM events WHERE event_page_url LIKE ?").bind("%/know-before-you-go%"),
   ]);
-}
-
-function authorize(request: Request) {
-  const runtime = env as typeof env & { ADMIN_INGEST_TOKEN?: string };
-
-  if (!runtime.ADMIN_INGEST_TOKEN) {
-    return { ok: true as const };
-  }
-
-  const auth = request.headers.get("authorization");
-  if (auth === `Bearer ${runtime.ADMIN_INGEST_TOKEN}`) {
-    return { ok: true as const };
-  }
-
-  return {
-    ok: false as const,
-    response: Response.json({ error: "Unauthorized" }, { status: 401 }),
-  };
 }
 
 function validateIncomingEvent(event: IncomingEvent) {

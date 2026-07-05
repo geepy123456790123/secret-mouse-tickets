@@ -37,11 +37,6 @@ const EXCLUDED_BROCHURE_SRC =
   "https://258ade6f769e5102661c-d0ee5722296a6e07a9b11bb4054abd10.ssl.cf2.rackcdn.com/thumbs/yBcDUZZON5KjxryAb3o2uizUnHfloBHeBrochure.png";
 
 export async function POST(request: Request) {
-  const auth = authorize(request);
-  if (!auth.ok) {
-    return auth.response;
-  }
-
   const runtime = env as typeof env & { SERPER_API_KEY?: string };
   if (!runtime.SERPER_API_KEY) {
     return Response.json({ error: "SERPER_API_KEY is not configured." }, { status: 500 });
@@ -167,24 +162,6 @@ export async function POST(request: Request) {
 
     return Response.json({ ok: false, runId, error: message }, { status: 500 });
   }
-}
-
-function authorize(request: Request) {
-  const runtime = env as typeof env & { ADMIN_INGEST_TOKEN?: string };
-
-  if (!runtime.ADMIN_INGEST_TOKEN) {
-    return { ok: true as const };
-  }
-
-  const auth = request.headers.get("authorization");
-  if (auth === `Bearer ${runtime.ADMIN_INGEST_TOKEN}`) {
-    return { ok: true as const };
-  }
-
-  return {
-    ok: false as const,
-    response: Response.json({ error: "Unauthorized" }, { status: 401 }),
-  };
 }
 
 async function discoverCandidateUrls({

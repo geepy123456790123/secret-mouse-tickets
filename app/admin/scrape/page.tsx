@@ -38,7 +38,6 @@ type ScrapeResult = {
 };
 
 export default function AdminScrapePage() {
-  const [token, setToken] = useState("");
   const [pages, setPages] = useState(15);
   const [concurrency, setConcurrency] = useState(6);
   const [startPage, setStartPage] = useState(1);
@@ -52,7 +51,6 @@ export default function AdminScrapePage() {
 
     try {
       const payload = await runScrapeBatches({
-        token,
         startPage,
         pages,
         concurrency,
@@ -77,17 +75,6 @@ export default function AdminScrapePage() {
         </div>
 
         <form onSubmit={runScrape} className="cartoon-panel grid gap-5 rounded-[24px] bg-white p-5 sm:p-6">
-          <label className="grid gap-2 text-sm font-bold">
-            Admin Token
-            <input
-              type="password"
-              required
-              value={token}
-              onChange={(event) => setToken(event.target.value)}
-              className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-3 text-base font-semibold"
-            />
-          </label>
-
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2 text-sm font-bold">
               Start Page
@@ -168,12 +155,10 @@ function Metric({ label, value }: { label: string; value: number }) {
 }
 
 async function runScrapeBatches({
-  token,
   startPage,
   pages,
   concurrency,
 }: {
-  token: string;
   startPage: number;
   pages: number;
   concurrency: number;
@@ -191,7 +176,6 @@ async function runScrapeBatches({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ startPage: batchStartPage, pages: batchPages, concurrency }),
     });
