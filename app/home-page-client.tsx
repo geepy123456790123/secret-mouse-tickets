@@ -470,6 +470,45 @@ export function HomePageClient() {
           ))}
         </div>
       </section>
+
+      <section className="mx-auto w-full max-w-7xl px-5 pb-8 lg:px-8 lg:pb-12">
+        <div className="cartoon-panel grid gap-4 rounded-[24px] bg-white p-5 sm:p-6 lg:grid-cols-2">
+          <div className="grid gap-2">
+            <p className="text-sm font-bold uppercase text-[#5d45b5]">Learn More</p>
+            <h2 className="text-2xl font-bold leading-tight">
+              Learn how Secret Mouse Tickets works and how Disney Group ticket offers fit in.
+            </h2>
+            <p className="text-sm font-semibold leading-6 text-[#3e304d]">
+              These guides explain the service, what you are buying, and how matching Disney Group
+              and Convention discount pages can help eligible trips save money.
+            </p>
+          </div>
+          <div className="grid gap-3">
+            <Link
+              href="/how-it-works"
+              className="rounded-[18px] border-[3px] border-[#120f17] bg-[#fff7de] px-4 py-3 text-left shadow-[4px_4px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#120f17]"
+            >
+              <span className="block text-base font-black text-[#120f17]">
+                How Secret Mouse Tickets Works
+              </span>
+              <span className="mt-1 block text-sm font-semibold leading-6 text-[#3e304d]">
+                See the step-by-step process from date check to your Disney purchase link.
+              </span>
+            </Link>
+            <Link
+              href="/disney-world-group-convention-tickets"
+              className="rounded-[18px] border-[3px] border-[#120f17] bg-[#efe8ff] px-4 py-3 text-left shadow-[4px_4px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#120f17]"
+            >
+              <span className="block text-base font-black text-[#120f17]">
+                Disney World Group And Convention Tickets Explained
+              </span>
+              <span className="mt-1 block text-sm font-semibold leading-6 text-[#3e304d]">
+                Learn what these Disney ticket offers are and how guests use qualifying sale pages.
+              </span>
+            </Link>
+          </div>
+        </div>
+      </section>
       <div className="hidden sm:block">
         <SiteFooter compact className="max-w-[calc(100%-2.5rem)]" />
       </div>
