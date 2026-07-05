@@ -223,7 +223,11 @@ export async function GET(request: Request) {
         LEFT JOIN leads ON leads.visit_id = visits.id
         LEFT JOIN orders ON orders.lead_id = leads.id
         WHERE visits.created_at >= ? AND visits.created_at < ?
-        GROUP BY source, medium, campaign, referrer_domain
+        GROUP BY
+          COALESCE(NULLIF(visits.utm_source, ''), 'direct'),
+          COALESCE(NULLIF(visits.utm_medium, ''), '(none)'),
+          COALESCE(NULLIF(visits.utm_campaign, ''), '(none)'),
+          COALESCE(NULLIF(visits.referrer_domain, ''), '(direct)')
         ORDER BY revenue_cents DESC, paid_orders DESC, visits DESC
         LIMIT 25`
       )
@@ -242,7 +246,7 @@ export async function GET(request: Request) {
         LEFT JOIN leads ON leads.visit_id = visits.id
         LEFT JOIN orders ON orders.lead_id = leads.id
         WHERE visits.created_at >= ? AND visits.created_at < ?
-        GROUP BY landing_page
+        GROUP BY COALESCE(NULLIF(visits.landing_page, ''), '/')
         ORDER BY visits DESC, revenue_cents DESC
         LIMIT 20`
       )
