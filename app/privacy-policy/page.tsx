@@ -3,8 +3,12 @@ import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Secret Mouse Tickets",
-  description: "Privacy Policy for Secret Mouse Tickets.",
+  title: "Privacy Policy",
+  description:
+    "Read the Secret Mouse Tickets Privacy Policy, including what information we collect, how checkout and support data are used, and how to contact us with privacy questions.",
+  alternates: {
+    canonical: "https://secretmousetickets.com/privacy-policy",
+  },
 };
 
 const effectiveDate = "July 3, 2026";

@@ -3,8 +3,12 @@ import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | Secret Mouse Tickets",
-  description: "Terms of Service for Secret Mouse Tickets.",
+  title: "Terms of Service",
+  description:
+    "Read the Secret Mouse Tickets Terms of Service, including how the service works, refund eligibility, payment terms, and important limitations.",
+  alternates: {
+    canonical: "https://secretmousetickets.com/terms-of-service",
+  },
 };
 
 const effectiveDate = "July 3, 2026";
