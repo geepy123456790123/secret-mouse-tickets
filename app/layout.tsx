@@ -11,7 +11,7 @@ const fredoka = Fredoka({
 export const metadata: Metadata = {
   title: "Secret Mouse Tickets",
   description:
-    "Secret Mouse Tickets helps customers find Disney Group & Convention ticket offers that may match their Walt Disney World visit dates.",
+    "We track discounted Disney World ticket sales that are not advertised to the public, so you can save BIG on your Disney trip.",
   icons: {
     icon: "/sparkles-favicon.svg",
     shortcut: "/sparkles-favicon.svg",

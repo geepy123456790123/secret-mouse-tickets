@@ -99,12 +99,7 @@ export default async function CheckoutPage({
             <p>
               Disney uses dynamic ticket pricing, so we cannot promise an exact savings amount in
               advance. If you do not come out ahead versus Disney&apos;s non-discounted price for the
-              same tickets after our fee, or if you cannot access the paid link, we&apos;ll review
-              your order for a refund.
-            </p>
-            <p>
-              Secret Mouse Tickets is an independent service and is not affiliated with, endorsed
-              by, or sponsored by Disney.
+              same tickets after our fee, we&apos;ll refund your Secret Mouse Tickets purchase.
             </p>
           </div>
 
