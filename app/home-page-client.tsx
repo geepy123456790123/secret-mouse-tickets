@@ -183,8 +183,8 @@ export function HomePageClient() {
 
           <div className="max-w-xl space-y-3 lg:-mt-2">
             <h1 className="text-2xl font-bold leading-tight text-[#120f17] sm:text-3xl">
-              Let our team of insiders connect you with hidden discounted tickets for your Walt
-              Disney World visit.
+              Let our team connect you with hidden discounted ticket offers for your Walt Disney
+              World visit.
             </h1>
             <p className="text-lg font-medium leading-8 text-[#3e304d]">
               We track discounted Disney World ticket sales that aren&apos;t advertised to the public,
@@ -230,10 +230,9 @@ export function HomePageClient() {
               <div>
                 <h2 className="text-base font-black">Our Guarantee</h2>
                 <p className="text-sm font-semibold leading-6 text-[#3e304d]">
-                  Disney uses dynamic ticket pricing, so while we cannot promise an exact savings
-                  amount ahead of time, we guarantee that you&apos;ll save versus Disney&apos;s
-                  non-discounted price for the same tickets after our fee or we&apos;ll refund your
-                  purchase.
+                  Disney&apos;s prices change daily, so we can&apos;t tell you the exact savings ahead
+                  of time. But here&apos;s our guarantee: after our fee, you&apos;ll still come out
+                  ahead of Disney&apos;s regular price, or we&apos;ll refund you.
                 </p>
               </div>
             </div>
@@ -476,11 +475,12 @@ export function HomePageClient() {
           <div className="grid gap-2">
             <p className="text-sm font-bold uppercase text-[#5d45b5]">Learn More</p>
             <h2 className="text-2xl font-bold leading-tight">
-              Learn how Secret Mouse Tickets works and how Disney Group ticket offers fit in.
+              Here&apos;s how Secret Mouse Tickets works, and how it connects to Disney Group &amp;
+              Convention ticket offers.
             </h2>
             <p className="text-sm font-semibold leading-6 text-[#3e304d]">
-              These guides explain the service, what you are buying, and how matching Disney Group
-              and Convention discount pages can help eligible trips save money.
+              These guides cover what you&apos;re buying, plus how matching Disney Group and
+              Convention discount pages can save you money on your Walt Disney World vacation.
             </p>
           </div>
           <div className="grid gap-3">
