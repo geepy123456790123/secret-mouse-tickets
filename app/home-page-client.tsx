@@ -232,7 +232,7 @@ export function HomePageClient() {
                 <p className="text-sm font-semibold leading-6 text-[#3e304d]">
                   Disney&apos;s prices change daily, so we can&apos;t tell you the exact savings ahead
                   of time. But here&apos;s our guarantee: after our fee, you&apos;ll still come out
-                  ahead of Disney&apos;s regular price, or we&apos;ll refund you.
+                  ahead of Disney&apos;s regular price, or your money back.
                 </p>
               </div>
             </div>
