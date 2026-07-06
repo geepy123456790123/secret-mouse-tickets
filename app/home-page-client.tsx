@@ -186,9 +186,8 @@ export function HomePageClient() {
               We find hidden discount tickets for your Walt Disney World trip.
             </h1>
             <p className="text-lg font-medium leading-8 text-[#3e304d]">
-              We track discounted Disney World ticket sales that aren&apos;t advertised to the public,
-              so you can save on your Disney trip. A typical family of 4 doing 5 park days saves
-              over $300 on tickets alone.
+              A typical family of 4 doing 5 park days saves over $300 on tickets alone, thanks to
+              discounted Disney World ticket sales that aren&apos;t advertised to the public.
             </p>
           </div>
         </div>
