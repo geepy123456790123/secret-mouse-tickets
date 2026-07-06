@@ -473,12 +473,11 @@ export function HomePageClient() {
           <div className="grid gap-2">
             <p className="text-sm font-bold uppercase text-[#5d45b5]">Learn More</p>
             <h2 className="text-2xl font-bold leading-tight">
-              Here&apos;s how Secret Mouse Tickets works, and how it connects to Disney Group &amp;
-              Convention ticket offers.
+              Here&apos;s how Secret Mouse Tickets works.
             </h2>
             <p className="text-sm font-semibold leading-6 text-[#3e304d]">
-              These guides cover what you&apos;re buying, plus how matching Disney Group and
-              Convention discount pages can save you money on your Walt Disney World vacation.
+              One walks through exactly what you&apos;re paying for. The other breaks down how
+              these discount ticket pages work, and how they can save you money on your trip.
             </p>
           </div>
           <div className="grid gap-3">
@@ -501,7 +500,7 @@ export function HomePageClient() {
                 Disney World Group And Convention Tickets Explained
               </span>
               <span className="mt-1 block text-sm font-semibold leading-6 text-[#3e304d]">
-                Learn what these Disney ticket offers are and how guests use qualifying sale pages.
+                Learn what these Disney ticket offers are and how to use one when your dates match.
               </span>
             </Link>
           </div>
