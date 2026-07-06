@@ -20,7 +20,7 @@ export default function HowItWorksPage() {
           <div className="grid gap-3">
             <p className="text-sm font-bold uppercase text-[#5d45b5]">How It Works</p>
             <h1 className="text-3xl font-bold leading-tight sm:text-4xl">
-              How Secret Mouse Tickets works for Disney World discount ticket access
+              How Secret Mouse Tickets works
             </h1>
             <p className="text-base font-semibold leading-7 text-[#3e304d]">
               Secret Mouse Tickets helps guests find Disney Group and Convention discount ticket
@@ -88,9 +88,12 @@ export default function HowItWorksPage() {
           <ContentSection title="What happens after purchase">
             <p>
               After payment, we send your confirmation and the matching Disney sale-page link to the
-              email address you entered. If there is ever an access problem, or if you do not come
-              out ahead compared with Disney&apos;s non-discounted ticket price for the same tickets
-              after our fee, contact us and we will review it under our refund policy.
+              email address you entered. If you run into any problem with your link, contact us and
+              we&apos;ll sort it out.
+            </p>
+            <p>
+              And if you do not come out ahead of Disney&apos;s regular price for the same tickets
+              after our fee, we&apos;ll review it under our refund policy.
             </p>
           </ContentSection>
 

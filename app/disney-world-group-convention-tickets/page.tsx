@@ -54,10 +54,9 @@ export default function DisneyWorldGroupConventionTicketsPage() {
 
           <ContentSection title="Why these offers matter">
             <p>
-              Many Disney guests search for Disney World discount tickets, Disney group tickets, or
-              convention ticket offers because the standard public pricing can be expensive. These
-              group and convention sale pages can sometimes offer better value for eligible visit
-              windows, especially for multi-day trips.
+              A lot of Disney guests go looking for any kind of ticket discount, since the standard
+              public pricing adds up fast. These group and convention sale pages can sometimes offer
+              better value for eligible visit windows, especially for multi-day trips.
             </p>
           </ContentSection>
 
