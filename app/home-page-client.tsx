@@ -500,7 +500,7 @@ export function HomePageClient() {
                 Disney World Group And Convention Tickets Explained
               </span>
               <span className="mt-1 block text-sm font-semibold leading-6 text-[#3e304d]">
-                Learn what these Disney ticket offers are and how to use one when your dates match.
+                Learn what these Disney ticket offers are and how to use them.
               </span>
             </Link>
           </div>
