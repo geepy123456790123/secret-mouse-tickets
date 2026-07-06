@@ -194,14 +194,9 @@ export function HomePageClient() {
         </div>
 
         <div className="grid content-center gap-5">
-          <div className="grid gap-2">
-            <p className="rounded-full bg-[#fff7de]/90 px-4 py-2 text-center text-sm font-bold text-[#5d45b5]">
-            Group and convention Walt Disney World ticket discounts, open to everyone
-            </p>
-            <p className="text-center text-sm font-bold text-[#3e304d]">
-              Group and convention discount pricing, without the group or the convention.
-            </p>
-          </div>
+          <p className="rounded-full bg-[#fff7de]/90 px-4 py-2 text-center text-sm font-bold text-[#5d45b5]">
+            Group and convention discount pricing, without the group or the convention.
+          </p>
 
           <section className="cartoon-panel grid gap-3 rounded-[22px] bg-white/95 p-5">
             <div className="flex gap-3">
@@ -426,7 +421,7 @@ export function HomePageClient() {
             Real trip savings examples
           </p>
           <h2 className="mt-5 text-3xl font-black leading-tight text-[#120f17] sm:text-4xl">
-            Families use Secret Mouse Tickets to spend less on tickets and more on the magic.
+            Families use Secret Mouse Tickets to spend less on tickets and more on Disney magic.
           </h2>
         </div>
 
