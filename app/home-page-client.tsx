@@ -76,7 +76,7 @@ const testimonials = [
     name: "Jason P.",
     initials: "JP",
     amount: "$312",
-    text: "I had no idea these group and convention rates were out there. Our dates matched, the access was $57, and our Disney ticket savings were over $300.",
+    text: "I had no idea these group and convention rates were out there. Our dates matched, the fee was $57, and our Disney ticket savings were over $300.",
     bg: "bg-[#8f72f2]",
   },
   {
@@ -183,21 +183,25 @@ export function HomePageClient() {
 
           <div className="max-w-xl space-y-3 lg:-mt-2">
             <h1 className="text-2xl font-bold leading-tight text-[#120f17] sm:text-3xl">
-              Let our team connect you with hidden discounted ticket offers for your Walt Disney
-              World visit.
+              We find hidden discount tickets for your Walt Disney World trip.
             </h1>
             <p className="text-lg font-medium leading-8 text-[#3e304d]">
               We track discounted Disney World ticket sales that aren&apos;t advertised to the public,
-              so you can save BIG on your Disney trip. A typical family of 4 doing 5 park days
-              saves over $300 on tickets alone.
+              so you can save on your Disney trip. A typical family of 4 doing 5 park days saves
+              over $300 on tickets alone.
             </p>
           </div>
         </div>
 
         <div className="grid content-center gap-5">
-          <p className="rounded-full bg-[#fff7de]/90 px-4 py-2 text-center text-sm font-bold text-[#5d45b5]">
+          <div className="grid gap-2">
+            <p className="rounded-full bg-[#fff7de]/90 px-4 py-2 text-center text-sm font-bold text-[#5d45b5]">
             Group and convention Walt Disney World ticket discounts, open to everyone
-          </p>
+            </p>
+            <p className="text-center text-sm font-bold text-[#3e304d]">
+              Group and convention discount pricing, without the group or the convention.
+            </p>
+          </div>
 
           <section className="cartoon-panel grid gap-3 rounded-[22px] bg-white/95 p-5">
             <div className="flex gap-3">
@@ -205,7 +209,7 @@ export function HomePageClient() {
                 <Sparkles size={18} aria-hidden="true" />
               </span>
               <div>
-                <h2 className="text-base font-black">Advance Purchase Savings</h2>
+                <h2 className="text-base font-black">Savings Disney Doesn&apos;t Advertise</h2>
                 <p className="text-sm font-semibold leading-6 text-[#3e304d]">
                   Save up to 20%* when you buy eligible 1-day and multi-day tickets directly
                   from Disney.
@@ -217,7 +221,7 @@ export function HomePageClient() {
                 <Waves size={18} aria-hidden="true" />
               </span>
               <div>
-                <h2 className="text-base font-black">Additional Disney Magic</h2>
+                <h2 className="text-base font-black">Free Bonus Water Park Days</h2>
                 <p className="text-sm font-semibold leading-6 text-[#3e304d]">
                   Multi-day Disney tickets include an extra Water Park Fun &amp; More Visit pass.
                 </p>
@@ -422,7 +426,7 @@ export function HomePageClient() {
             Real trip savings examples
           </p>
           <h2 className="mt-5 text-3xl font-black leading-tight text-[#120f17] sm:text-4xl">
-            Families use Secret Mouse Tickets to keep more magic money in their pockets.
+            Families use Secret Mouse Tickets to spend less on tickets and more on the magic.
           </h2>
         </div>
 

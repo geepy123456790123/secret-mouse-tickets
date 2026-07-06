@@ -4,7 +4,7 @@ import { HomePageClient } from "./home-page-client";
 const siteUrl = "https://secretmousetickets.com";
 
 export const metadata: Metadata = {
-  title: "Disney World Discount Tickets | Secret Mouse Tickets",
+  title: "Disney World Discount Tickets",
   description:
     "Find hidden Walt Disney World Group and Convention discount ticket offers for your visit dates. Check Disney World ticket eligibility, then buy your actual tickets directly from Disney.",
   alternates: {
