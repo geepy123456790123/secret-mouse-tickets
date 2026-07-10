@@ -1,5 +1,6 @@
 import { ensureDatabase, getRawDb } from "@/db";
 import { isIsoDate, todayIso } from "@/lib/dates";
+import { env } from "cloudflare:workers";
 
 type EventDestination = "disney_world" | "disneyland" | "unknown";
 
@@ -24,6 +25,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const auth = authorize(request);
+  if (!auth.ok) {
+    return auth.response;
+  }
+
   await ensureDatabase();
   const payload = (await request.json()) as IncomingEvent | IncomingEvent[];
   const events = Array.isArray(payload) ? payload : [payload];
@@ -76,6 +82,24 @@ export async function POST(request: Request) {
     .run();
 
   return Response.json({ ok: true, upserted, ignored });
+}
+
+function authorize(request: Request) {
+  const runtime = env as typeof env & { ADMIN_INGEST_TOKEN?: string };
+
+  if (!runtime.ADMIN_INGEST_TOKEN) {
+    return { ok: true as const };
+  }
+
+  const auth = request.headers.get("authorization");
+  if (auth === `Bearer ${runtime.ADMIN_INGEST_TOKEN}`) {
+    return { ok: true as const };
+  }
+
+  return {
+    ok: false as const,
+    response: Response.json({ error: "Unauthorized" }, { status: 401 }),
+  };
 }
 
 async function cleanupNonProductionEvents(db: ReturnType<typeof getRawDb>) {

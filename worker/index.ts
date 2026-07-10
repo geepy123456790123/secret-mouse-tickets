@@ -20,12 +20,7 @@ interface ExecutionContext {
   passThroughOnException(): void;
 }
 
-type ScheduledController = {
-  cron: string;
-  scheduledTime: number;
-};
-
-const SCRAPE_BATCH_SIZE = 4;
+const SCRAPE_BATCH_SIZE = 1;
 const SCRAPE_TOTAL_PAGES = 15;
 
 // Image security config. SVG sources with .svg extension auto-skip the
@@ -49,12 +44,33 @@ const worker = {
       }, allowedWidths);
     }
 
+    if (url.pathname === "/api/admin/scrape" && request.method === "POST") {
+      const body = await request.clone().json().catch(() => null);
+
+      if (body && typeof body === "object" && body.batched !== true) {
+        const startPage = clampPositiveInt(body.startPage, 1);
+        const pages = clampPositiveInt(body.pages, SCRAPE_TOTAL_PAGES);
+
+        if (pages > SCRAPE_BATCH_SIZE) {
+          try {
+            return await runBatchedScrapeRequest({
+              request,
+              env,
+              ctx,
+              body,
+              startPage,
+              pages,
+            });
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            return Response.json({ ok: false, error: message }, { status: 500 });
+          }
+        }
+      }
+    }
+
     const response = await handler.fetch(request, env, ctx);
     return withSecurityHeaders(response);
-  },
-
-  async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    ctx.waitUntil(runDailyScrape(controller, env, ctx));
   },
 };
 
@@ -89,49 +105,144 @@ function withSecurityHeaders(response: Response) {
   });
 }
 
-async function runDailyScrape(
-  controller: ScheduledController,
-  env: Env,
-  ctx: ExecutionContext,
-): Promise<void> {
-  const headers = new Headers({ "Content-Type": "application/json" });
-
-  if (env.ADMIN_INGEST_TOKEN) {
-    headers.set("Authorization", `Bearer ${env.ADMIN_INGEST_TOKEN}`);
-  }
-
-  const batchCount = Math.ceil(SCRAPE_TOTAL_PAGES / SCRAPE_BATCH_SIZE);
-  const batchResults: unknown[] = [];
+async function runBatchedScrapeRequest({
+  request,
+  env,
+  ctx,
+  body,
+  startPage,
+  pages,
+}: {
+  request: Request;
+  env: Env;
+  ctx: ExecutionContext;
+  body: Record<string, unknown>;
+  startPage: number;
+  pages: number;
+}) {
+  const batchCount = Math.ceil(pages / SCRAPE_BATCH_SIZE);
+  const batchRuns: number[] = [];
+  const batchResults: ScrapeBatchResult[] = [];
 
   for (let index = 0; index < batchCount; index++) {
-    const startPage = 1 + index * SCRAPE_BATCH_SIZE;
-    const remainingPages = SCRAPE_TOTAL_PAGES - index * SCRAPE_BATCH_SIZE;
-    const pages = Math.min(SCRAPE_BATCH_SIZE, remainingPages);
+    const batchStartPage = startPage + index * SCRAPE_BATCH_SIZE;
+    const remainingPages = pages - index * SCRAPE_BATCH_SIZE;
+    const batchPages = Math.min(SCRAPE_BATCH_SIZE, remainingPages);
     const response = await handler.fetch(
       new Request("https://secret-mouse-tickets.internal/api/admin/scrape", {
         method: "POST",
-        headers,
-        body: JSON.stringify({ startPage, pages }),
+        headers: copyScrapeHeaders(request.headers),
+        body: JSON.stringify({
+          ...body,
+          startPage: batchStartPage,
+          pages: batchPages,
+          batched: true,
+        }),
       }),
       env,
       ctx,
     );
+    const payload = (await response.json().catch(() => null)) as ScrapeBatchResult | null;
 
-    const payload = await response.text();
-
-    if (!response.ok) {
-      throw new Error(`Daily scrape batch ${startPage}-${startPage + pages - 1} failed with ${response.status}: ${payload}`);
+    if (!response.ok || !payload?.ok) {
+      return Response.json(
+        {
+          ok: false,
+          error: payload?.error ?? `Scrape batch ${batchStartPage} failed with ${response.status}.`,
+          batchRuns,
+        },
+        { status: response.ok ? 500 : response.status }
+      );
     }
 
-    batchResults.push(JSON.parse(payload));
+    if (payload.runId) {
+      batchRuns.push(payload.runId);
+    }
+
+    batchResults.push(payload);
   }
 
-  console.log(
-    JSON.stringify({
-      message: "Daily Disney event scrape completed.",
-      cron: controller.cron,
-      scheduledTime: controller.scheduledTime,
-      result: batchResults,
-    }),
-  );
+  return Response.json({
+    ok: true,
+    batchRuns,
+    provider: batchResults[0]?.provider,
+    sourceUrl: batchResults[0]?.sourceUrl,
+    query: batchResults[0]?.query,
+    startPage,
+    pages,
+    discovered: batchResults.reduce((sum, item) => sum + (item.discovered ?? 0), 0),
+    parsed: batchResults.reduce((sum, item) => sum + (item.parsed ?? 0), 0),
+    skipped: batchResults.reduce((sum, item) => sum + (item.skipped ?? 0), 0),
+    ingest: {
+      ok: true,
+      upserted: batchResults.reduce((sum, item) => sum + (item.ingest?.upserted ?? 0), 0),
+      ignored: batchResults.reduce((sum, item) => sum + (item.ingest?.ignored ?? 0), 0),
+      ignoredItems: batchResults.flatMap((item) => item.ingest?.ignoredItems ?? []).slice(0, 25),
+      upsertedUrls: batchResults.flatMap((item) => item.ingest?.upsertedUrls ?? []).slice(0, 25),
+    },
+    skipReasonSummary: summarizeBatchReasons(batchResults),
+    warnings: [...new Set(batchResults.flatMap((item) => item.warnings ?? []))],
+    sampleEvents: batchResults.flatMap((item) => item.sampleEvents ?? []).slice(0, 5),
+    sampleSkipped: batchResults.flatMap((item) => item.sampleSkipped ?? []).slice(0, 10),
+  });
 }
+
+function copyScrapeHeaders(headers: Headers) {
+  const next = new Headers({ "Content-Type": "application/json" });
+  const authorization = headers.get("authorization");
+
+  if (authorization) {
+    next.set("authorization", authorization);
+  }
+
+  return next;
+}
+
+function clampPositiveInt(value: unknown, fallback: number) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function summarizeBatchReasons(results: ScrapeBatchResult[]) {
+  const counts = new Map<string, number>();
+
+  for (const result of results) {
+    for (const item of result.skipReasonSummary ?? []) {
+      counts.set(item.reason, (counts.get(item.reason) ?? 0) + item.count);
+    }
+  }
+
+  return [...counts.entries()]
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 10)
+    .map(([reason, count]) => ({ reason, count }));
+}
+
+type ScrapeBatchResult = {
+  ok: boolean;
+  runId?: number;
+  provider?: string;
+  sourceUrl?: string;
+  query?: string;
+  discovered?: number;
+  parsed?: number;
+  skipped?: number;
+  ingest?: {
+    ok: boolean;
+    upserted: number;
+    ignored: number;
+    ignoredItems?: Array<{ url: string; reason: string }>;
+    upsertedUrls?: string[];
+  };
+  skipReasonSummary?: Array<{ reason: string; count: number }>;
+  warnings?: string[];
+  sampleEvents?: Array<{
+    eventPageUrl: string;
+    infoBannerFirst: string;
+    eventStartDate: string;
+    eventEndDate: string;
+    destination: string;
+  }>;
+  sampleSkipped?: Array<{ url: string; reason: string }>;
+  error?: string;
+};

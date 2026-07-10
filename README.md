@@ -25,6 +25,9 @@ Copy `.env.example` to `.env.local` for local work. In production, configure the
 - `SQUARE_WEBHOOK_NOTIFICATION_URL` (optional, use only if Square's configured URL differs from the request URL seen by the app)
 - `RESEND_API_KEY`
 - `FROM_EMAIL`
+- `GOOGLE_SEARCH_CONSOLE_CLIENT_EMAIL`
+- `GOOGLE_SEARCH_CONSOLE_PRIVATE_KEY`
+- `GOOGLE_SEARCH_CONSOLE_SITE_URL`
 - `SERPER_API_KEY`
 - `GOOGLE_SEARCH_URL`
 - `SEARCH_NORMALIZER_PROVIDER`
@@ -51,4 +54,23 @@ The `/api/search/disneyevent` endpoint defaults to Serper, requests the `site:di
 
 Parsed events are posted to `INGEST_ENDPOINT` when set, usually `/api/admin/events`. Duplicate event URLs are upserted. Expired events and pages with the excluded brochure image are deleted/ignored.
 
-Production scrape runs can be triggered from `/admin/scrape`. The page calls `/api/admin/scrape`, which performs Serper discovery, scrapes candidate DisneyEvent pages, parses event metadata, and writes directly to D1 from inside the deployed Worker. The scrape API requires `ADMIN_INGEST_TOKEN`.
+Production scrape runs can be triggered from `/admin/scrape`. The page runs one search page at a time to stay within Cloudflare Worker subrequest limits.
+
+## Daily production ingest
+
+The full 15-page daily scrape now runs outside the Worker in GitHub Actions:
+
+- Workflow: `.github/workflows/daily-event-ingest.yml`
+- Schedule: daily at `10:15 UTC`
+- Manual fallback: GitHub Actions -> `Daily Event Ingest` -> `Run workflow`
+
+The workflow calls:
+
+- `https://secret-mouse-tickets.drgrant.workers.dev/api/search/disneyevent`
+- `https://secret-mouse-tickets.drgrant.workers.dev/api/admin/events`
+
+Required GitHub Actions secret:
+
+- `ADMIN_INGEST_TOKEN`
+
+This external job avoids Cloudflare's per-invocation subrequest cap while still using the live production search and ingest endpoints. The public site domain is protected by Cloudflare Access, so the unattended workflow targets the Worker hostname directly.
