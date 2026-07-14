@@ -1,6 +1,7 @@
 import { env } from "cloudflare:workers";
 import { ensureDatabase, getRawDb } from "@/db";
 import { markOrderPaidAndSendConfirmation } from "@/lib/orders";
+import { getClientIpAddress, sendMetaConversionEvent } from "@/lib/meta-conversions";
 
 type PaymentOrder = {
   id: string;
@@ -8,6 +9,8 @@ type PaymentOrder = {
   currency: string;
   status: string;
   recipient_email: string;
+  lead_id: string;
+  fbclid: string | null;
 };
 
 type SquarePaymentResponse = {
@@ -31,6 +34,9 @@ export async function POST(request: Request) {
       SQUARE_ACCESS_TOKEN?: string;
       SQUARE_LOCATION_ID?: string;
       SQUARE_ENVIRONMENT?: string;
+      META_CONVERSIONS_API_ACCESS_TOKEN?: string;
+      META_PIXEL_ID?: string;
+      META_TEST_EVENT_CODE?: string;
     };
 
     if (!runtime.SQUARE_ACCESS_TOKEN || !runtime.SQUARE_LOCATION_ID) {
@@ -52,7 +58,7 @@ export async function POST(request: Request) {
     const db = getRawDb();
     const order = await db
       .prepare(
-        "SELECT orders.id, orders.amount_cents, orders.currency, orders.status, leads.email AS recipient_email FROM orders JOIN leads ON leads.id = orders.lead_id WHERE orders.id = ? LIMIT 1"
+        "SELECT orders.id, orders.amount_cents, orders.currency, orders.status, leads.id AS lead_id, leads.email AS recipient_email, leads.fbclid AS fbclid FROM orders JOIN leads ON leads.id = orders.lead_id WHERE orders.id = ? LIMIT 1"
       )
       .bind(orderId)
       .first<PaymentOrder>();
@@ -79,6 +85,31 @@ export async function POST(request: Request) {
 
       if (!result.ok) {
         return Response.json({ error: result.error }, { status: result.status });
+      }
+
+      try {
+        await sendMetaConversionEvent({
+          accessToken: runtime.META_CONVERSIONS_API_ACCESS_TOKEN?.trim() || null,
+          pixelId: runtime.META_PIXEL_ID?.trim() || null,
+          testEventCode: runtime.META_TEST_EVENT_CODE?.trim() || null,
+          eventName: "Purchase",
+          eventId: order.id,
+          eventSourceUrl: `${new URL(request.url).origin}/checkout/${order.id}`,
+          userData: {
+            email: order.recipient_email,
+            externalId: order.lead_id,
+            clientIpAddress: getClientIpAddress(request),
+            clientUserAgent: request.headers.get("user-agent"),
+            fbclid: order.fbclid,
+          },
+          customData: {
+            currency: order.currency,
+            value: order.amount_cents / 100,
+            orderId: order.id,
+          },
+        });
+      } catch (error) {
+        console.error("Meta Purchase send failed", error);
       }
 
       return Response.json({
@@ -129,6 +160,31 @@ export async function POST(request: Request) {
 
     if (!result.ok) {
       return Response.json({ error: result.error }, { status: result.status });
+    }
+
+    try {
+      await sendMetaConversionEvent({
+        accessToken: runtime.META_CONVERSIONS_API_ACCESS_TOKEN?.trim() || null,
+        pixelId: runtime.META_PIXEL_ID?.trim() || null,
+        testEventCode: runtime.META_TEST_EVENT_CODE?.trim() || null,
+        eventName: "Purchase",
+        eventId: order.id,
+        eventSourceUrl: `${new URL(request.url).origin}/checkout/${order.id}`,
+        userData: {
+          email: order.recipient_email,
+          externalId: order.lead_id,
+          clientIpAddress: getClientIpAddress(request),
+          clientUserAgent: request.headers.get("user-agent"),
+          fbclid: order.fbclid,
+        },
+        customData: {
+          currency: order.currency,
+          value: order.amount_cents / 100,
+          orderId: order.id,
+        },
+      });
+    } catch (error) {
+      console.error("Meta Purchase send failed", error);
     }
 
     return Response.json({

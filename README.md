@@ -28,6 +28,11 @@ Copy `.env.example` to `.env.local` for local work. In production, configure the
 - `GOOGLE_SEARCH_CONSOLE_CLIENT_EMAIL`
 - `GOOGLE_SEARCH_CONSOLE_PRIVATE_KEY`
 - `GOOGLE_SEARCH_CONSOLE_SITE_URL`
+- `GOOGLE_ADS_TAG_ID`
+- `GOOGLE_ADS_BEGIN_CHECKOUT_LABEL` (optional)
+- `GOOGLE_ADS_PURCHASE_LABEL`
+- `META_PIXEL_ID`
+- `META_TEST_EVENT_CODE` (optional, for Meta Events Manager Test Events verification)
 - `SERPER_API_KEY`
 - `GOOGLE_SEARCH_URL`
 - `SEARCH_NORMALIZER_PROVIDER`

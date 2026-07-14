@@ -1,14 +1,19 @@
 "use client";
 
+import Link from "next/link";
 import { CheckCircle2, Mail } from "lucide-react";
 import { useState } from "react";
 
 export function CheckoutConfirm({
   orderId,
   showTestButton,
+  amountCents,
+  couponCode,
 }: {
   orderId: string;
   showTestButton: boolean;
+  amountCents: number;
+  couponCode: string | null;
 }) {
   const [status, setStatus] = useState<"idle" | "working" | "done">("idle");
   const [message, setMessage] = useState("");
@@ -56,14 +61,53 @@ export function CheckoutConfirm({
   }
 
   if (!showTestButton) {
+    const isZeroDollarUnlock = amountCents <= 0;
+
     return (
-      <div className="rounded-[18px] border-4 border-[#120f17] bg-[#efe8ff] p-4 text-sm font-semibold leading-6 sm:rounded-[20px] sm:p-5">
-        <p className="inline-flex items-center gap-2 font-bold text-[#5d45b5]">
-          <Mail size={19} aria-hidden="true" />
-          Confirmation email on the way
-        </p>
-        <p className="mt-2">
-          If you do not see it within a few minutes, check your spam or promotions folder.
+      <div className="grid gap-4 rounded-[18px] border-4 border-[#120f17] bg-[#efe8ff] p-4 sm:rounded-[20px] sm:p-5">
+        <div className="flex items-start gap-3">
+          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-[3px] border-[#120f17] bg-[#ffbd38]">
+            <CheckCircle2 size={20} aria-hidden="true" />
+          </span>
+          <div className="grid gap-1">
+            <p className="text-base font-black text-[#120f17]">
+              {isZeroDollarUnlock ? "Your link has been unlocked" : "Confirmation email on the way"}
+            </p>
+            <p className="text-sm font-semibold leading-6 text-[#3e304d]">
+              {isZeroDollarUnlock
+                ? "Your coupon covered the full Secret Mouse Tickets fee, and your Disney discount link and confirmation details have been sent."
+                : "Your Disney discount link and confirmation details have been sent."}{" "}
+              If you do not see the email within a few minutes, check spam or promotions.
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-[16px] border-[3px] border-[#120f17] bg-white p-4 text-sm font-semibold leading-6 text-[#3e304d]">
+          <p>
+            The message comes from{" "}
+            <span className="font-black text-[#120f17]">hello@secretmousetickets.com</span>.
+          </p>
+          <p className="mt-2">
+            Keep the email handy so you can open your Disney purchase link again later if needed.
+            {couponCode ? (
+              <>
+                {" "}Your code{" "}
+                <span className="font-black text-[#120f17]">{couponCode}</span>{" "}
+                has already been applied to this order.
+              </>
+            ) : null}
+          </p>
+        </div>
+
+        <p className="text-sm font-semibold leading-6 text-[#3e304d]">
+          Need help?{" "}
+          <Link
+            href="mailto:hello@secretmousetickets.com"
+            className="font-black text-[#5d45b5] underline underline-offset-4"
+          >
+            Contact Us
+          </Link>
+          .
         </p>
       </div>
     );

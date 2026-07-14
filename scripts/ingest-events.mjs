@@ -52,6 +52,11 @@ async function main() {
       }
 
       const html = await response.text();
+      if (!hasBuyTicketsButton(html)) {
+        skipped.push({ url, reason: "No Buy Tickets button found." });
+        continue;
+      }
+
       const event = parseEventPage(normalizeEventPageUrl(url), html);
 
       if (!event) {
@@ -202,6 +207,10 @@ function parseEventPage(url, html) {
     destination,
     excluded: destination !== "disney_world",
   };
+}
+
+function hasBuyTicketsButton(html) {
+  return /Buy Tickets/i.test(html);
 }
 
 function parseNextEventPage($, url, html) {

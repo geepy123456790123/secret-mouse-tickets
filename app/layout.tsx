@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Fredoka } from "next/font/google";
+import { env } from "cloudflare:workers";
 import "./globals.css";
+import { MarketingScripts } from "@/components/marketing-scripts";
 
 const siteUrl = "https://secretmousetickets.com";
 
@@ -73,6 +75,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const runtime = env as typeof env & {
+    GOOGLE_ADS_TAG_ID?: string;
+    META_PIXEL_ID?: string;
+  };
+  const googleAdsTagId = runtime.GOOGLE_ADS_TAG_ID?.trim() || null;
+  const metaPixelId = runtime.META_PIXEL_ID?.trim() || null;
+
   return (
     <html lang="en">
       <head>
@@ -86,6 +95,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${fredoka.variable} antialiased`}>
+        <MarketingScripts googleAdsTagId={googleAdsTagId} metaPixelId={metaPixelId} />
         {children}
       </body>
     </html>

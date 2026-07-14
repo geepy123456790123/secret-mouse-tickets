@@ -37,7 +37,11 @@ type ScrapeResult = {
   error?: string;
 };
 
-export default function AdminScrapePage() {
+type AdminScrapePanelProps = {
+  showHeader?: boolean;
+};
+
+export function AdminScrapePanel({ showHeader = true }: AdminScrapePanelProps) {
   const [pages, setPages] = useState(15);
   const [concurrency, setConcurrency] = useState(6);
   const [startPage, setStartPage] = useState(1);
@@ -67,14 +71,22 @@ export default function AdminScrapePage() {
   }
 
   return (
-    <main className="brand-page min-h-screen px-5 py-8 text-[#120f17]">
-      <section className="mx-auto grid max-w-4xl gap-6">
+    <section className="cartoon-panel grid gap-5 rounded-[24px] bg-white p-5 sm:p-6">
+      {showHeader ? (
         <div>
           <p className="text-sm font-bold uppercase tracking-wide text-[#5d45b5]">Admin</p>
           <h1 className="text-3xl font-bold">Event Scrape</h1>
         </div>
+      ) : (
+        <div>
+          <h2 className="text-2xl font-black">Event Scrape</h2>
+          <p className="mt-1 text-sm font-semibold leading-6 text-[#3e304d]">
+            Run the Google-results scrape and ingest the latest qualifying Disney event pages.
+          </p>
+        </div>
+      )}
 
-        <form onSubmit={runScrape} className="cartoon-panel grid gap-5 rounded-[24px] bg-white p-5 sm:p-6">
+      <form onSubmit={runScrape} className="grid gap-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2 text-sm font-bold">
               Start Page
@@ -118,28 +130,37 @@ export default function AdminScrapePage() {
           >
             {status === "running" ? "Running..." : "Run Full Scrape"}
           </button>
-        </form>
+      </form>
 
-        {result ? (
-          <section className="cartoon-panel grid gap-4 rounded-[24px] bg-white p-5 sm:p-6">
-            <div className="grid gap-3 sm:grid-cols-4">
-              <Metric label="Discovered" value={result.discovered ?? 0} />
-              <Metric label="Parsed" value={result.parsed ?? 0} />
-              <Metric label="Upserted" value={result.ingest?.upserted ?? 0} />
-              <Metric label="Ignored" value={result.ingest?.ignored ?? 0} />
-            </div>
+      {result ? (
+        <section className="grid gap-4 rounded-[18px] border-[3px] border-[#120f17] bg-[#fffaf0] p-4">
+          <div className="grid gap-3 sm:grid-cols-4">
+            <Metric label="Discovered" value={result.discovered ?? 0} />
+            <Metric label="Parsed" value={result.parsed ?? 0} />
+            <Metric label="Upserted" value={result.ingest?.upserted ?? 0} />
+            <Metric label="Ignored" value={result.ingest?.ignored ?? 0} />
+          </div>
 
-            {result.error ? (
-              <p className="rounded-[14px] border-[3px] border-[#120f17] bg-[#ffe4e4] p-3 font-bold">
-                {result.error}
-              </p>
-            ) : null}
+          {result.error ? (
+            <p className="rounded-[14px] border-[3px] border-[#120f17] bg-[#ffe4e4] p-3 font-bold">
+              {result.error}
+            </p>
+          ) : null}
 
-            <pre className="max-h-[420px] overflow-auto rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] p-4 text-xs font-semibold leading-5">
-              {JSON.stringify(result, null, 2)}
-            </pre>
-          </section>
-        ) : null}
+          <pre className="max-h-[420px] overflow-auto rounded-[14px] border-[3px] border-[#120f17] bg-white p-4 text-xs font-semibold leading-5">
+            {JSON.stringify(result, null, 2)}
+          </pre>
+        </section>
+      ) : null}
+    </section>
+  );
+}
+
+export default function AdminScrapePage() {
+  return (
+    <main className="brand-page min-h-screen px-5 py-8 text-[#120f17]">
+      <section className="mx-auto grid max-w-4xl gap-6">
+        <AdminScrapePanel />
       </section>
     </main>
   );
@@ -163,7 +184,7 @@ async function runScrapeBatches({
   pages: number;
   concurrency: number;
 }) {
-  const batchSize = 4;
+  const batchSize = 1;
   const batchCount = Math.ceil(pages / batchSize);
   const batchRuns: number[] = [];
   const batchResults: ScrapeResult[] = [];
@@ -172,7 +193,7 @@ async function runScrapeBatches({
     const batchStartPage = startPage + index * batchSize;
     const remainingPages = pages - index * batchSize;
     const batchPages = Math.min(batchSize, remainingPages);
-    const response = await fetch("/api/admin/scrape", {
+    const response = await fetch("/admin/api/scrape", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

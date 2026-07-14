@@ -219,6 +219,11 @@ async function scrapeCandidateUrls(urls: string[], concurrency: number) {
         }
 
         const html = await response.text();
+        if (!hasBuyTicketsButton(html)) {
+          skipped.push({ url, reason: "No Buy Tickets button found." });
+          continue;
+        }
+
         const event = parseEventPage(url, html);
         if (!event) {
           skipped.push({ url, reason: "No event date payload found." });
@@ -320,6 +325,10 @@ function parseEventPage(url: string, html: string): ScrapedEvent | null {
   }
 
   return parseNextEventPage($, url, html);
+}
+
+function hasBuyTicketsButton(html: string) {
+  return /Buy Tickets/i.test(html);
 }
 
 function parseNextEventPage($: ReturnType<typeof load>, url: string, html: string) {

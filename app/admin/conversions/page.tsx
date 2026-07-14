@@ -1,8 +1,17 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { BarChart3, DollarSign, Filter, Percent, ShoppingCart, Ticket } from "lucide-react";
+import {
+  BarChart3,
+  ChevronDown,
+  ChevronUp,
+  DollarSign,
+  Filter,
+  Percent,
+  ShoppingCart,
+  Ticket,
+} from "lucide-react";
 
 type ConversionData = {
   ok: boolean;
@@ -80,6 +89,21 @@ type ConversionData = {
     paidOrders: number;
     revenueCents: number;
   }>;
+  organicSearch: {
+    status: {
+      configured: boolean;
+      connected: boolean;
+      siteUrl: string | null;
+      error?: string;
+    };
+    rows: Array<{
+      term: string;
+      clicks: number;
+      impressions: number;
+      ctr: number;
+      position: number;
+    }>;
+  };
   checkoutAging: {
     under1Hour: number;
     over24Hours: number;
@@ -115,14 +139,43 @@ type ConversionData = {
   error?: string;
 };
 
+type ManagedCoupon = {
+  id: number;
+  code: string;
+  discountCents: number;
+  discountDollars: string;
+  active: boolean;
+  maxRedemptions: number | null;
+  redemptionCount: number;
+  expiresAt: string | null;
+  createdAt: string;
+};
+
 const defaultWindow = getDefaultWindow();
 
-export default function AdminConversionsPage() {
+type AdminConversionsDashboardProps = {
+  showHeader?: boolean;
+};
+
+export function AdminConversionsDashboard({
+  showHeader = true,
+}: AdminConversionsDashboardProps) {
   const [startDate, setStartDate] = useState(defaultWindow.startDate);
   const [endDate, setEndDate] = useState(defaultWindow.endDate);
   const [status, setStatus] = useState<"idle" | "loading">("idle");
   const [data, setData] = useState<ConversionData | null>(null);
   const [error, setError] = useState("");
+  const [coupons, setCoupons] = useState<ManagedCoupon[]>([]);
+  const [couponError, setCouponError] = useState("");
+  const [couponStatus, setCouponStatus] = useState<"idle" | "loading" | "saving">("idle");
+  const [couponOpen, setCouponOpen] = useState(false);
+  const [draftCoupon, setDraftCoupon] = useState({
+    code: "",
+    discountDollars: "",
+    active: true,
+    maxRedemptions: "",
+    expiresAt: "",
+  });
 
   const rates = useMemo(() => {
     const summary = data?.summary;
@@ -141,7 +194,7 @@ export default function AdminConversionsPage() {
 
     try {
       const params = new URLSearchParams({ start: startDate, end: endDate });
-      const response = await fetch(`/api/admin/conversions?${params.toString()}`);
+      const response = await fetch(`/admin/api/conversions?${params.toString()}`);
       const payload = (await response.json()) as ConversionData;
 
       if (!response.ok) {
@@ -159,29 +212,172 @@ export default function AdminConversionsPage() {
     }
   }
 
-  return (
-    <main className="brand-page min-h-screen px-5 py-8 text-[#120f17]">
-      <section className="mx-auto grid max-w-7xl gap-6">
-        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
-          <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-[#5d45b5]">Admin</p>
-            <h1 className="text-3xl font-black sm:text-4xl">Conversions</h1>
-            <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-[#3e304d]">
-              Track the lead cohort from date check to paid access, then compare revenue by coupon,
-              source, and campaign.
-            </p>
-          </div>
-          {data ? (
-            <p className="rounded-full border-[3px] border-[#120f17] bg-[#fff7de] px-4 py-2 text-sm font-black shadow-[4px_4px_0_#120f17]">
-              {data.window.startDate} to {data.window.endDate}
-            </p>
-          ) : null}
-        </div>
+  async function createCoupon(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setCouponStatus("saving");
+    setCouponError("");
 
-        <form
-          onSubmit={loadDashboard}
-          className="cartoon-panel grid gap-4 rounded-[24px] bg-white p-5 sm:grid-cols-[180px_180px_auto] sm:items-end sm:p-6"
-        >
+    try {
+      const response = await fetch("/admin/api/coupons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: draftCoupon.code,
+          discountDollars: draftCoupon.discountDollars,
+          active: draftCoupon.active,
+          maxRedemptions: draftCoupon.maxRedemptions || null,
+          expiresAt: draftCoupon.expiresAt || null,
+        }),
+      });
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        coupons?: ManagedCoupon[];
+        error?: string;
+      };
+
+      if (!response.ok || !payload.ok || !payload.coupons) {
+        throw new Error(payload.error ?? "Unable to create coupon.");
+      }
+
+      setCoupons(payload.coupons);
+      setDraftCoupon({
+        code: "",
+        discountDollars: "",
+        active: true,
+        maxRedemptions: "",
+        expiresAt: "",
+      });
+    } catch (caught) {
+      setCouponError(caught instanceof Error ? caught.message : "Unable to create coupon.");
+    } finally {
+      setCouponStatus("idle");
+    }
+  }
+
+  async function saveCoupon(coupon: ManagedCoupon) {
+    setCouponStatus("saving");
+    setCouponError("");
+
+    try {
+      const response = await fetch("/admin/api/coupons", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: coupon.id,
+          code: coupon.code,
+          discountDollars: coupon.discountDollars,
+          active: coupon.active,
+          maxRedemptions: coupon.maxRedemptions,
+          expiresAt: coupon.expiresAt,
+        }),
+      });
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        coupons?: ManagedCoupon[];
+        error?: string;
+      };
+
+      if (!response.ok || !payload.ok || !payload.coupons) {
+        throw new Error(payload.error ?? "Unable to save coupon.");
+      }
+
+      setCoupons(payload.coupons);
+    } catch (caught) {
+      setCouponError(caught instanceof Error ? caught.message : "Unable to save coupon.");
+    } finally {
+      setCouponStatus("idle");
+    }
+  }
+
+  async function deleteCoupon(id: number) {
+    setCouponStatus("saving");
+    setCouponError("");
+
+    try {
+      const response = await fetch("/admin/api/coupons", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        coupons?: ManagedCoupon[];
+        error?: string;
+      };
+
+      if (!response.ok || !payload.ok || !payload.coupons) {
+        throw new Error(payload.error ?? "Unable to delete coupon.");
+      }
+
+      setCoupons(payload.coupons);
+    } catch (caught) {
+      setCouponError(caught instanceof Error ? caught.message : "Unable to delete coupon.");
+    } finally {
+      setCouponStatus("idle");
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const response = await fetch("/admin/api/coupons");
+        const payload = (await response.json()) as {
+          ok?: boolean;
+          coupons?: ManagedCoupon[];
+          error?: string;
+        };
+
+        if (cancelled) {
+          return;
+        }
+
+        if (!response.ok || !payload.ok || !payload.coupons) {
+          throw new Error(payload.error ?? "Unable to load coupons.");
+        }
+
+        setCoupons(payload.coupons);
+      } catch (caught) {
+        if (!cancelled) {
+          setCouponError(caught instanceof Error ? caught.message : "Unable to load coupons.");
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return (
+    <section className="grid gap-6">
+      <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+        <div>
+          {showHeader ? (
+            <>
+              <p className="text-sm font-bold uppercase tracking-wide text-[#5d45b5]">Admin</p>
+              <h1 className="text-3xl font-black sm:text-4xl">Conversions</h1>
+            </>
+          ) : (
+            <h2 className="text-2xl font-black sm:text-3xl">Conversions</h2>
+          )}
+          <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-[#3e304d]">
+            Track the lead cohort from date check to paid access, then compare revenue by coupon,
+            source, and campaign.
+          </p>
+        </div>
+        {data ? (
+          <p className="rounded-full border-[3px] border-[#120f17] bg-[#fff7de] px-4 py-2 text-sm font-black shadow-[4px_4px_0_#120f17]">
+            {data.window.startDate} to {data.window.endDate}
+          </p>
+        ) : null}
+      </div>
+
+      <form
+        onSubmit={loadDashboard}
+        className="cartoon-panel grid gap-4 rounded-[24px] bg-white p-5 sm:grid-cols-[180px_180px_auto] sm:items-end sm:p-6"
+      >
           <label className="grid gap-2 text-sm font-bold">
             Start Date
             <input
@@ -208,16 +404,16 @@ export default function AdminConversionsPage() {
             <Filter size={18} aria-hidden="true" />
             {status === "loading" ? "Loading..." : "Load"}
           </button>
-        </form>
+      </form>
 
-        {error ? (
-          <p className="rounded-[18px] border-4 border-[#120f17] bg-[#ffdfe7] px-4 py-3 text-sm font-bold shadow-[5px_5px_0_#120f17]">
-            {error}
-          </p>
-        ) : null}
+      {error ? (
+        <p className="rounded-[18px] border-4 border-[#120f17] bg-[#ffdfe7] px-4 py-3 text-sm font-bold shadow-[5px_5px_0_#120f17]">
+          {error}
+        </p>
+      ) : null}
 
-        {data ? (
-          <>
+      {data ? (
+        <>
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               <MetricCard
                 icon={<Ticket size={22} aria-hidden="true" />}
@@ -366,19 +562,45 @@ export default function AdminConversionsPage() {
               </Panel>
             </section>
 
-            <Panel title="Search Terms" subtitle="Paid-search or tagged query terms captured through UTM term values.">
-              <DataTable
-                columns={["Term", "Visits", "Leads", "Paid", "Revenue"]}
-                rows={data.searchTerms.map((item) => [
-                  item.term,
-                  formatNumber(item.visits),
-                  formatNumber(item.leads),
-                  formatNumber(item.paidOrders),
-                  formatMoney(item.revenueCents),
-                ])}
-                empty="No tracked search terms in this window. Organic Google queries usually require Search Console."
-              />
-            </Panel>
+            <section className="grid gap-6 xl:grid-cols-2">
+              <Panel
+                title="Organic Google Queries"
+                subtitle={
+                  data.organicSearch.status.connected
+                    ? `Live Search Console data for ${data.organicSearch.status.siteUrl}.`
+                    : "Search Console query performance for this date window."
+                }
+              >
+                <DataTable
+                  columns={["Query", "Clicks", "Impressions", "CTR", "Avg Position"]}
+                  rows={data.organicSearch.rows.map((item) => [
+                    item.term,
+                    formatNumber(item.clicks),
+                    formatNumber(item.impressions),
+                    formatPercent(item.ctr),
+                    item.position.toFixed(1),
+                  ])}
+                  empty={data.organicSearch.status.error ?? "No organic Google query data in this window."}
+                />
+              </Panel>
+
+              <Panel
+                title="Tagged Search Terms"
+                subtitle="Paid-search or manually tagged query terms captured through UTM term values."
+              >
+                <DataTable
+                  columns={["Term", "Visits", "Leads", "Paid", "Revenue"]}
+                  rows={data.searchTerms.map((item) => [
+                    item.term,
+                    formatNumber(item.visits),
+                    formatNumber(item.leads),
+                    formatNumber(item.paidOrders),
+                    formatMoney(item.revenueCents),
+                  ])}
+                  empty="No tagged search terms in this window."
+                />
+              </Panel>
+            </section>
 
             <section className="grid gap-6 xl:grid-cols-2">
               <Panel title="Checkout Timing" subtitle="Median time between lead, checkout, and payment.">
@@ -441,13 +663,248 @@ export default function AdminConversionsPage() {
             <BarChart3 className="mx-auto text-[#8f72f2]" size={38} aria-hidden="true" />
             <h2 className="mt-3 text-xl font-black">Load conversion data</h2>
             <p className="mx-auto mt-2 max-w-2xl text-sm font-semibold leading-6 text-[#3e304d]">
-              Choose a date window and enter the admin token to see the current funnel, revenue,
-              coupons, attribution, and recent checkout starts.
+              Choose a date window to see the current funnel, revenue, coupons, attribution,
+              recent checkout starts, and organic search performance.
             </p>
           </section>
-        )}
+      )}
+
+      <section className="cartoon-panel overflow-hidden rounded-[24px] bg-white">
+        <button
+          type="button"
+          onClick={() => setCouponOpen((current) => !current)}
+          className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+        >
+          <div>
+            <h2 className="text-2xl font-black">Coupon Management</h2>
+            <p className="mt-1 text-sm font-semibold leading-6 text-[#3e304d]">
+              Add, update, pause, or remove coupon codes without touching the database directly.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            {couponStatus !== "idle" ? (
+              <p className="text-sm font-black text-[#5d45b5]">
+                {couponStatus === "loading" ? "Loading coupons..." : "Saving coupons..."}
+              </p>
+            ) : null}
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border-[3px] border-[#120f17] bg-[#fff7de]">
+              {couponOpen ? <ChevronUp size={22} aria-hidden="true" /> : <ChevronDown size={22} aria-hidden="true" />}
+            </span>
+          </div>
+        </button>
+
+        {couponOpen ? (
+          <div className="grid gap-5 border-t-4 border-[#120f17] p-5 sm:p-6">
+            {couponError ? (
+              <p className="rounded-[16px] border-[3px] border-[#120f17] bg-[#ffdfe7] px-4 py-3 text-sm font-bold">
+                {couponError}
+              </p>
+            ) : null}
+
+            <form
+              onSubmit={createCoupon}
+              className="grid gap-4 rounded-[18px] border-[3px] border-[#120f17] bg-[#fffaf0] p-4 lg:grid-cols-5"
+            >
+              <label className="grid gap-2 text-sm font-bold">
+                Code
+                <input
+                  value={draftCoupon.code}
+                  onChange={(event) =>
+                    setDraftCoupon((current) => ({
+                      ...current,
+                      code: event.target.value.toUpperCase(),
+                    }))
+                  }
+                  className="h-11 rounded-[12px] border-[3px] border-[#120f17] bg-white px-3 font-semibold uppercase"
+                  placeholder="SUMMERDEAL25"
+                />
+              </label>
+              <label className="grid gap-2 text-sm font-bold">
+                Discount ($)
+                <input
+                  value={draftCoupon.discountDollars}
+                  onChange={(event) =>
+                    setDraftCoupon((current) => ({
+                      ...current,
+                      discountDollars: event.target.value,
+                    }))
+                  }
+                  className="h-11 rounded-[12px] border-[3px] border-[#120f17] bg-white px-3 font-semibold"
+                  placeholder="14.25"
+                />
+              </label>
+              <label className="grid gap-2 text-sm font-bold">
+                Max Redemptions
+                <input
+                  value={draftCoupon.maxRedemptions}
+                  onChange={(event) =>
+                    setDraftCoupon((current) => ({
+                      ...current,
+                      maxRedemptions: event.target.value,
+                    }))
+                  }
+                  className="h-11 rounded-[12px] border-[3px] border-[#120f17] bg-white px-3 font-semibold"
+                  placeholder="Unlimited"
+                />
+              </label>
+              <label className="grid gap-2 text-sm font-bold">
+                Expires
+                <input
+                  type="date"
+                  value={draftCoupon.expiresAt}
+                  onChange={(event) =>
+                    setDraftCoupon((current) => ({ ...current, expiresAt: event.target.value }))
+                  }
+                  className="h-11 rounded-[12px] border-[3px] border-[#120f17] bg-white px-3 font-semibold"
+                />
+              </label>
+              <label className="flex items-end gap-3 text-sm font-bold">
+                <input
+                  type="checkbox"
+                  checked={draftCoupon.active}
+                  onChange={(event) =>
+                    setDraftCoupon((current) => ({ ...current, active: event.target.checked }))
+                  }
+                  className="h-5 w-5 accent-[#5d45b5]"
+                />
+                Active
+              </label>
+
+              <button
+                type="submit"
+                disabled={couponStatus !== "idle"}
+                className="inline-flex h-11 items-center justify-center rounded-[14px] border-4 border-[#120f17] bg-[#ffbd38] px-4 font-black shadow-[4px_4px_0_#120f17] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 lg:col-span-5 lg:w-fit"
+              >
+                Add Coupon
+              </button>
+            </form>
+
+            <div className="grid gap-4">
+              {coupons.map((coupon) => (
+                <CouponEditor
+                  key={coupon.id}
+                  coupon={coupon}
+                  disabled={couponStatus !== "idle"}
+                  onChange={(next) =>
+                    setCoupons((current) =>
+                      current.map((item) => (item.id === next.id ? next : item))
+                    )
+                  }
+                  onSave={saveCoupon}
+                  onDelete={deleteCoupon}
+                />
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </section>
+    </section>
+  );
+}
+
+export default function AdminConversionsPage() {
+  return (
+    <main className="brand-page min-h-screen px-5 py-8 text-[#120f17]">
+      <section className="mx-auto grid max-w-7xl gap-6">
+        <AdminConversionsDashboard />
       </section>
     </main>
+  );
+}
+
+function CouponEditor({
+  coupon,
+  disabled,
+  onChange,
+  onSave,
+  onDelete,
+}: {
+  coupon: ManagedCoupon;
+  disabled: boolean;
+  onChange: (coupon: ManagedCoupon) => void;
+  onSave: (coupon: ManagedCoupon) => void;
+  onDelete: (id: number) => void;
+}) {
+  return (
+    <div className="grid gap-4 rounded-[18px] border-[3px] border-[#120f17] bg-[#efe8ff] p-4 lg:grid-cols-[1.2fr_0.8fr_0.8fr_0.9fr_auto] lg:items-end">
+      <label className="grid gap-2 text-sm font-bold">
+        Code
+        <input
+          value={coupon.code}
+          onChange={(event) => onChange({ ...coupon, code: event.target.value.toUpperCase() })}
+          className="h-11 rounded-[12px] border-[3px] border-[#120f17] bg-white px-3 font-semibold uppercase"
+          disabled={disabled}
+        />
+      </label>
+      <label className="grid gap-2 text-sm font-bold">
+        Discount ($)
+        <input
+          value={coupon.discountDollars}
+          onChange={(event) => onChange({ ...coupon, discountDollars: event.target.value })}
+          className="h-11 rounded-[12px] border-[3px] border-[#120f17] bg-white px-3 font-semibold"
+          disabled={disabled}
+        />
+      </label>
+      <label className="grid gap-2 text-sm font-bold">
+        Max Redemptions
+        <input
+          value={coupon.maxRedemptions ?? ""}
+          onChange={(event) =>
+            onChange({
+              ...coupon,
+              maxRedemptions: event.target.value ? Number(event.target.value) : null,
+            })
+          }
+          className="h-11 rounded-[12px] border-[3px] border-[#120f17] bg-white px-3 font-semibold"
+          disabled={disabled}
+        />
+      </label>
+      <label className="grid gap-2 text-sm font-bold">
+        Expires
+        <input
+          type="date"
+          value={coupon.expiresAt ?? ""}
+          onChange={(event) => onChange({ ...coupon, expiresAt: event.target.value || null })}
+          className="h-11 rounded-[12px] border-[3px] border-[#120f17] bg-white px-3 font-semibold"
+          disabled={disabled}
+        />
+      </label>
+      <div className="grid gap-2">
+        <label className="flex items-center gap-2 text-sm font-bold">
+          <input
+            type="checkbox"
+            checked={coupon.active}
+            onChange={(event) => onChange({ ...coupon, active: event.target.checked })}
+            className="h-5 w-5 accent-[#5d45b5]"
+            disabled={disabled}
+          />
+          Active
+        </label>
+        <p className="text-xs font-bold text-[#3e304d]">
+          Used {formatNumber(coupon.redemptionCount)}
+          {coupon.maxRedemptions ? ` of ${formatNumber(coupon.maxRedemptions)}` : ""}
+        </p>
+      </div>
+
+      <div className="flex flex-wrap gap-3 lg:col-span-5">
+        <button
+          type="button"
+          onClick={() => onSave(coupon)}
+          disabled={disabled}
+          className="inline-flex h-11 items-center justify-center rounded-[14px] border-4 border-[#120f17] bg-[#ffbd38] px-4 font-black shadow-[4px_4px_0_#120f17] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Save Coupon
+        </button>
+        <button
+          type="button"
+          onClick={() => onDelete(coupon.id)}
+          disabled={disabled}
+          className="inline-flex h-11 items-center justify-center rounded-[14px] border-4 border-[#120f17] bg-white px-4 font-black shadow-[4px_4px_0_#120f17] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          Delete Coupon
+        </button>
+      </div>
+    </div>
   );
 }
 

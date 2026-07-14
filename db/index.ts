@@ -130,12 +130,21 @@ async function createSchema() {
     }
   }
 
-  await db
-    .prepare(
-      "INSERT INTO coupons (code, discount_cents, active, max_redemptions, expires_at) VALUES (?, ?, 1, NULL, NULL) ON CONFLICT(code) DO UPDATE SET discount_cents = excluded.discount_cents, active = 1, max_redemptions = NULL, expires_at = NULL"
-    )
-    .bind("LAUNCH25", 1425)
-    .run();
+  const seededCoupons = [
+    ["SUMMERDEAL25", 1425],
+    ["TEST00", 5700],
+  ] as const;
+
+  for (const [code, discountCents] of seededCoupons) {
+    await db
+      .prepare(
+        "INSERT INTO coupons (code, discount_cents, active, max_redemptions, expires_at) VALUES (?, ?, 1, NULL, NULL) ON CONFLICT(code) DO UPDATE SET discount_cents = excluded.discount_cents, active = 1, max_redemptions = NULL, expires_at = NULL"
+      )
+      .bind(code, discountCents)
+      .run();
+  }
+
+  await db.prepare("DELETE FROM coupons WHERE code = ?").bind("LAUNCH25").run();
 
   await db.prepare("CREATE INDEX IF NOT EXISTS leads_created_at_idx ON leads (created_at)").run();
   await db.prepare("CREATE INDEX IF NOT EXISTS leads_visit_id_idx ON leads (visit_id)").run();

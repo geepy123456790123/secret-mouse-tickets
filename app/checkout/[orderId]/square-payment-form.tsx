@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 type SquarePaymentFormProps = {
   orderId: string;
   amountCents: number;
+  initialCouponCode: string | null;
   recipientEmail: string;
   applicationId: string | null;
   locationId: string | null;
@@ -37,15 +38,18 @@ declare global {
 export function SquarePaymentForm({
   orderId,
   amountCents,
+  initialCouponCode,
   recipientEmail,
   applicationId,
   locationId,
   environment,
 }: SquarePaymentFormProps) {
   const cardRef = useRef<SquareCard | null>(null);
+  const [couponCode, setCouponCode] = useState(initialCouponCode ?? "");
   const [status, setStatus] = useState<"loading" | "ready" | "paying" | "paid" | "error">(
     amountCents <= 0 ? "ready" : "loading"
   );
+  const [couponStatus, setCouponStatus] = useState<"idle" | "applying">("idle");
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -144,7 +148,31 @@ export function SquarePaymentForm({
     }
   }
 
-  const isWorking = status === "loading" || status === "paying" || status === "paid";
+  async function applyCoupon() {
+    setCouponStatus("applying");
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/checkout/coupon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, couponCode }),
+      });
+      const payload = (await response.json()) as { ok?: boolean; error?: string };
+
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error ?? "Unable to apply coupon code.");
+      }
+
+      window.location.reload();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Unable to apply coupon code.");
+      setCouponStatus("idle");
+    }
+  }
+
+  const isWorking =
+    status === "loading" || status === "paying" || status === "paid" || couponStatus === "applying";
 
   return (
     <div className="rounded-[18px] border-4 border-[#120f17] bg-[#efe8ff] p-4 shadow-[4px_4px_0_#120f17] sm:rounded-[20px] sm:p-5 sm:shadow-[6px_6px_0_#120f17]">
@@ -159,6 +187,30 @@ export function SquarePaymentForm({
             Secret Mouse Tickets.
           </p>
         </div>
+      </div>
+
+      <div className="mt-4 grid gap-3 sm:mt-5 sm:grid-cols-[1fr_auto] sm:items-end">
+        <label className="grid gap-2 text-sm font-bold">
+          Coupon Code
+          <input
+            value={couponCode}
+            onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
+            className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-white px-3 text-base font-semibold uppercase"
+            placeholder="Optional"
+            disabled={isWorking}
+          />
+        </label>
+        <button
+          type="button"
+          onClick={applyCoupon}
+          disabled={isWorking}
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-[16px] border-4 border-[#120f17] bg-white px-5 font-bold text-[#120f17] shadow-[4px_4px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#120f17] disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {couponStatus === "applying" ? (
+            <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+          ) : null}
+          {couponStatus === "applying" ? "Applying..." : "Apply Code"}
+        </button>
       </div>
 
       {amountCents > 0 && (

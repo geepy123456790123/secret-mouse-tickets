@@ -1,4 +1,5 @@
 import { ensureDatabase, getRawDb } from "@/db";
+import { getOrganicSearchQueries } from "@/lib/google-search-console";
 
 type SummaryRow = {
   total_leads: number;
@@ -274,6 +275,8 @@ export async function GET(request: Request) {
       .bind(startDate, endExclusive)
       .all<SearchTermRow>();
 
+    const organicSearch = await getOrganicSearchQueries(startDate, endDate);
+
     const checkoutAging = await db
       .prepare(
         `SELECT
@@ -356,6 +359,7 @@ export async function GET(request: Request) {
       visitAttribution: (visitAttributionRows.results ?? []).map(normalizeVisitAttribution),
       landingPages: (landingPageRows.results ?? []).map(normalizeLandingPage),
       searchTerms: (searchTermRows.results ?? []).map(normalizeSearchTerm),
+      organicSearch,
       checkoutAging: normalizeCheckoutAging(checkoutAging),
       timings: normalizeTimings(timingRows.results ?? []),
       daily: (dailyRows.results ?? []).map(normalizeDaily),

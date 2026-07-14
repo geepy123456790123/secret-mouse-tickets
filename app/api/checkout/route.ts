@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { ensureDatabase, getRawDb } from "@/db";
-
-const PRICE_CENTS = 5700;
+import { priceForCoupon } from "@/lib/coupons";
+import { getClientIpAddress, sendMetaConversionEvent } from "@/lib/meta-conversions";
 
 type LeadWithEvent = {
   lead_id: string;
@@ -9,6 +9,7 @@ type LeadWithEvent = {
   theme_park_days: number;
   event_id: number;
   event_page_url: string;
+  fbclid: string | null;
 };
 
 export async function POST(request: Request) {
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
 
     const lead = await db
       .prepare(
-        "SELECT leads.id AS lead_id, leads.email AS email, leads.theme_park_days, events.id AS event_id, events.event_page_url AS event_page_url FROM leads JOIN events ON events.id = leads.matched_event_id WHERE leads.id = ? AND leads.status = 'matched' LIMIT 1"
+        "SELECT leads.id AS lead_id, leads.email AS email, leads.theme_park_days, leads.fbclid AS fbclid, events.id AS event_id, events.event_page_url AS event_page_url FROM leads JOIN events ON events.id = leads.matched_event_id WHERE leads.id = ? AND leads.status = 'matched' LIMIT 1"
       )
       .bind(leadId)
       .first<LeadWithEvent>();
@@ -39,6 +40,9 @@ export async function POST(request: Request) {
       .first<{ count: number }>();
     const runtime = env as typeof env & {
       DAILY_PURCHASE_LIMIT?: string;
+      META_CONVERSIONS_API_ACCESS_TOKEN?: string;
+      META_PIXEL_ID?: string;
+      META_TEST_EVENT_CODE?: string;
     };
     const dailyLimit = Number(runtime.DAILY_PURCHASE_LIMIT ?? 25);
 
@@ -68,44 +72,34 @@ export async function POST(request: Request) {
       )
       .run();
 
+    try {
+      await sendMetaConversionEvent({
+        accessToken: runtime.META_CONVERSIONS_API_ACCESS_TOKEN?.trim() || null,
+        pixelId: runtime.META_PIXEL_ID?.trim() || null,
+        testEventCode: runtime.META_TEST_EVENT_CODE?.trim() || null,
+        eventName: "InitiateCheckout",
+        eventId: orderId,
+        eventSourceUrl: checkoutUrl,
+        userData: {
+          email: lead.email,
+          externalId: lead.lead_id,
+          clientIpAddress: getClientIpAddress(request),
+          clientUserAgent: request.headers.get("user-agent"),
+          fbclid: lead.fbclid,
+        },
+        customData: {
+          currency: "USD",
+          value: amountCents / 100,
+          orderId,
+        },
+      });
+    } catch (error) {
+      console.error("Meta InitiateCheckout send failed", error);
+    }
+
     return Response.json({ checkoutUrl });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unexpected error";
     return Response.json({ error: message }, { status: 500 });
   }
-}
-
-async function priceForCoupon(
-  db: ReturnType<typeof getRawDb>,
-  couponCode: string | null
-) {
-  if (!couponCode) {
-    return PRICE_CENTS;
-  }
-
-  const coupon = await db
-    .prepare(
-      "SELECT discount_cents, max_redemptions, redemption_count, expires_at FROM coupons WHERE code = ? AND active = 1 LIMIT 1"
-    )
-    .bind(couponCode)
-    .first<{
-      discount_cents: number;
-      max_redemptions: number | null;
-      redemption_count: number;
-      expires_at: string | null;
-    }>();
-
-  if (!coupon) {
-    throw new Error("Coupon or access code was not found.");
-  }
-
-  if (coupon.max_redemptions !== null && coupon.redemption_count >= coupon.max_redemptions) {
-    throw new Error("Coupon or access code has reached its limit.");
-  }
-
-  if (coupon.expires_at && coupon.expires_at < new Date().toISOString().slice(0, 10)) {
-    throw new Error("Coupon or access code has expired.");
-  }
-
-  return Math.max(0, PRICE_CENTS - coupon.discount_cents);
 }
