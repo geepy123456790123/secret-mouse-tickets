@@ -3,7 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
+  ArrowDown,
   BadgeCheck,
+  CircleCheck,
   Mail,
   Quote,
   Search,
@@ -88,6 +90,30 @@ const testimonials = [
   },
 ];
 
+const priceComparisonExamples = [
+  {
+    date: "July 25",
+    regularLabel: "Disney's Regular Price",
+    eventName: "HCAF Annual Conference & Trade Show",
+    regularItems: [{ label: "1-Day Magic Kingdom Ticket", price: "$184" }],
+    discountedItems: [{ label: "1-Day Magic Kingdom Ticket", price: "$165.60" }],
+  },
+  {
+    date: "October 10",
+    regularLabel: "Disney's Regular Price",
+    eventName: "MCE Conferences October Event",
+    regularItems: [{ label: "1-Day Hollywood Studios Ticket", price: "$199" }],
+    discountedItems: [{ label: "1-Day Hollywood Studios Ticket", price: "$179.10" }],
+  },
+  {
+    date: "December 19",
+    regularLabel: "Disney's Regular Price",
+    eventName: "MER Conferences - Orthopedic Medicine for Primary Care",
+    regularItems: [{ label: "1-Day Magic Kingdom Ticket", price: "$209" }],
+    discountedItems: [{ label: "1-Day Magic Kingdom Ticket", price: "$188.10" }],
+  },
+] as const;
+
 export function HomePageClient() {
   const [form, setForm] = useState(defaultForm);
   const [result, setResult] = useState<EligibilityResult | null>(null);
@@ -165,7 +191,7 @@ export function HomePageClient() {
     <main className="brand-page min-h-screen text-[#120f17]">
       <div className="mx-auto flex w-full max-w-7xl justify-center px-5 pt-5 lg:px-8">
         <div className="w-fit rounded-[18px] border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2.5 text-center text-lg font-black text-[#120f17] shadow-[5px_5px_0_#120f17] sm:px-6 sm:text-xl">
-          Save 25% with code <span className="text-[#5d45b5]">LAUNCH25</span>
+          Save 25% with code <span className="text-[#5d45b5]">SUMMERDEAL25</span>
         </div>
       </div>
 
@@ -186,10 +212,13 @@ export function HomePageClient() {
               We find hidden discount tickets for your Walt Disney World trip.
             </h1>
             <p className="text-lg font-medium leading-8 text-[#3e304d]">
-              A typical family of 4 doing 5 park days saves over $300 on tickets alone, thanks to
-              discounted Disney World ticket sales that aren&apos;t advertised to the public.
+              A typical family of 4 buying park tickets for 5 days can save over $300 on tickets
+              alone, thanks to discounted Disney World ticket sales that aren&apos;t advertised to
+              the public.
             </p>
           </div>
+
+          <DesktopSavingsShowcase />
         </div>
 
         <div className="grid content-center gap-5">
@@ -206,7 +235,7 @@ export function HomePageClient() {
                 <h2 className="text-base font-black">Savings Disney Doesn&apos;t Advertise</h2>
                 <p className="text-sm font-semibold leading-6 text-[#3e304d]">
                   Save up to 20%* when you buy eligible 1-day and multi-day tickets directly
-                  from Disney.
+                  from Disney through our discounted ticket links.
                 </p>
               </div>
             </div>
@@ -237,8 +266,7 @@ export function HomePageClient() {
             <div className="rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] px-4 py-3 text-sm font-bold leading-6 text-[#3e304d]">
               Secret Mouse Tickets finds Disney Group &amp; Convention discount ticket offers that
               match your Walt Disney World visit dates. You do not need to attend a convention or
-              belong to a group to use these offers. You buy your actual theme park tickets
-              directly from Disney.
+              belong to a group to use these offers. Tickets are purchased directly from Disney.
             </div>
           </section>
 
@@ -392,7 +420,7 @@ export function HomePageClient() {
                   className="inline-flex h-12 items-center justify-center gap-2 self-end rounded-[16px] border-4 border-[#120f17] bg-[#8f72f2] px-5 font-bold text-white shadow-[5px_5px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[7px_7px_0_#120f17] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   <ShoppingCart size={18} aria-hidden="true" />
-                  {status === "checkout" ? "Opening..." : "Buy Access For $57"}
+                  {status === "checkout" ? "Opening..." : "Continue to Checkout"}
                 </button>
               </div>
             </section>
@@ -417,7 +445,7 @@ export function HomePageClient() {
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 pt-4 lg:px-8 lg:pb-20">
         <div className="mx-auto max-w-3xl text-center">
           <p className="inline-flex rounded-full border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2 text-sm font-black text-[#120f17] shadow-[4px_4px_0_#120f17]">
-            Real trip savings examples
+            Real Disney World Ticket Savings
           </p>
           <h2 className="mt-5 text-3xl font-black leading-tight text-[#120f17] sm:text-4xl">
             Families use Secret Mouse Tickets to spend less on tickets and more on Disney magic.
@@ -476,8 +504,8 @@ export function HomePageClient() {
               Here&apos;s how Secret Mouse Tickets works.
             </h2>
             <p className="text-sm font-semibold leading-6 text-[#3e304d]">
-              One walks through exactly what you&apos;re paying for. The other breaks down how
-              these discount ticket pages work, and how they can save you money on your trip.
+              Start here for a clear overview of the service, what you&apos;re paying for, and how
+              matching Disney discount pages can help lower your ticket cost.
             </p>
           </div>
           <div className="grid gap-3">
@@ -511,6 +539,155 @@ export function HomePageClient() {
       </div>
       <SupportChat />
     </main>
+  );
+}
+
+function DesktopSavingsShowcase() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isFading, setIsFading] = useState(false);
+
+  useEffect(() => {
+    const fadeTimer = window.setTimeout(() => {
+      setIsFading(true);
+    }, 10400);
+
+    const nextTimer = window.setTimeout(() => {
+      setActiveIndex((current) => (current + 1) % priceComparisonExamples.length);
+      setIsFading(false);
+    }, 11000);
+
+    return () => {
+      window.clearTimeout(fadeTimer);
+      window.clearTimeout(nextTimer);
+    };
+  }, [activeIndex]);
+
+  const activeExample = priceComparisonExamples[activeIndex];
+
+  return (
+    <section className="hidden w-full max-w-xl pt-3 lg:block">
+      <div className="cartoon-panel overflow-hidden rounded-[24px] bg-white/95 p-5">
+        <div
+          className={`flex items-center justify-between gap-4 transition-opacity duration-500 ${
+            isFading ? "opacity-0" : "opacity-100"
+          }`}
+        >
+          <h2 className="text-xl font-black text-[#120f17]">{activeExample.date} Ticket Prices</h2>
+          <div className="flex gap-2">
+            {priceComparisonExamples.map((example, index) => (
+              <span
+                key={example.date}
+                className={`h-2.5 rounded-full border-2 border-[#120f17] transition-all ${
+                  index === activeIndex ? "w-8 bg-[#8f72f2]" : "w-2.5 bg-[#fff7de]"
+                }`}
+                aria-hidden="true"
+              />
+            ))}
+          </div>
+        </div>
+
+        <div
+          className={`transition-opacity duration-500 ${isFading ? "opacity-0" : "opacity-100"}`}
+        >
+          <SavingsComparisonCard key={activeExample.date} example={activeExample} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SavingsComparisonCard({
+  example,
+}: {
+  example: (typeof priceComparisonExamples)[number];
+}) {
+  const [phase, setPhase] = useState<"regular" | "crossed" | "discounted">("regular");
+
+  useEffect(() => {
+    const crossTimer = window.setTimeout(() => {
+      setPhase("crossed");
+    }, 2800);
+
+    const discountTimer = window.setTimeout(() => {
+      setPhase("discounted");
+    }, 5000);
+
+    return () => {
+      window.clearTimeout(crossTimer);
+      window.clearTimeout(discountTimer);
+    };
+  }, []);
+
+  return (
+    <div className="mt-4 grid gap-4">
+      <div className="rounded-[18px] border-[3px] border-[#120f17] bg-[#fffaf0] p-4 text-left">
+        <p className="text-xs font-bold uppercase tracking-wide text-[#6a6170]">
+          {example.regularLabel}
+        </p>
+        <div className="mt-3 grid gap-3">
+          {example.regularItems.map((item) => (
+            <div
+              key={`${example.date}-${item.label}-regular`}
+              className="flex items-end justify-between gap-4 border-b-2 border-dashed border-[#d5cde0] pb-2 last:border-b-0 last:pb-0"
+            >
+              <span className="text-sm font-bold leading-6 text-[#3e304d]">{item.label}</span>
+              <span
+                className={`text-lg font-black text-[#120f17] transition-all duration-700 ${
+                  phase === "regular"
+                    ? "translate-y-0 opacity-100"
+                    : "translate-y-0 opacity-100 line-through decoration-2 decoration-[#ff7f98]"
+                }`}
+              >
+                {item.price}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div
+        className={`flex items-center justify-center gap-2 text-[#5d45b5] transition-all duration-500 ${
+          phase === "discounted"
+            ? "translate-y-0 opacity-100"
+            : "pointer-events-none translate-y-2 opacity-0"
+        }`}
+      >
+        <ArrowDown size={18} strokeWidth={3} aria-hidden="true" />
+        <span className="text-xs font-black uppercase tracking-[0.18em]">
+          Conference/Event Price
+        </span>
+        <ArrowDown size={18} strokeWidth={3} aria-hidden="true" />
+      </div>
+
+      <div
+        className={`rounded-[18px] border-[3px] border-[#120f17] bg-[#efe8ff] p-4 text-left shadow-[4px_4px_0_#120f17] transition-all duration-500 ${
+          phase === "discounted"
+            ? "translate-y-0 opacity-100"
+            : "pointer-events-none translate-y-3 opacity-0"
+        }`}
+      >
+        <p className="text-sm font-black leading-6 text-[#120f17]">{example.eventName}</p>
+        <div className="mt-3 grid gap-3">
+          {example.discountedItems.map((item) => (
+            <div
+              key={`${example.date}-${item.label}-discounted`}
+              className="flex items-end justify-between gap-4 border-b-2 border-dashed border-[#c7bae7] pb-2 last:border-b-0 last:pb-0"
+            >
+              <span className="text-sm font-bold leading-6 text-[#3e304d]">{item.label}</span>
+              <span className="inline-flex items-center gap-2 text-lg font-black text-[#5d45b5]">
+                <CircleCheck
+                  size={18}
+                  strokeWidth={2.6}
+                  className="text-[#8f72f2]"
+                  aria-hidden="true"
+                />
+                {item.price}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
