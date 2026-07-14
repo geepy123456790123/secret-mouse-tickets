@@ -258,8 +258,8 @@ export function HomePageClient() {
                 <h2 className="text-base font-black">Our Guarantee</h2>
                 <p className="text-sm font-semibold leading-6 text-[#3e304d]">
                   Disney&apos;s prices change daily, so we can&apos;t tell you the exact savings ahead
-                  of time. But here&apos;s our guarantee: after our fee, you&apos;ll still come out
-                  ahead of Disney&apos;s regular price, or your money back.
+                  of time. But here&apos;s our guarantee: you&apos;ll still come out ahead of
+                  Disney&apos;s regular price, even after our fee, or your money back.
                 </p>
               </div>
             </div>

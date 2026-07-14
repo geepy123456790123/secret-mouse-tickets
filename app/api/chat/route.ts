@@ -317,7 +317,7 @@ function getFaqReply(input: string) {
   }
 
   if (/\bcheck my dates|how do i check|qualify|eligib/.test(text)) {
-    return "Use the Visit Details form on the homepage to enter your dates, number of park days, guest counts, and email. If your trip matches an eligible Disney offer and the trip is large enough to make sense financially, we'll show you the checkout option right away.";
+    return "Use the Visit Details form on the homepage to enter your dates, number of park days, guest counts, and email. If your trip matches an eligible Disney offer and your group will save money using Secret Mouse Tickets, we'll show you the checkout option right away.";
   }
 
   if (/\bhow much|price|cost|57\b/.test(text)) {
