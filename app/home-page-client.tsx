@@ -224,7 +224,7 @@ export function HomePageClient() {
     <main className="brand-page min-h-screen text-[#120f17]">
       <div className="mx-auto flex w-full max-w-7xl justify-center px-5 pt-5 lg:px-8">
         <div className="w-fit rounded-[18px] border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2.5 text-center text-lg font-black text-[#120f17] shadow-[5px_5px_0_#120f17] sm:px-6 sm:text-xl">
-          25% off our fee through August 31, code{" "}
+          25% off our fee through August 31, use code{" "}
           <span className="text-[#5d45b5]">SUMMERDEAL25</span> at checkout
         </div>
       </div>
