@@ -252,6 +252,11 @@ export function HomePageClient() {
             </p>
           </div>
 
+          <div className="rounded-[18px] border-[3px] border-[#120f17] bg-[#fff7de] px-5 py-4 text-center text-base font-black leading-7 text-[#120f17] shadow-[4px_4px_0_#120f17] sm:text-lg sm:leading-8">
+            Our fee: $57. Our guarantee: you come out ahead of Disney&apos;s regular ticket price
+            after that fee, or you get it back.
+          </div>
+
           <DesktopSavingsShowcase />
         </div>
 
@@ -304,11 +309,6 @@ export function HomePageClient() {
               belong to a group to use these offers. Tickets are purchased directly from Disney.
             </div>
           </section>
-
-          <div className="rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] px-4 py-3 text-center text-sm font-black leading-6 text-[#120f17] shadow-[4px_4px_0_#120f17]">
-            Our fee: $57. Our guarantee: you come out ahead of Disney&apos;s price after that fee,
-            or you get it back.
-          </div>
 
           <form
             onSubmit={submitForm}
