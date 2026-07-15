@@ -80,8 +80,8 @@ export default function HowItWorksPage() {
               large enough to make financial sense.
             </p>
             <p>
-              In practice, that usually means at least three ticket-days total, such as one guest
-              for three park days or three guests for one park day.
+              In practice, that usually means at least four ticket-days total, such as two guests
+              for two park days or four guests for one park day.
             </p>
           </ContentSection>
 

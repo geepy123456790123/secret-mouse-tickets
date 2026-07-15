@@ -132,6 +132,7 @@ export default async function CheckoutPage({
           </div>
 
           <div className="space-y-3 rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] p-3.5 text-[15px] leading-7 font-semibold break-words sm:rounded-[18px] sm:p-4 sm:text-sm sm:leading-6">
+            <p className="font-black text-[#120f17]">{order.info_banner_first}</p>
             <p className="font-bold">
               {isPaid
                 ? isZeroDollarOrder
