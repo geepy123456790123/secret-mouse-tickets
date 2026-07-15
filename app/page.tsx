@@ -29,10 +29,34 @@ const faqSchema = {
   mainEntity: [
     {
       "@type": "Question",
-      name: "What does Secret Mouse Tickets sell?",
+      name: "Is this a scam?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Secret Mouse Tickets helps customers find Disney Group and Convention discount ticket offers that match their Walt Disney World visit dates. After purchase, customers receive a link to the eligible Disney sale page and buy their actual theme park tickets directly from Disney.",
+        text: "No. We never sell tickets or take your Disney payment information. We match your travel dates to a real Disney Group and Convention sale page, then you buy directly from Disney using Disney's own checkout.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Why isn't this offer on Disney's main ticket page?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Disney runs these Group and Convention sale pages separately from the ticket page most guests see. They're tied to specific conventions and events, not hidden, just not linked from where most families start.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Will this affect my park reservations or get my tickets canceled?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "No. Your tickets are standard Disney tickets, bought through Disney's own checkout and covered by Disney's own terms. We never hold or issue your tickets at any point.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What am I actually paying Secret Mouse Tickets for?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "The matching and delivery step. We check your travel dates against active Disney Group and Convention offers and send you the correct sale page link if one matches. Disney sets the ticket price, and you complete the purchase on Disney's site.",
       },
     },
     {
@@ -40,23 +64,15 @@ const faqSchema = {
       name: "Do I need to attend a convention or belong to a group?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "No. Secret Mouse Tickets is built around Disney Group and Convention ticket offers that are open for qualifying public purchase through the linked sale pages. You do not need to attend a convention or belong to a group to use an eligible offer we provide access to.",
+        text: "No. These sale pages allow qualifying public purchase. You don't need to register for a conference or belong to an organization.",
       },
     },
     {
       "@type": "Question",
-      name: "How do I check whether my Disney World trip dates qualify?",
+      name: "What if my dates don't match an offer, or I don't actually come out ahead?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Use the Visit Details form on the homepage to enter your Walt Disney World visit dates, number of park days, guest counts, and email address. If your dates match an eligible Disney discount sale page and the trip size makes sense financially, the site will show you the checkout option.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Do I buy Disney tickets from Secret Mouse Tickets?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "No. Secret Mouse Tickets does not sell Disney tickets directly. Customers pay Secret Mouse Tickets for access to a qualifying Disney discount sale page, then purchase their actual Walt Disney World theme park tickets directly from Disney.",
+        text: "If nothing matches your dates, you're not charged. If we do find a match and you still don't come out ahead of Disney's regular price after our fee, contact us and we'll make it right under our guarantee.",
       },
     },
   ],

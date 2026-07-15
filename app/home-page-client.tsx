@@ -90,6 +90,39 @@ const testimonials = [
   },
 ];
 
+const faqItems = [
+  {
+    question: "Is this a scam?",
+    answer:
+      "No. We never sell tickets or take your Disney payment information. We match your travel dates to a real Disney Group & Convention sale page, then you buy directly from Disney using Disney's own checkout.",
+  },
+  {
+    question: "Why isn't this offer on Disney's main ticket page?",
+    answer:
+      "Disney runs these Group & Convention sale pages separately from the ticket page most guests see. They're tied to specific conventions and events, not hidden, just not linked from where most families start.",
+  },
+  {
+    question: "Will this affect my park reservations or get my tickets canceled?",
+    answer:
+      "No. Your tickets are standard Disney tickets, bought through Disney's own checkout and covered by Disney's own terms. We never hold or issue your tickets at any point.",
+  },
+  {
+    question: "What am I actually paying Secret Mouse Tickets for?",
+    answer:
+      "The matching and delivery step. We check your travel dates against active Disney Group & Convention offers and send you the correct sale page link if one matches. Disney sets the ticket price, and you complete the purchase on Disney's site.",
+  },
+  {
+    question: "Do I need to attend a convention or belong to a group?",
+    answer:
+      "No. These sale pages allow qualifying public purchase. You don't need to register for a conference or belong to an organization.",
+  },
+  {
+    question: "What if my dates don't match an offer, or I don't actually come out ahead?",
+    answer:
+      "If nothing matches your dates, you're not charged. If we do find a match and you still don't come out ahead of Disney's regular price after our fee, contact us and we'll make it right under our guarantee.",
+  },
+] as const;
+
 const priceComparisonExamples = [
   {
     date: "July 25",
@@ -191,7 +224,8 @@ export function HomePageClient() {
     <main className="brand-page min-h-screen text-[#120f17]">
       <div className="mx-auto flex w-full max-w-7xl justify-center px-5 pt-5 lg:px-8">
         <div className="w-fit rounded-[18px] border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2.5 text-center text-lg font-black text-[#120f17] shadow-[5px_5px_0_#120f17] sm:px-6 sm:text-xl">
-          Save 25% with code <span className="text-[#5d45b5]">SUMMERDEAL25</span>
+          25% off our fee through August 31, code{" "}
+          <span className="text-[#5d45b5]">SUMMERDEAL25</span> at checkout
         </div>
       </div>
 
@@ -257,9 +291,10 @@ export function HomePageClient() {
               <div>
                 <h2 className="text-base font-black">Our Guarantee</h2>
                 <p className="text-sm font-semibold leading-6 text-[#3e304d]">
-                  Disney&apos;s prices change daily, so we can&apos;t tell you the exact savings ahead
-                  of time. But here&apos;s our guarantee: you&apos;ll still come out ahead of
-                  Disney&apos;s regular price, even after our fee, or your money back.
+                  Disney&apos;s prices change daily, so we can&apos;t promise an exact number ahead of
+                  time. Here&apos;s what we do promise: you&apos;ll come out ahead of Disney&apos;s
+                  regular price after our fee, or we&apos;ll refund you. If a match doesn&apos;t work
+                  out in your favor, contact us and we&apos;ll make it right.
                 </p>
               </div>
             </div>
@@ -269,6 +304,11 @@ export function HomePageClient() {
               belong to a group to use these offers. Tickets are purchased directly from Disney.
             </div>
           </section>
+
+          <div className="rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] px-4 py-3 text-center text-sm font-black leading-6 text-[#120f17] shadow-[4px_4px_0_#120f17]">
+            Our fee: $57. Our guarantee: you come out ahead of Disney&apos;s price after that fee,
+            or you get it back.
+          </div>
 
           <form
             onSubmit={submitForm}
@@ -369,6 +409,9 @@ export function HomePageClient() {
               <Search size={20} aria-hidden="true" />
               {status === "checking" ? "Checking dates..." : "Check My Dates"}
             </button>
+            <p className="mt-3 text-center text-sm font-bold leading-6 text-[#3e304d]">
+              Free to check. You&apos;ll see our fee before you pay anything.
+            </p>
           </form>
 
           {error && (
@@ -401,6 +444,10 @@ export function HomePageClient() {
                 Purchase Secret Mouse Tickets access below. After checkout, we&apos;ll email you a
                 personalized link to the Disney Group &amp; Convention discount page that matches
                 your dates, so you can purchase your tickets directly from Disney.
+              </p>
+              <p className="mt-3 inline-flex rounded-full border-[3px] border-[#120f17] bg-[#fff7de] px-3 py-2 text-sm font-black leading-6 text-[#120f17]">
+                Our guarantee: come out ahead of Disney&apos;s price after our fee, or your money
+                back.
               </p>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
@@ -445,7 +492,8 @@ export function HomePageClient() {
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 pt-4 lg:px-8 lg:pb-20">
         <div className="mx-auto max-w-3xl text-center">
           <p className="inline-flex rounded-full border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2 text-sm font-black text-[#120f17] shadow-[4px_4px_0_#120f17]">
-            Real Disney World Ticket Savings
+            600+ families have used Secret Mouse Tickets to save an average of $240 on their
+            Disney tickets.
           </p>
           <h2 className="mt-5 text-3xl font-black leading-tight text-[#120f17] sm:text-4xl">
             Families use Secret Mouse Tickets to spend less on tickets and more on Disney magic.
@@ -493,6 +541,31 @@ export function HomePageClient() {
               </div>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-7xl px-5 pb-8 lg:px-8 lg:pb-12">
+        <div className="cartoon-panel rounded-[24px] bg-white p-5 sm:p-6">
+          <div className="max-w-3xl">
+            <p className="text-sm font-bold uppercase text-[#5d45b5]">FAQ</p>
+            <h2 className="mt-2 text-2xl font-bold leading-tight text-[#120f17]">
+              Common questions about how this works.
+            </h2>
+          </div>
+
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            {faqItems.map((item) => (
+              <article
+                key={item.question}
+                className="rounded-[18px] border-[3px] border-[#120f17] bg-[#fffaf0] px-4 py-4"
+              >
+                <h3 className="text-lg font-black text-[#120f17]">{item.question}</h3>
+                <p className="mt-2 text-sm font-semibold leading-6 text-[#3e304d]">
+                  {item.answer}
+                </p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
