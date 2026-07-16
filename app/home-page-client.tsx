@@ -253,8 +253,8 @@ export function HomePageClient() {
           </div>
 
           <div className="rounded-[18px] border-[3px] border-[#120f17] bg-[#fff7de] px-5 py-4 text-center text-base font-black leading-7 text-[#120f17] shadow-[4px_4px_0_#120f17] sm:text-lg sm:leading-8">
-            Our fee: $57. Our guarantee: you come out ahead of Disney&apos;s regular ticket price
-            after that fee, or you get it back.
+            We guarantee you&apos;ll save money using Secret Mouse Tickets over Disney&apos;s
+            regular park ticket prices, or your money back.
           </div>
 
           <DesktopSavingsShowcase />
@@ -296,10 +296,10 @@ export function HomePageClient() {
               <div>
                 <h2 className="text-base font-black">Our Guarantee</h2>
                 <p className="text-sm font-semibold leading-6 text-[#3e304d]">
-                  Disney&apos;s prices change daily, so we can&apos;t promise an exact number ahead of
-                  time. Here&apos;s what we do promise: you&apos;ll come out ahead of Disney&apos;s
-                  regular price after our fee, or we&apos;ll refund you. If a match doesn&apos;t work
-                  out in your favor, contact us and we&apos;ll make it right.
+                  Disney uses dynamic pricing that changes daily, so we can&apos;t promise an exact
+                  percent savings ahead of time. Here&apos;s what we do promise: if you don&apos;t
+                  come out ahead of Disney&apos;s regular price after our fee, contact us and
+                  we&apos;ll make it right.
                 </p>
               </div>
             </div>
