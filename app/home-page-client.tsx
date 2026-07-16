@@ -254,17 +254,13 @@ export function HomePageClient() {
 
           <div className="rounded-[18px] border-[3px] border-[#120f17] bg-[#fff7de] px-5 py-4 text-center text-base font-black leading-7 text-[#120f17] shadow-[4px_4px_0_#120f17] sm:text-lg sm:leading-8">
             We guarantee you&apos;ll save money using Secret Mouse Tickets over Disney&apos;s
-            regular park ticket prices, or your money back.
+            regular park ticket prices - even after our fee - or your money back.
           </div>
 
           <DesktopSavingsShowcase />
         </div>
 
         <div className="grid content-center gap-5">
-          <p className="rounded-full bg-[#fff7de]/90 px-4 py-2 text-center text-sm font-bold text-[#5d45b5]">
-            Group and convention discount pricing, without the group or the convention.
-          </p>
-
           <section className="cartoon-panel grid gap-3 rounded-[22px] bg-white/95 p-5">
             <div className="flex gap-3">
               <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[3px] border-[#120f17] bg-[#ffbd38]">
