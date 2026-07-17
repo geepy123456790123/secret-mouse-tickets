@@ -151,6 +151,14 @@ type ManagedCoupon = {
   createdAt: string;
 };
 
+type ManagedTopBanner = {
+  prefix: string;
+  highlight: string;
+  suffix: string;
+  textColor: string;
+  highlightColor: string;
+};
+
 const defaultWindow = getDefaultWindow();
 
 type AdminConversionsDashboardProps = {
@@ -169,6 +177,9 @@ export function AdminConversionsDashboard({
   const [couponError, setCouponError] = useState("");
   const [couponStatus, setCouponStatus] = useState<"idle" | "loading" | "saving">("idle");
   const [couponOpen, setCouponOpen] = useState(false);
+  const [bannerSettings, setBannerSettings] = useState<ManagedTopBanner | null>(null);
+  const [bannerError, setBannerError] = useState("");
+  const [bannerStatus, setBannerStatus] = useState<"idle" | "loading" | "saving">("idle");
   const [draftCoupon, setDraftCoupon] = useState({
     code: "",
     discountDollars: "",
@@ -317,6 +328,67 @@ export function AdminConversionsDashboard({
     }
   }
 
+  async function loadBannerSettings() {
+    setBannerStatus("loading");
+    setBannerError("");
+
+    try {
+      const response = await fetch("/admin/api/banner");
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        banner?: ManagedTopBanner;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.ok || !payload.banner) {
+        throw new Error(payload.error ?? "Unable to load banner settings.");
+      }
+
+      setBannerSettings(payload.banner);
+    } catch (caught) {
+      setBannerError(
+        caught instanceof Error ? caught.message : "Unable to load banner settings."
+      );
+    } finally {
+      setBannerStatus("idle");
+    }
+  }
+
+  async function saveBannerSettings(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!bannerSettings) {
+      return;
+    }
+
+    setBannerStatus("saving");
+    setBannerError("");
+
+    try {
+      const response = await fetch("/admin/api/banner", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bannerSettings),
+      });
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        banner?: ManagedTopBanner;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.ok || !payload.banner) {
+        throw new Error(payload.error ?? "Unable to save banner settings.");
+      }
+
+      setBannerSettings(payload.banner);
+    } catch (caught) {
+      setBannerError(
+        caught instanceof Error ? caught.message : "Unable to save banner settings."
+      );
+    } finally {
+      setBannerStatus("idle");
+    }
+  }
+
   useEffect(() => {
     let cancelled = false;
 
@@ -341,6 +413,41 @@ export function AdminConversionsDashboard({
       } catch (caught) {
         if (!cancelled) {
           setCouponError(caught instanceof Error ? caught.message : "Unable to load coupons.");
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const response = await fetch("/admin/api/banner");
+        const payload = (await response.json()) as {
+          ok?: boolean;
+          banner?: ManagedTopBanner;
+          error?: string;
+        };
+
+        if (cancelled) {
+          return;
+        }
+
+        if (!response.ok || !payload.ok || !payload.banner) {
+          throw new Error(payload.error ?? "Unable to load banner settings.");
+        }
+
+        setBannerSettings(payload.banner);
+      } catch (caught) {
+        if (!cancelled) {
+          setBannerError(
+            caught instanceof Error ? caught.message : "Unable to load banner settings."
+          );
         }
       }
     })();
@@ -528,7 +635,7 @@ export function AdminConversionsDashboard({
               </Panel>
             </section>
 
-            <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+            <section className="grid gap-6">
               <Panel title="Traffic Sources" subtitle="Visits, lead capture, and paid orders by acquisition source.">
                 <DataTable
                   columns={["Source", "Medium", "Campaign", "Referrer", "Visits", "Lead Rate", "Paid Rate", "Revenue"]}
@@ -543,21 +650,6 @@ export function AdminConversionsDashboard({
                     formatMoney(item.revenueCents),
                   ])}
                   empty="No visit attribution in this window."
-                />
-              </Panel>
-
-              <Panel title="Landing Pages" subtitle="Which entry pages turn visits into leads.">
-                <DataTable
-                  columns={["Landing Page", "Visits", "Leads", "Lead Rate", "Paid", "Revenue"]}
-                  rows={data.landingPages.map((item) => [
-                    item.landingPage,
-                    formatNumber(item.visits),
-                    formatNumber(item.leads),
-                    formatPercent(item.leadRate),
-                    formatNumber(item.paidOrders),
-                    formatMoney(item.revenueCents),
-                  ])}
-                  empty="No landing-page data in this window."
                 />
               </Panel>
             </section>
@@ -668,6 +760,153 @@ export function AdminConversionsDashboard({
             </p>
           </section>
       )}
+
+      <section className="cartoon-panel overflow-hidden rounded-[24px] bg-white">
+        <div className="border-b-4 border-[#120f17] px-5 py-4">
+          <h2 className="text-2xl font-black">Top Banner</h2>
+          <p className="mt-1 text-sm font-semibold leading-6 text-[#3e304d]">
+            Edit the homepage promo banner text and choose the main and highlighted text colors.
+          </p>
+        </div>
+
+        <div className="grid gap-5 p-5 sm:p-6">
+          {bannerError ? (
+            <p className="rounded-[16px] border-[3px] border-[#120f17] bg-[#ffdfe7] px-4 py-3 text-sm font-bold">
+              {bannerError}
+            </p>
+          ) : null}
+
+          {bannerStatus === "loading" && !bannerSettings ? (
+            <p className="text-sm font-black text-[#5d45b5]">Loading banner settings...</p>
+          ) : null}
+
+          {bannerSettings ? (
+            <>
+              <div
+                className="w-fit max-w-full rounded-[18px] border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2.5 text-center text-lg font-black shadow-[5px_5px_0_#120f17] sm:px-6 sm:text-xl"
+                style={{ color: bannerSettings.textColor }}
+              >
+                {bannerSettings.prefix}{" "}
+                <span style={{ color: bannerSettings.highlightColor }}>
+                  {bannerSettings.highlight}
+                </span>{" "}
+                {bannerSettings.suffix}
+              </div>
+
+              <form
+                onSubmit={saveBannerSettings}
+                className="grid gap-4 rounded-[18px] border-[3px] border-[#120f17] bg-[#fffaf0] p-4 lg:grid-cols-2"
+              >
+                <label className="grid gap-2 text-sm font-bold lg:col-span-2">
+                  Text Before Highlight
+                  <input
+                    value={bannerSettings.prefix}
+                    onChange={(event) =>
+                      setBannerSettings((current) =>
+                        current ? { ...current, prefix: event.target.value } : current
+                      )
+                    }
+                    className="h-11 rounded-[12px] border-[3px] border-[#120f17] bg-white px-3 font-semibold"
+                    disabled={bannerStatus !== "idle"}
+                  />
+                </label>
+                <label className="grid gap-2 text-sm font-bold">
+                  Highlighted Text
+                  <input
+                    value={bannerSettings.highlight}
+                    onChange={(event) =>
+                      setBannerSettings((current) =>
+                        current ? { ...current, highlight: event.target.value } : current
+                      )
+                    }
+                    className="h-11 rounded-[12px] border-[3px] border-[#120f17] bg-white px-3 font-semibold"
+                    disabled={bannerStatus !== "idle"}
+                  />
+                </label>
+                <label className="grid gap-2 text-sm font-bold">
+                  Text After Highlight
+                  <input
+                    value={bannerSettings.suffix}
+                    onChange={(event) =>
+                      setBannerSettings((current) =>
+                        current ? { ...current, suffix: event.target.value } : current
+                      )
+                    }
+                    className="h-11 rounded-[12px] border-[3px] border-[#120f17] bg-white px-3 font-semibold"
+                    disabled={bannerStatus !== "idle"}
+                  />
+                </label>
+                <label className="grid gap-2 text-sm font-bold">
+                  Main Text Color
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={bannerSettings.textColor}
+                      onChange={(event) =>
+                        setBannerSettings((current) =>
+                          current ? { ...current, textColor: event.target.value } : current
+                        )
+                      }
+                      className="h-11 w-14 rounded-[12px] border-[3px] border-[#120f17] bg-white px-1"
+                      disabled={bannerStatus !== "idle"}
+                    />
+                    <input
+                      value={bannerSettings.textColor}
+                      onChange={(event) =>
+                        setBannerSettings((current) =>
+                          current ? { ...current, textColor: event.target.value } : current
+                        )
+                      }
+                      className="h-11 flex-1 rounded-[12px] border-[3px] border-[#120f17] bg-white px-3 font-semibold uppercase"
+                      disabled={bannerStatus !== "idle"}
+                    />
+                  </div>
+                </label>
+                <label className="grid gap-2 text-sm font-bold">
+                  Highlight Color
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={bannerSettings.highlightColor}
+                      onChange={(event) =>
+                        setBannerSettings((current) =>
+                          current
+                            ? { ...current, highlightColor: event.target.value }
+                            : current
+                        )
+                      }
+                      className="h-11 w-14 rounded-[12px] border-[3px] border-[#120f17] bg-white px-1"
+                      disabled={bannerStatus !== "idle"}
+                    />
+                    <input
+                      value={bannerSettings.highlightColor}
+                      onChange={(event) =>
+                        setBannerSettings((current) =>
+                          current
+                            ? { ...current, highlightColor: event.target.value }
+                            : current
+                        )
+                      }
+                      className="h-11 flex-1 rounded-[12px] border-[3px] border-[#120f17] bg-white px-3 font-semibold uppercase"
+                      disabled={bannerStatus !== "idle"}
+                    />
+                  </div>
+                </label>
+
+                <div className="lg:col-span-2">
+                  <button
+                    type="submit"
+                    disabled={bannerStatus !== "idle"}
+                    className="inline-flex h-11 items-center justify-center rounded-[14px] border-4 border-[#120f17] bg-[#ffbd38] px-4 font-black shadow-[4px_4px_0_#120f17] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {bannerStatus === "saving" ? "Saving..." : "Save Banner"}
+                  </button>
+                </div>
+              </form>
+            </>
+          ) : null}
+        </div>
+      </section>
 
       <section className="cartoon-panel overflow-hidden rounded-[24px] bg-white">
         <button

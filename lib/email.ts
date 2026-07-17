@@ -10,6 +10,14 @@ type ConfirmationEmailInput = {
   origin: string;
 };
 
+type CheckoutReminderEmailInput = {
+  recipientEmail: string;
+  checkoutUrl: string;
+  event: EventRecord;
+  themeParkDays: number;
+  couponCode: string;
+};
+
 export function buildConfirmationEmail(input: ConfirmationEmailInput) {
   const multiDayBonusText =
     input.themeParkDays > 1
@@ -62,6 +70,65 @@ www.secretmousetickets.com`;
 
   return {
     subject: "Secret Mouse Tickets Confirmation",
+    bodyText,
+    html,
+  };
+}
+
+export function buildCheckoutReminderEmail(input: CheckoutReminderEmailInput) {
+  const multiDayBonusText =
+    input.themeParkDays > 1
+      ? "\n\nMulti-day Disney tickets purchased through the matching offer also include an extra Water Park Fun & More Visit pass."
+      : "";
+
+  const bodyText = `Still planning your Disney trip?
+
+We found a Secret Mouse Tickets match for your Walt Disney World dates: ${input.event.info_banner_first}.
+
+To help you finish checkout, we've applied 25% off our fee with coupon code ${input.couponCode}.
+
+Complete your purchase here:
+${input.checkoutUrl}
+
+If you complete checkout, we'll email your Disney Group & Convention discount ticket link right away.
+
+Tickets purchased through the matching Disney offer are valid from ${formatDate(input.event.valid_start_date)} through ${formatDate(input.event.valid_end_date)}.${multiDayBonusText}
+
+Secret Mouse Tickets
+hello@secretmousetickets.com
+www.secretmousetickets.com`;
+
+  const html = `<div style="background:#f5edff;padding:24px;font-family:Arial,sans-serif;color:#120f17">
+    <div style="max-width:640px;margin:0 auto;background:#ffffff;border:4px solid #120f17;border-radius:20px;box-shadow:8px 8px 0 #120f17;overflow:hidden">
+      <div style="padding:28px 28px 8px">
+        <div style="display:inline-block;background:#fff7de;border:3px solid #120f17;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:0.02em;color:#5d45b5;text-transform:uppercase">Complete your checkout</div>
+        <h1 style="margin:16px 0 10px;font-size:28px;line-height:1.15">Your Disney ticket match is still waiting</h1>
+        <p style="margin:0 0 20px;font-size:16px;line-height:1.6">We found a Secret Mouse Tickets match for your Walt Disney World dates, and we've applied <strong>25% off our fee</strong> to help you finish checkout.</p>
+      </div>
+      <div style="padding:0 28px 28px">
+        <div style="border:3px solid #120f17;border-radius:18px;background:#efe8ff;padding:18px;margin-bottom:18px">
+          <p style="margin:0 0 8px;font-size:13px;font-weight:700;text-transform:uppercase;color:#5d45b5">Matched offer</p>
+          <p style="margin:0;font-size:18px;line-height:1.5;font-weight:700">${escapeHtml(input.event.info_banner_first)}</p>
+        </div>
+        <div style="border:3px solid #120f17;border-radius:18px;background:#fff7de;padding:18px;margin-bottom:18px">
+          <p style="margin:0 0 8px;font-size:13px;font-weight:700;text-transform:uppercase;color:#5d45b5">Applied coupon</p>
+          <p style="margin:0;font-size:28px;line-height:1.1;font-weight:800">${escapeHtml(input.couponCode)}</p>
+        </div>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.7">Complete your purchase here and we'll email your Disney Group &amp; Convention discount ticket link right away:</p>
+        <p style="margin:0 0 18px"><a href="${escapeHtml(input.checkoutUrl)}" style="display:inline-block;background:#ffbd38;border:3px solid #120f17;border-radius:16px;padding:14px 18px;font-size:16px;font-weight:800;color:#120f17;text-decoration:none">Return to checkout</a></p>
+        <p style="margin:0 0 14px;font-size:15px;line-height:1.7">Tickets purchased through the matching Disney offer are valid from <strong>${formatDate(input.event.valid_start_date)}</strong> through <strong>${formatDate(input.event.valid_end_date)}</strong>.</p>
+        ${
+          input.themeParkDays > 1
+            ? '<p style="margin:0 0 14px;font-size:15px;line-height:1.7">Multi-day Disney tickets purchased through the matching offer also include an extra Water Park Fun &amp; More Visit pass.</p>'
+            : ""
+        }
+        <p style="margin:0;font-size:15px;line-height:1.7">Questions? Contact <a href="mailto:hello@secretmousetickets.com" style="color:#5d45b5;text-decoration:underline">hello@secretmousetickets.com</a>.</p>
+      </div>
+    </div>
+  </div>`;
+
+  return {
+    subject: "Complete your Secret Mouse Tickets checkout",
     bodyText,
     html,
   };

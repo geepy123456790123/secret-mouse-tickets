@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { HomePageClient } from "./home-page-client";
+import { getTopBannerSettings } from "@/lib/site-settings";
 
 const siteUrl = "https://secretmousetickets.com";
 
@@ -78,14 +79,16 @@ const faqSchema = {
   ],
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const topBanner = await getTopBannerSettings();
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <HomePageClient />
+      <HomePageClient topBanner={topBanner} />
     </>
   );
 }

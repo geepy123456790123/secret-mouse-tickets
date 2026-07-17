@@ -46,7 +46,7 @@ async function createSchema() {
       "CREATE TABLE IF NOT EXISTS coupons (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT NOT NULL UNIQUE, discount_cents INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1, max_redemptions INTEGER, redemption_count INTEGER NOT NULL DEFAULT 0, expires_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
     ),
     db.prepare(
-      "CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, lead_id TEXT NOT NULL, event_id INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'pending', amount_cents INTEGER NOT NULL DEFAULT 5700, currency TEXT NOT NULL DEFAULT 'USD', confirmation_number TEXT, coupon_code TEXT, square_payment_link_id TEXT, square_order_id TEXT, square_payment_id TEXT, square_payment_status TEXT, checkout_url TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, paid_at TEXT)"
+      "CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, lead_id TEXT NOT NULL, event_id INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'pending', amount_cents INTEGER NOT NULL DEFAULT 5700, currency TEXT NOT NULL DEFAULT 'USD', confirmation_number TEXT, coupon_code TEXT, square_payment_link_id TEXT, square_order_id TEXT, square_payment_id TEXT, square_payment_status TEXT, checkout_url TEXT, checkout_reminder_sent_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, paid_at TEXT)"
     ),
     db.prepare(
       "CREATE INDEX IF NOT EXISTS orders_paid_at_idx ON orders (paid_at)"
@@ -59,6 +59,9 @@ async function createSchema() {
     ),
     db.prepare(
       "CREATE TABLE IF NOT EXISTS scrape_run_items (id INTEGER PRIMARY KEY AUTOINCREMENT, scrape_run_id INTEGER NOT NULL, url TEXT NOT NULL, status TEXT NOT NULL, reason TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
+    ),
+    db.prepare(
+      "CREATE TABLE IF NOT EXISTS site_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
     ),
   ]);
 
@@ -122,6 +125,7 @@ async function createSchema() {
   const squareColumns = [
     ["square_payment_id", "TEXT"],
     ["square_payment_status", "TEXT"],
+    ["checkout_reminder_sent_at", "TEXT"],
   ] as const;
 
   for (const [name, type] of squareColumns) {
@@ -132,6 +136,7 @@ async function createSchema() {
 
   const seededCoupons = [
     ["SUMMERDEAL25", 1425],
+    ["COMEBACK25", 1425],
     ["TEST00", 5700],
   ] as const;
 
@@ -158,4 +163,19 @@ async function createSchema() {
   await db.prepare("CREATE INDEX IF NOT EXISTS visits_session_id_idx ON visits (session_id)").run();
   await db.prepare("CREATE INDEX IF NOT EXISTS visits_visitor_id_idx ON visits (visitor_id)").run();
   await db.prepare("CREATE INDEX IF NOT EXISTS visits_source_idx ON visits (utm_source, utm_campaign)").run();
+
+  const siteSettingSeeds = [
+    ["top_banner_prefix", "25% off our fee through August 31, use code"],
+    ["top_banner_highlight", "SUMMERDEAL25"],
+    ["top_banner_suffix", "at checkout"],
+    ["top_banner_text_color", "#120f17"],
+    ["top_banner_highlight_color", "#5d45b5"],
+  ] as const;
+
+  for (const [key, value] of siteSettingSeeds) {
+    await db
+      .prepare("INSERT OR IGNORE INTO site_settings (key, value) VALUES (?, ?)")
+      .bind(key, value)
+      .run();
+  }
 }

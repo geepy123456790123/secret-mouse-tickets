@@ -18,6 +18,7 @@ import {
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { formatDate } from "@/lib/dates";
 import { SiteFooter } from "@/components/site-footer";
+import type { TopBannerSettings } from "@/lib/site-settings";
 import { SupportChat } from "./support-chat";
 
 type EventSummary = {
@@ -147,7 +148,7 @@ const priceComparisonExamples = [
   },
 ] as const;
 
-export function HomePageClient() {
+export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) {
   const [form, setForm] = useState(defaultForm);
   const [result, setResult] = useState<EligibilityResult | null>(null);
   const [status, setStatus] = useState<"idle" | "checking" | "checkout">("idle");
@@ -223,9 +224,13 @@ export function HomePageClient() {
   return (
     <main className="brand-page min-h-screen text-[#120f17]">
       <div className="mx-auto flex w-full max-w-7xl justify-center px-5 pt-5 lg:px-8">
-        <div className="w-fit rounded-[18px] border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2.5 text-center text-lg font-black text-[#120f17] shadow-[5px_5px_0_#120f17] sm:px-6 sm:text-xl">
-          25% off our fee through August 31, use code{" "}
-          <span className="text-[#5d45b5]">SUMMERDEAL25</span> at checkout
+        <div
+          className="w-fit rounded-[18px] border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2.5 text-center text-lg font-black shadow-[5px_5px_0_#120f17] sm:px-6 sm:text-xl"
+          style={{ color: topBanner.textColor }}
+        >
+          {topBanner.prefix}{" "}
+          <span style={{ color: topBanner.highlightColor }}>{topBanner.highlight}</span>{" "}
+          {topBanner.suffix}
         </div>
       </div>
 

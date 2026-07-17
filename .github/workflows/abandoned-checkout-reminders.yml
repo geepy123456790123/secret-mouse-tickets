@@ -1,0 +1,24 @@
+name: Abandoned Checkout Reminders
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: abandoned-checkout-reminders
+  cancel-in-progress: false
+
+jobs:
+  reminders:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Send pending checkout reminders
+        env:
+          ADMIN_INGEST_TOKEN: ${{ secrets.ADMIN_INGEST_TOKEN }}
+        run: |
+          curl --fail --show-error --silent \
+            -X POST \
+            -H "Authorization: Bearer ${ADMIN_INGEST_TOKEN}" \
+            https://secret-mouse-tickets.drgrant.workers.dev/api/admin/checkout-reminders

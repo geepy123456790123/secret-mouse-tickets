@@ -111,6 +111,7 @@ export const orders = sqliteTable(
     squarePaymentId: text("square_payment_id"),
     squarePaymentStatus: text("square_payment_status"),
     checkoutUrl: text("checkout_url"),
+    checkoutReminderSentAt: text("checkout_reminder_sent_at"),
     createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
     paidAt: text("paid_at"),
   },
@@ -163,3 +164,9 @@ export const scrapeRunItems = sqliteTable(
     index("scrape_run_items_status_idx").on(table.status),
   ]
 );
+
+export const siteSettings = sqliteTable("site_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+});

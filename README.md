@@ -79,3 +79,17 @@ Required GitHub Actions secret:
 - `ADMIN_INGEST_TOKEN`
 
 This external job avoids Cloudflare's per-invocation subrequest cap while still using the live production search and ingest endpoints. The public site domain is protected by Cloudflare Access, so the unattended workflow targets the Worker hostname directly.
+
+## Abandoned checkout reminders
+
+Pending checkout reminders now run outside the Worker in GitHub Actions:
+
+- Workflow: `.github/workflows/abandoned-checkout-reminders.yml`
+- Schedule: every 15 minutes
+- Reminder timing: one reminder per pending order after it has been pending for at least 2 hours
+
+The workflow calls:
+
+- `https://secret-mouse-tickets.drgrant.workers.dev/api/admin/checkout-reminders`
+
+The reminder flow applies coupon code `COMEBACK25` to qualifying pending orders before sending the email so the discounted price is already reflected when the customer returns to checkout.
