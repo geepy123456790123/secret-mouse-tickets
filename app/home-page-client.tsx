@@ -441,7 +441,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
                 Matched event: {result.event.infoBannerFirst}
               </p>
               <p className="mt-3 text-sm font-semibold leading-6 text-[#3e304d]">
-                Valid for {form.themeParkDays} days from {formatDate(result.event.validStartDate)} to{" "}
+                Tickets valid from {formatDate(result.event.validStartDate)} to{" "}
                 {formatDate(result.event.validEndDate)}.
               </p>
               <p className="mt-3 rounded-[16px] border-[3px] border-[#120f17] bg-white px-3 py-2 text-sm font-bold leading-6 text-[#3e304d]">
