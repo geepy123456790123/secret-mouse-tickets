@@ -36,6 +36,7 @@ Copy `.env.example` to `.env.local` for local work. In production, configure the
 - `SERPER_API_KEY`
 - `GOOGLE_SEARCH_URL`
 - `SEARCH_NORMALIZER_PROVIDER`
+- `TRUSTPILOT_REVIEW_URL` (optional, defaults to `https://www.trustpilot.com/evaluate/secretmousetickets.com`)
 
 When Square credentials are absent, checkout uses a local demo confirmation page. When Square credentials are present, `/api/checkout` creates a Square hosted checkout link.
 
@@ -93,3 +94,17 @@ The workflow calls:
 - `https://secret-mouse-tickets.drgrant.workers.dev/api/admin/checkout-reminders`
 
 The reminder flow applies coupon code `COMEBACK25` to qualifying pending orders before sending the email so the discounted price is already reflected when the customer returns to checkout.
+
+## Trustpilot review requests
+
+Completed orders can now trigger a follow-up review request email:
+
+- Workflow: `.github/workflows/trustpilot-review-requests.yml`
+- Schedule: every 30 minutes
+- Reminder timing: one review request per paid order after it has been paid for at least 4 hours
+
+The workflow calls:
+
+- `https://secret-mouse-tickets.drgrant.workers.dev/api/admin/trustpilot-review-requests`
+
+The review email sends customers to `TRUSTPILOT_REVIEW_URL`, which defaults to the public Trustpilot page for `secretmousetickets.com`.

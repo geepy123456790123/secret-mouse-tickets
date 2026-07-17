@@ -1,0 +1,24 @@
+name: Trustpilot Review Requests
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: trustpilot-review-requests
+  cancel-in-progress: false
+
+jobs:
+  review-requests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Send Trustpilot review requests
+        env:
+          ADMIN_INGEST_TOKEN: ${{ secrets.ADMIN_INGEST_TOKEN }}
+        run: |
+          curl --fail --show-error --silent \
+            -X POST \
+            -H "Authorization: Bearer ${ADMIN_INGEST_TOKEN}" \
+            https://secret-mouse-tickets.drgrant.workers.dev/api/admin/trustpilot-review-requests

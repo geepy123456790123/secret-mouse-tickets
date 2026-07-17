@@ -19,6 +19,11 @@ type CheckoutReminderEmailInput = {
   stage: "2h" | "24h";
 };
 
+type TrustpilotReviewEmailInput = {
+  recipientEmail: string;
+  reviewUrl: string;
+};
+
 export function buildConfirmationEmail(input: ConfirmationEmailInput) {
   const multiDayBonusText =
     input.themeParkDays > 1
@@ -153,6 +158,46 @@ www.secretmousetickets.com`;
 
   return {
     subject: stageCopy.subject,
+    bodyText,
+    html,
+  };
+}
+
+export function buildTrustpilotReviewEmail(input: TrustpilotReviewEmailInput) {
+  const bodyText = `Thanks again for using Secret Mouse Tickets.
+
+If we helped you save money on your Disney tickets, would you mind leaving a quick Trustpilot review?
+
+Leave a review here:
+${input.reviewUrl}
+
+Your feedback helps other families feel confident about checking their dates before they buy.
+
+Questions or need help with your order?
+hello@secretmousetickets.com
+
+Secret Mouse Tickets
+www.secretmousetickets.com`;
+
+  const html = `<div style="background:#f5edff;padding:24px;font-family:Arial,sans-serif;color:#120f17">
+    <div style="max-width:640px;margin:0 auto;background:#ffffff;border:4px solid #120f17;border-radius:20px;box-shadow:8px 8px 0 #120f17;overflow:hidden">
+      <div style="padding:28px 28px 8px">
+        <div style="display:inline-block;background:#efe8ff;border:3px solid #120f17;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:0.02em;color:#5d45b5;text-transform:uppercase">Quick favor</div>
+        <h1 style="margin:16px 0 10px;font-size:28px;line-height:1.15">How did we do?</h1>
+        <p style="margin:0 0 20px;font-size:16px;line-height:1.6">If Secret Mouse Tickets helped with your Disney trip, we'd really appreciate a quick Trustpilot review.</p>
+      </div>
+      <div style="padding:0 28px 28px">
+        <div style="border:3px solid #120f17;border-radius:18px;background:#fff7de;padding:18px;margin-bottom:18px">
+          <p style="margin:0;font-size:16px;line-height:1.7">Your feedback helps other families feel more confident about checking their dates and deciding whether Secret Mouse Tickets is a fit for their trip.</p>
+        </div>
+        <p style="margin:0 0 18px"><a href="${escapeHtml(input.reviewUrl)}" style="display:inline-block;background:#ffbd38;border:3px solid #120f17;border-radius:16px;padding:14px 18px;font-size:16px;font-weight:800;color:#120f17;text-decoration:none">Leave a Trustpilot review</a></p>
+        <p style="margin:0;font-size:15px;line-height:1.7">Need anything else with your order? Email <a href="mailto:hello@secretmousetickets.com" style="color:#5d45b5;text-decoration:underline">hello@secretmousetickets.com</a>.</p>
+      </div>
+    </div>
+  </div>`;
+
+  return {
+    subject: "How was your Secret Mouse Tickets experience?",
     bodyText,
     html,
   };
