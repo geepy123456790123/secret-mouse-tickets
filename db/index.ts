@@ -46,7 +46,7 @@ async function createSchema() {
       "CREATE TABLE IF NOT EXISTS coupons (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT NOT NULL UNIQUE, discount_cents INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1, max_redemptions INTEGER, redemption_count INTEGER NOT NULL DEFAULT 0, expires_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
     ),
     db.prepare(
-      "CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, lead_id TEXT NOT NULL, event_id INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'pending', amount_cents INTEGER NOT NULL DEFAULT 5700, currency TEXT NOT NULL DEFAULT 'USD', confirmation_number TEXT, coupon_code TEXT, square_payment_link_id TEXT, square_order_id TEXT, square_payment_id TEXT, square_payment_status TEXT, checkout_url TEXT, checkout_reminder_sent_at TEXT, checkout_reminder_followup_sent_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, paid_at TEXT)"
+      "CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, lead_id TEXT NOT NULL, event_id INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'pending', amount_cents INTEGER NOT NULL DEFAULT 3900, currency TEXT NOT NULL DEFAULT 'USD', confirmation_number TEXT, coupon_code TEXT, square_payment_link_id TEXT, square_order_id TEXT, square_payment_id TEXT, square_payment_status TEXT, checkout_url TEXT, checkout_reminder_sent_at TEXT, checkout_reminder_followup_sent_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, paid_at TEXT)"
     ),
     db.prepare(
       "CREATE INDEX IF NOT EXISTS orders_paid_at_idx ON orders (paid_at)"
@@ -146,9 +146,9 @@ async function createSchema() {
   }
 
   const seededCoupons = [
-    ["SUMMERDEAL25", 1425],
-    ["COMEBACK25", 1425],
-    ["TEST00", 5700],
+    ["SUMMERDEAL25", 975],
+    ["COMEBACK25", 975],
+    ["TEST00", 3900],
   ] as const;
 
   for (const [code, discountCents] of seededCoupons) {

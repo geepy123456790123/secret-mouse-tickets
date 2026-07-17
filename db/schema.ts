@@ -102,7 +102,7 @@ export const orders = sqliteTable(
     leadId: text("lead_id").notNull(),
     eventId: integer("event_id").notNull(),
     status: text("status").notNull().default("pending"),
-    amountCents: integer("amount_cents").notNull().default(5700),
+    amountCents: integer("amount_cents").notNull().default(3900),
     currency: text("currency").notNull().default("USD"),
     confirmationNumber: text("confirmation_number"),
     couponCode: text("coupon_code"),

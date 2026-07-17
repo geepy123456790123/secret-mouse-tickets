@@ -44,7 +44,7 @@ Answer only questions about Secret Mouse Tickets, Walt Disney World discount tic
 
 Core facts:
 - Secret Mouse Tickets is an independent service and is not affiliated with Disney.
-- Secret Mouse Tickets sells access for $57 to eligible Walt Disney World discount ticket sale pages.
+- Secret Mouse Tickets sells access for $39 to eligible Walt Disney World discount ticket sale pages.
 - Customers buy actual theme park tickets directly from Disney through the link sent after purchase.
 - The site tracks group and convention Walt Disney World ticket discounts that are not broadly advertised to the public.
 - The form checks visit start date, visit end date, number of park days, guest counts, and email.
@@ -320,8 +320,8 @@ function getFaqReply(input: string) {
     return "Use the Visit Details form on the homepage to enter your dates, number of park days, guest counts, and email. If your trip matches an eligible Disney offer and your group will save money using Secret Mouse Tickets, we'll show you the checkout option right away.";
   }
 
-  if (/\bhow much|price|cost|57\b/.test(text)) {
-    return "Secret Mouse Tickets access is $57 before any coupon code. That fee covers our matching service and delivery of the eligible Disney discount link, while your actual theme park tickets are purchased separately from Disney.";
+  if (/\bhow much|price|cost|39|57\b/.test(text)) {
+    return "Secret Mouse Tickets access is $39 before any coupon code. That fee covers our matching service and delivery of the eligible Disney discount link, while your actual theme park tickets are purchased separately from Disney.";
   }
 
   if (/\brefund|money back|guarantee|come out ahead|save money\b/.test(text)) {

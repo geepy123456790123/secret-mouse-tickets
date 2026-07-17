@@ -79,7 +79,7 @@ const testimonials = [
     name: "Jason P.",
     initials: "JP",
     amount: "$312",
-    text: "I had no idea these group and convention rates were out there. Our dates matched, the fee was $57, and our Disney ticket savings were over $300.",
+    text: "I had no idea these group and convention rates were out there. Our dates matched, the fee was $39, and our Disney ticket savings were over $300.",
     bg: "bg-[#8f72f2]",
   },
   {
