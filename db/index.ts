@@ -46,13 +46,13 @@ async function createSchema() {
       "CREATE TABLE IF NOT EXISTS coupons (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT NOT NULL UNIQUE, discount_cents INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1, max_redemptions INTEGER, redemption_count INTEGER NOT NULL DEFAULT 0, expires_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
     ),
     db.prepare(
-      "CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, lead_id TEXT NOT NULL, event_id INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'pending', amount_cents INTEGER NOT NULL DEFAULT 5700, currency TEXT NOT NULL DEFAULT 'USD', confirmation_number TEXT, coupon_code TEXT, square_payment_link_id TEXT, square_order_id TEXT, square_payment_id TEXT, square_payment_status TEXT, checkout_url TEXT, checkout_reminder_sent_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, paid_at TEXT)"
+      "CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, lead_id TEXT NOT NULL, event_id INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'pending', amount_cents INTEGER NOT NULL DEFAULT 5700, currency TEXT NOT NULL DEFAULT 'USD', confirmation_number TEXT, coupon_code TEXT, square_payment_link_id TEXT, square_order_id TEXT, square_payment_id TEXT, square_payment_status TEXT, checkout_url TEXT, checkout_reminder_sent_at TEXT, checkout_reminder_followup_sent_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, paid_at TEXT)"
     ),
     db.prepare(
       "CREATE INDEX IF NOT EXISTS orders_paid_at_idx ON orders (paid_at)"
     ),
     db.prepare(
-      "CREATE TABLE IF NOT EXISTS email_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, order_id TEXT NOT NULL, recipient_email TEXT NOT NULL, subject TEXT NOT NULL, body_text TEXT NOT NULL, provider_message_id TEXT, status TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
+      "CREATE TABLE IF NOT EXISTS email_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, order_id TEXT NOT NULL, recipient_email TEXT NOT NULL, template TEXT NOT NULL DEFAULT 'transactional', subject TEXT NOT NULL, body_text TEXT NOT NULL, provider_message_id TEXT, status TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
     ),
     db.prepare(
       "CREATE TABLE IF NOT EXISTS scrape_runs (id INTEGER PRIMARY KEY AUTOINCREMENT, status TEXT NOT NULL, provider TEXT, query TEXT, source_url TEXT, candidate_count INTEGER NOT NULL DEFAULT 0, parsed_count INTEGER NOT NULL DEFAULT 0, skipped_count INTEGER NOT NULL DEFAULT 0, upserted_count INTEGER NOT NULL DEFAULT 0, ignored_count INTEGER NOT NULL DEFAULT 0, error TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
@@ -126,11 +126,22 @@ async function createSchema() {
     ["square_payment_id", "TEXT"],
     ["square_payment_status", "TEXT"],
     ["checkout_reminder_sent_at", "TEXT"],
+    ["checkout_reminder_followup_sent_at", "TEXT"],
   ] as const;
 
   for (const [name, type] of squareColumns) {
     if (!existingOrderColumns.has(name)) {
       await db.prepare(`ALTER TABLE orders ADD COLUMN ${name} ${type}`).run();
+    }
+  }
+
+  const emailLogColumns = await db.prepare("PRAGMA table_info(email_logs)").all<{ name: string }>();
+  const existingEmailLogColumns = new Set(emailLogColumns.results?.map((column) => column.name) ?? []);
+  const emailLogOptionalColumns = [["template", "TEXT NOT NULL DEFAULT 'transactional'"]] as const;
+
+  for (const [name, type] of emailLogOptionalColumns) {
+    if (!existingEmailLogColumns.has(name)) {
+      await db.prepare(`ALTER TABLE email_logs ADD COLUMN ${name} ${type}`).run();
     }
   }
 

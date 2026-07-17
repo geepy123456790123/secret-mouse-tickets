@@ -58,14 +58,6 @@ type VisitAttributionRow = {
   revenue_cents: number;
 };
 
-type LandingPageRow = {
-  landing_page: string;
-  visits: number;
-  leads: number;
-  paid_orders: number;
-  revenue_cents: number;
-};
-
 type SearchTermRow = {
   term: string;
   visits: number;
@@ -110,6 +102,13 @@ type CheckoutAgingRow = {
   under_1_hour: number;
   over_24_hours: number;
   over_7_days: number;
+};
+
+type ReminderPerformanceRow = {
+  template: string;
+  sent_count: number;
+  converted_orders: number;
+  converted_revenue_cents: number;
 };
 
 export async function GET(request: Request) {
@@ -235,25 +234,6 @@ export async function GET(request: Request) {
       .bind(startDate, endExclusive)
       .all<VisitAttributionRow>();
 
-    const landingPageRows = await db
-      .prepare(
-        `SELECT
-          COALESCE(NULLIF(visits.landing_page, ''), '/') AS landing_page,
-          COUNT(DISTINCT visits.id) AS visits,
-          COUNT(DISTINCT leads.id) AS leads,
-          COUNT(DISTINCT CASE WHEN orders.status = 'paid' THEN orders.id END) AS paid_orders,
-          SUM(CASE WHEN orders.status = 'paid' THEN orders.amount_cents ELSE 0 END) AS revenue_cents
-        FROM visits
-        LEFT JOIN leads ON leads.visit_id = visits.id
-        LEFT JOIN orders ON orders.lead_id = leads.id
-        WHERE visits.created_at >= ? AND visits.created_at < ?
-        GROUP BY COALESCE(NULLIF(visits.landing_page, ''), '/')
-        ORDER BY visits DESC, revenue_cents DESC
-        LIMIT 20`
-      )
-      .bind(startDate, endExclusive)
-      .all<LandingPageRow>();
-
     const searchTermRows = await db
       .prepare(
         `SELECT
@@ -289,6 +269,34 @@ export async function GET(request: Request) {
       )
       .bind(startDate, endExclusive)
       .first<CheckoutAgingRow>();
+
+    const reminderPerformanceRows = await db
+      .prepare(
+        `SELECT
+          email_logs.template,
+          COUNT(email_logs.id) AS sent_count,
+          COUNT(DISTINCT CASE
+            WHEN orders.status = 'paid'
+             AND orders.paid_at IS NOT NULL
+             AND datetime(orders.paid_at) >= datetime(email_logs.created_at)
+            THEN orders.id
+          END) AS converted_orders,
+          SUM(CASE
+            WHEN orders.status = 'paid'
+             AND orders.paid_at IS NOT NULL
+             AND datetime(orders.paid_at) >= datetime(email_logs.created_at)
+            THEN orders.amount_cents
+            ELSE 0
+          END) AS converted_revenue_cents
+        FROM email_logs
+        JOIN orders ON orders.id = email_logs.order_id
+        WHERE email_logs.created_at >= ? AND email_logs.created_at < ?
+          AND email_logs.template IN ('checkout_reminder_2h', 'checkout_reminder_24h')
+        GROUP BY email_logs.template
+        ORDER BY email_logs.template ASC`
+      )
+      .bind(startDate, endExclusive)
+      .all<ReminderPerformanceRow>();
 
     const dailyRows = await db
       .prepare(
@@ -357,10 +365,10 @@ export async function GET(request: Request) {
       coupons: (couponRows.results ?? []).map(normalizeCoupon),
       attribution: (attributionRows.results ?? []).map(normalizeAttribution),
       visitAttribution: (visitAttributionRows.results ?? []).map(normalizeVisitAttribution),
-      landingPages: (landingPageRows.results ?? []).map(normalizeLandingPage),
       searchTerms: (searchTermRows.results ?? []).map(normalizeSearchTerm),
       organicSearch,
       checkoutAging: normalizeCheckoutAging(checkoutAging),
+      reminderPerformance: normalizeReminderPerformance(reminderPerformanceRows.results ?? []),
       timings: normalizeTimings(timingRows.results ?? []),
       daily: (dailyRows.results ?? []).map(normalizeDaily),
       recentOrders: (recentOrders.results ?? []).map(normalizeRecentOrder),
@@ -501,20 +509,6 @@ function normalizeVisitAttribution(row: VisitAttributionRow) {
   };
 }
 
-function normalizeLandingPage(row: LandingPageRow) {
-  const visits = Number(row.visits ?? 0);
-  const leads = Number(row.leads ?? 0);
-
-  return {
-    landingPage: row.landing_page,
-    visits,
-    leads,
-    paidOrders: Number(row.paid_orders ?? 0),
-    revenueCents: Number(row.revenue_cents ?? 0),
-    leadRate: visits ? Math.round((leads / visits) * 1000) / 10 : 0,
-  };
-}
-
 function normalizeSearchTerm(row: SearchTermRow) {
   return {
     term: row.term,
@@ -531,6 +525,41 @@ function normalizeCheckoutAging(row: CheckoutAgingRow | null) {
     over24Hours: Number(row?.over_24_hours ?? 0),
     over7Days: Number(row?.over_7_days ?? 0),
   };
+}
+
+function normalizeReminderPerformance(rows: ReminderPerformanceRow[]) {
+  const normalized = {
+    firstReminder: {
+      label: "2-hour reminder",
+      sent: 0,
+      convertedOrders: 0,
+      convertedRevenueCents: 0,
+      conversionRate: 0,
+    },
+    secondReminder: {
+      label: "24-hour reminder",
+      sent: 0,
+      convertedOrders: 0,
+      convertedRevenueCents: 0,
+      conversionRate: 0,
+    },
+  };
+
+  for (const row of rows) {
+    const target =
+      row.template === "checkout_reminder_24h"
+        ? normalized.secondReminder
+        : normalized.firstReminder;
+
+    target.sent = Number(row.sent_count ?? 0);
+    target.convertedOrders = Number(row.converted_orders ?? 0);
+    target.convertedRevenueCents = Number(row.converted_revenue_cents ?? 0);
+    target.conversionRate = target.sent
+      ? Math.round((target.convertedOrders / target.sent) * 1000) / 10
+      : 0;
+  }
+
+  return normalized;
 }
 
 function normalizeTimings(rows: TimingRow[]) {

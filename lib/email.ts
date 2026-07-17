@@ -16,6 +16,7 @@ type CheckoutReminderEmailInput = {
   event: EventRecord;
   themeParkDays: number;
   couponCode: string;
+  stage: "2h" | "24h";
 };
 
 export function buildConfirmationEmail(input: ConfirmationEmailInput) {
@@ -81,6 +82,29 @@ export function buildCheckoutReminderEmail(input: CheckoutReminderEmailInput) {
       ? "\n\nMulti-day Disney tickets purchased through the matching offer also include an extra Water Park Fun & More Visit pass."
       : "";
 
+  const stageCopy =
+    input.stage === "24h"
+      ? {
+          subject: "Your Secret Mouse Tickets match is still available",
+          eyebrow: "Still available",
+          heading: "Your Disney ticket match is still waiting",
+          intro:
+            "Your dates still match an eligible Secret Mouse Tickets offer, and your 25% off comeback code is still ready to use.",
+          bodyLead:
+            "If you're still comparing options, now is a good time to finish checkout and lock in the discounted Disney ticket link for your trip.",
+          cta: "Finish checkout",
+        }
+      : {
+          subject: "Complete your Secret Mouse Tickets checkout",
+          eyebrow: "Finish checkout",
+          heading: "Your Disney ticket match is ready",
+          intro:
+            "We found a match for your Walt Disney World dates, and we've already applied 25% off our fee to help you complete checkout.",
+          bodyLead:
+            "Complete your purchase and we'll send your matching Disney Group & Convention discount ticket link right away.",
+          cta: "Return to checkout",
+        };
+
   const bodyText = `Still planning your Disney trip?
 
 We found a Secret Mouse Tickets match for your Walt Disney World dates: ${input.event.info_banner_first}.
@@ -90,7 +114,7 @@ To help you finish checkout, we've applied 25% off our fee with coupon code ${in
 Complete your purchase here:
 ${input.checkoutUrl}
 
-If you complete checkout, we'll email your Disney Group & Convention discount ticket link right away.
+${stageCopy.bodyLead}
 
 Tickets purchased through the matching Disney offer are valid from ${formatDate(input.event.valid_start_date)} through ${formatDate(input.event.valid_end_date)}.${multiDayBonusText}
 
@@ -101,9 +125,9 @@ www.secretmousetickets.com`;
   const html = `<div style="background:#f5edff;padding:24px;font-family:Arial,sans-serif;color:#120f17">
     <div style="max-width:640px;margin:0 auto;background:#ffffff;border:4px solid #120f17;border-radius:20px;box-shadow:8px 8px 0 #120f17;overflow:hidden">
       <div style="padding:28px 28px 8px">
-        <div style="display:inline-block;background:#fff7de;border:3px solid #120f17;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:0.02em;color:#5d45b5;text-transform:uppercase">Complete your checkout</div>
-        <h1 style="margin:16px 0 10px;font-size:28px;line-height:1.15">Your Disney ticket match is still waiting</h1>
-        <p style="margin:0 0 20px;font-size:16px;line-height:1.6">We found a Secret Mouse Tickets match for your Walt Disney World dates, and we've applied <strong>25% off our fee</strong> to help you finish checkout.</p>
+        <div style="display:inline-block;background:#fff7de;border:3px solid #120f17;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:0.02em;color:#5d45b5;text-transform:uppercase">${stageCopy.eyebrow}</div>
+        <h1 style="margin:16px 0 10px;font-size:28px;line-height:1.15">${stageCopy.heading}</h1>
+        <p style="margin:0 0 20px;font-size:16px;line-height:1.6">${stageCopy.intro}</p>
       </div>
       <div style="padding:0 28px 28px">
         <div style="border:3px solid #120f17;border-radius:18px;background:#efe8ff;padding:18px;margin-bottom:18px">
@@ -114,8 +138,8 @@ www.secretmousetickets.com`;
           <p style="margin:0 0 8px;font-size:13px;font-weight:700;text-transform:uppercase;color:#5d45b5">Applied coupon</p>
           <p style="margin:0;font-size:28px;line-height:1.1;font-weight:800">${escapeHtml(input.couponCode)}</p>
         </div>
-        <p style="margin:0 0 16px;font-size:15px;line-height:1.7">Complete your purchase here and we'll email your Disney Group &amp; Convention discount ticket link right away:</p>
-        <p style="margin:0 0 18px"><a href="${escapeHtml(input.checkoutUrl)}" style="display:inline-block;background:#ffbd38;border:3px solid #120f17;border-radius:16px;padding:14px 18px;font-size:16px;font-weight:800;color:#120f17;text-decoration:none">Return to checkout</a></p>
+        <p style="margin:0 0 16px;font-size:15px;line-height:1.7">${stageCopy.bodyLead}</p>
+        <p style="margin:0 0 18px"><a href="${escapeHtml(input.checkoutUrl)}" style="display:inline-block;background:#ffbd38;border:3px solid #120f17;border-radius:16px;padding:14px 18px;font-size:16px;font-weight:800;color:#120f17;text-decoration:none">${stageCopy.cta}</a></p>
         <p style="margin:0 0 14px;font-size:15px;line-height:1.7">Tickets purchased through the matching Disney offer are valid from <strong>${formatDate(input.event.valid_start_date)}</strong> through <strong>${formatDate(input.event.valid_end_date)}</strong>.</p>
         ${
           input.themeParkDays > 1
@@ -128,7 +152,7 @@ www.secretmousetickets.com`;
   </div>`;
 
   return {
-    subject: "Complete your Secret Mouse Tickets checkout",
+    subject: stageCopy.subject,
     bodyText,
     html,
   };

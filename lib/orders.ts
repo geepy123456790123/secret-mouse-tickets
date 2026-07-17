@@ -86,11 +86,12 @@ export async function markOrderPaidAndSendConfirmation({
 
   await db
     .prepare(
-      "INSERT INTO email_logs (order_id, recipient_email, subject, body_text, provider_message_id, status) VALUES (?, ?, ?, ?, ?, ?)"
+      "INSERT INTO email_logs (order_id, recipient_email, template, subject, body_text, provider_message_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)"
     )
     .bind(
       orderId,
       details.recipient_email,
+      "confirmation",
       message.subject,
       message.bodyText,
       emailResult.providerMessageId,

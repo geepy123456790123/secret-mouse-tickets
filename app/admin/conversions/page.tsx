@@ -74,14 +74,6 @@ type ConversionData = {
     leadRate: number;
     paidRate: number;
   }>;
-  landingPages: Array<{
-    landingPage: string;
-    visits: number;
-    leads: number;
-    paidOrders: number;
-    revenueCents: number;
-    leadRate: number;
-  }>;
   searchTerms: Array<{
     term: string;
     visits: number;
@@ -108,6 +100,22 @@ type ConversionData = {
     under1Hour: number;
     over24Hours: number;
     over7Days: number;
+  };
+  reminderPerformance: {
+    firstReminder: {
+      label: string;
+      sent: number;
+      convertedOrders: number;
+      convertedRevenueCents: number;
+      conversionRate: number;
+    };
+    secondReminder: {
+      label: string;
+      sent: number;
+      convertedOrders: number;
+      convertedRevenueCents: number;
+      conversionRate: number;
+    };
   };
   timings: {
     medianLeadToCheckoutHours: number;
@@ -715,6 +723,50 @@ export function AdminConversionsDashboard({
                     ["7 days or more", formatNumber(data.checkoutAging.over7Days)],
                   ]}
                   empty="No pending checkout aging in this window."
+                />
+              </Panel>
+            </section>
+
+            <section className="grid gap-6 xl:grid-cols-2">
+              <Panel
+                title="Comeback Emails"
+                subtitle="How many checkout reminder emails were sent and how many later converted."
+              >
+                <DataTable
+                  columns={["Reminder", "Sent", "Converted", "Conversion Rate", "Revenue"]}
+                  rows={[
+                    [
+                      data.reminderPerformance.firstReminder.label,
+                      formatNumber(data.reminderPerformance.firstReminder.sent),
+                      formatNumber(data.reminderPerformance.firstReminder.convertedOrders),
+                      formatPercent(data.reminderPerformance.firstReminder.conversionRate),
+                      formatMoney(data.reminderPerformance.firstReminder.convertedRevenueCents),
+                    ],
+                    [
+                      data.reminderPerformance.secondReminder.label,
+                      formatNumber(data.reminderPerformance.secondReminder.sent),
+                      formatNumber(data.reminderPerformance.secondReminder.convertedOrders),
+                      formatPercent(data.reminderPerformance.secondReminder.conversionRate),
+                      formatMoney(data.reminderPerformance.secondReminder.convertedRevenueCents),
+                    ],
+                  ]}
+                  empty="No comeback emails in this window."
+                />
+              </Panel>
+
+              <Panel
+                title="Comeback Email Notes"
+                subtitle="Current automation timing and incentive."
+              >
+                <DataTable
+                  columns={["Setting", "Value"]}
+                  rows={[
+                    ["First reminder", "2 hours after a matched checkout starts"],
+                    ["Second reminder", "24 hours after a matched checkout starts"],
+                    ["Coupon code", "COMEBACK25"],
+                    ["Offer", "25% off the Secret Mouse Tickets fee"],
+                  ]}
+                  empty="No reminder settings available."
                 />
               </Panel>
             </section>
