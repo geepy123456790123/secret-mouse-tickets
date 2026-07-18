@@ -72,14 +72,20 @@ The full 15-page daily scrape now runs outside the Worker in GitHub Actions:
 
 The workflow calls:
 
-- `https://secret-mouse-tickets.drgrant.workers.dev/api/search/disneyevent`
-- `https://secret-mouse-tickets.drgrant.workers.dev/api/admin/events`
+- `${SITE_BASE_URL}/api/search/disneyevent`
+- `${SITE_BASE_URL}/api/admin/events`
 
 Required GitHub Actions secret:
 
 - `ADMIN_INGEST_TOKEN`
 
-This external job avoids Cloudflare's per-invocation subrequest cap while still using the live production search and ingest endpoints. The public site domain is protected by Cloudflare Access, so the unattended workflow targets the Worker hostname directly.
+Recommended GitHub Actions configuration:
+
+- Repository variable `SITE_BASE_URL`
+- Repository secret `SITE_BYPASS_TOKEN` when the chosen host is protected
+- If `SITE_BYPASS_TOKEN` is set, the workflow sends it as `OAI-Sites-Authorization: Bearer ...`
+
+This external job avoids Cloudflare's per-invocation subrequest cap while still using the live production search and ingest endpoints.
 
 ## Abandoned checkout reminders
 
@@ -91,7 +97,12 @@ Pending checkout reminders now run outside the Worker in GitHub Actions:
 
 The workflow calls:
 
-- `https://secret-mouse-tickets.drgrant.workers.dev/api/admin/checkout-reminders`
+- `${SITE_BASE_URL}/api/admin/checkout-reminders`
+
+Recommended GitHub Actions configuration:
+
+- Repository variable `SITE_BASE_URL`
+- Repository secret `SITE_BYPASS_TOKEN` when the chosen host is protected
 
 The reminder flow applies coupon code `COMEBACK25` to qualifying pending orders before sending the email so the discounted price is already reflected when the customer returns to checkout.
 
@@ -105,6 +116,11 @@ Completed orders can now trigger a follow-up review request email:
 
 The workflow calls:
 
-- `https://secret-mouse-tickets.drgrant.workers.dev/api/admin/trustpilot-review-requests`
+- `${SITE_BASE_URL}/api/admin/trustpilot-review-requests`
+
+Recommended GitHub Actions configuration:
+
+- Repository variable `SITE_BASE_URL`
+- Repository secret `SITE_BYPASS_TOKEN` when the chosen host is protected
 
 The review email sends customers to `TRUSTPILOT_REVIEW_URL`, which defaults to the public Trustpilot page for `secretmousetickets.com`.

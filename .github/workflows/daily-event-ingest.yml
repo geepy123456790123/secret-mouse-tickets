@@ -29,6 +29,13 @@ jobs:
       - name: Run production event ingest
         env:
           ADMIN_INGEST_TOKEN: ${{ secrets.ADMIN_INGEST_TOKEN }}
-          SEARCH_PROVIDER_ENDPOINT: https://secret-mouse-tickets.drgrant.workers.dev/api/search/disneyevent
-          INGEST_ENDPOINT: https://secret-mouse-tickets.drgrant.workers.dev/api/admin/events
-        run: npm run ingest:events
+          SITE_BASE_URL: ${{ vars.SITE_BASE_URL }}
+          SITE_BYPASS_TOKEN: ${{ secrets.SITE_BYPASS_TOKEN }}
+        run: |
+          BASE_URL="${SITE_BASE_URL:-https://secretmousetickets.com}"
+          if [ -n "${SITE_BYPASS_TOKEN:-}" ]; then
+            export OAI_SITES_AUTHORIZATION="Bearer ${SITE_BYPASS_TOKEN}"
+          fi
+          export SEARCH_PROVIDER_ENDPOINT="${BASE_URL}/api/search/disneyevent"
+          export INGEST_ENDPOINT="${BASE_URL}/api/admin/events"
+          npm run ingest:events

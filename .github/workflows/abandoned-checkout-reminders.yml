@@ -17,8 +17,17 @@ jobs:
       - name: Send pending checkout reminders
         env:
           ADMIN_INGEST_TOKEN: ${{ secrets.ADMIN_INGEST_TOKEN }}
+          SITE_BASE_URL: ${{ vars.SITE_BASE_URL }}
+          SITE_BYPASS_TOKEN: ${{ secrets.SITE_BYPASS_TOKEN }}
         run: |
+          BASE_URL="${SITE_BASE_URL:-https://secretmousetickets.com}"
+          EXTRA_HEADERS=()
+          if [ -n "${SITE_BYPASS_TOKEN:-}" ]; then
+            EXTRA_HEADERS+=(-H "OAI-Sites-Authorization: Bearer ${SITE_BYPASS_TOKEN}")
+          fi
+
           curl --fail --show-error --silent \
             -X POST \
             -H "Authorization: Bearer ${ADMIN_INGEST_TOKEN}" \
-            https://secret-mouse-tickets.drgrant.workers.dev/api/admin/checkout-reminders
+            "${EXTRA_HEADERS[@]}" \
+            "${BASE_URL}/api/admin/checkout-reminders"

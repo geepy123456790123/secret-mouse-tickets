@@ -102,6 +102,9 @@ async function main() {
       ...(process.env.ADMIN_INGEST_TOKEN
         ? { Authorization: `Bearer ${process.env.ADMIN_INGEST_TOKEN}` }
         : {}),
+      ...(process.env.OAI_SITES_AUTHORIZATION
+        ? { "OAI-Sites-Authorization": process.env.OAI_SITES_AUTHORIZATION }
+        : {}),
     },
     body: JSON.stringify(events),
   });
@@ -151,6 +154,9 @@ async function discoverCandidateUrls() {
       headers: {
         ...(process.env.ADMIN_INGEST_TOKEN
           ? { Authorization: `Bearer ${process.env.ADMIN_INGEST_TOKEN}` }
+          : {}),
+        ...(process.env.OAI_SITES_AUTHORIZATION
+          ? { "OAI-Sites-Authorization": process.env.OAI_SITES_AUTHORIZATION }
           : {}),
       },
     });
