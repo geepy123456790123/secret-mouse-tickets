@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 import { env } from "cloudflare:workers";
+import { Check, Mail, ShieldCheck } from "lucide-react";
 import { ensureDatabase, getRawDb } from "@/db";
 import { formatDate } from "@/lib/dates";
 import { SiteFooter } from "@/components/site-footer";
@@ -109,7 +111,7 @@ export default async function CheckoutPage({
             ) : null}
             <div className="pt-1">
               <p className="text-xs font-black uppercase tracking-wide text-[#5d45b5] sm:text-sm">
-                Total
+                One-time Secret Mouse Tickets fee
               </p>
               {order.coupon_code && order.amount_cents < PRICE_CENTS ? (
                 <div className="grid gap-1">
@@ -128,34 +130,58 @@ export default async function CheckoutPage({
                   ${(order.amount_cents / 100).toFixed(2)}
                 </p>
               )}
+              {!isPaid ? (
+                <p className="mt-1 text-sm font-bold text-[#3e304d]">
+                  No subscription or recurring charge.
+                </p>
+              ) : null}
             </div>
           </div>
 
-          <div className="space-y-3 rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] p-3.5 text-[15px] leading-7 font-semibold break-words sm:rounded-[18px] sm:p-4 sm:text-sm sm:leading-6">
-            <p className="font-black text-[#120f17]">{order.info_banner_first}</p>
-            <p className="font-bold">
-              {isPaid
-                ? isZeroDollarOrder
-                  ? "Your confirmation and Disney Group & Convention discount link were sent automatically to "
-                  : "Your payment confirmation and Disney Group & Convention discount link were sent automatically to "
-                : "Complete the secure payment below and we'll email your payment confirmation and Disney Group & Convention discount link automatically to "}
-              {order.recipient_email}. Use the emailed link to purchase your actual theme park
-              tickets directly from Disney.
+          <div className="rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] p-4 break-words sm:rounded-[18px] sm:p-5">
+            <p className="text-xs font-black uppercase tracking-wide text-[#5d45b5]">
+              Your matched Disney offer
             </p>
-            <p>
-              Tickets purchased through this Disney offer are valid from{" "}
-              {formatDate(order.valid_start_date)} through {formatDate(order.valid_end_date)}.
+            <p className="mt-1 text-lg font-black leading-6 text-[#120f17]">
+              {order.info_banner_first}
+            </p>
+            <p className="mt-2 text-sm font-semibold leading-6 text-[#3e304d]">
+              Tickets available through this link are valid from{" "}
+              <span className="font-black text-[#120f17]">{formatDate(order.valid_start_date)}</span>{" "}
+              through{" "}
+              <span className="font-black text-[#120f17]">{formatDate(order.valid_end_date)}</span>.
               Multi-day tickets also include an extra Water Park Fun &amp; More Visit pass.
             </p>
-            {!isPaid ? (
-              <p>
-                Disney uses dynamic ticket pricing, so we cannot promise an exact savings amount
-                in advance. If you do not come out ahead versus Disney&apos;s non-discounted price
-                for the same tickets after our fee, we&apos;ll refund your Secret Mouse Tickets
-                purchase.
-              </p>
-            ) : null}
           </div>
+
+          {!isPaid ? (
+            <div className="grid gap-3">
+              <h2 className="text-lg font-black sm:text-xl">What happens after payment</h2>
+              <CheckoutStep
+                icon={<Mail size={18} aria-hidden="true" />}
+                text={
+                  <>
+                    We immediately email the matched Disney sale-page link to{" "}
+                    <span className="font-black text-[#120f17]">{order.recipient_email}</span>.
+                  </>
+                }
+              />
+              <CheckoutStep
+                icon={<Check size={19} strokeWidth={3} aria-hidden="true" />}
+                text="You use that link to select and buy your actual park tickets directly from Disney."
+              />
+              <CheckoutStep
+                icon={<ShieldCheck size={19} aria-hidden="true" />}
+                text="If you do not save versus Disney's regular ticket price after our fee, we'll refund you."
+              />
+            </div>
+          ) : (
+            <div className="rounded-[16px] border-[3px] border-[#120f17] bg-[#efe8ff] p-4 text-sm font-bold leading-6 text-[#3e304d]">
+              Your confirmation and Disney Group &amp; Convention discount link were sent to{" "}
+              <span className="font-black text-[#120f17]">{order.recipient_email}</span>. Use the
+              emailed link to purchase your actual park tickets directly from Disney.
+            </div>
+          )}
 
           {isPaid ? (
             <CheckoutConfirm
@@ -186,5 +212,22 @@ export default async function CheckoutPage({
       </section>
       <SiteFooter className="max-w-2xl" />
     </main>
+  );
+}
+
+function CheckoutStep({
+  icon,
+  text,
+}: {
+  icon: ReactNode;
+  text: ReactNode;
+}) {
+  return (
+    <div className="flex items-start gap-3 rounded-[16px] border-[3px] border-[#120f17] bg-white px-3.5 py-3">
+      <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#d8c6ff] text-[#120f17]">
+        {icon}
+      </span>
+      <p className="pt-0.5 text-sm font-bold leading-6 text-[#3e304d]">{text}</p>
+    </div>
   );
 }

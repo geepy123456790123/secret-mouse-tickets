@@ -6,11 +6,11 @@ import {
   ArrowDown,
   BadgeCheck,
   CircleCheck,
+  ExternalLink,
   Mail,
   Quote,
   Search,
   ShieldCheck,
-  ShoppingCart,
   Sparkles,
   Star,
   Waves,
@@ -433,26 +433,41 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
                 <BadgeCheck size={17} aria-hidden="true" />
                 Match found
               </p>
-              <h2 className="mt-4 text-2xl font-bold leading-tight">
-                We found Walt Disney World&reg; Discounted Group & Convention Theme Park Tickets
-                &amp; Passes that match the date of your visit!
+              <h2 className="mt-4 text-2xl font-bold leading-tight sm:text-3xl">
+                Your dates match a Disney Group &amp; Convention ticket offer.
               </h2>
-              <p className="mt-3 rounded-[16px] border-[3px] border-[#120f17] bg-white px-3 py-2 text-sm font-black leading-6 text-[#120f17]">
-                Matched event: {result.event.infoBannerFirst}
-              </p>
-              <p className="mt-3 text-sm font-semibold leading-6 text-[#3e304d]">
-                Tickets valid from {formatDate(result.event.validStartDate)} to{" "}
-                {formatDate(result.event.validEndDate)}.
-              </p>
-              <p className="mt-3 rounded-[16px] border-[3px] border-[#120f17] bg-white px-3 py-2 text-sm font-bold leading-6 text-[#3e304d]">
-                Purchase Secret Mouse Tickets access below. After checkout, we&apos;ll email you a
-                personalized link to the Disney Group &amp; Convention discount page that matches
-                your dates, so you can purchase your tickets directly from Disney.
-              </p>
-              <p className="mt-3 inline-flex rounded-full border-[3px] border-[#120f17] bg-[#fff7de] px-3 py-2 text-sm font-black leading-6 text-[#120f17]">
-                Our guarantee: come out ahead of Disney&apos;s price after our fee, or your money
-                back.
-              </p>
+
+              <div className="mt-4 rounded-[18px] border-[3px] border-[#120f17] bg-white p-4">
+                <p className="text-sm font-black uppercase text-[#5d45b5]">Your matched offer</p>
+                <p className="mt-1 text-lg font-black leading-6 text-[#120f17]">
+                  {result.event.infoBannerFirst}
+                </p>
+                <p className="mt-2 text-sm font-semibold leading-6 text-[#3e304d]">
+                  Tickets available through this link are valid from{" "}
+                  <span className="font-black text-[#120f17]">
+                    {formatDate(result.event.validStartDate)}
+                  </span>{" "}
+                  to{" "}
+                  <span className="font-black text-[#120f17]">
+                    {formatDate(result.event.validEndDate)}
+                  </span>
+                  .
+                </p>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <MatchStep number="1" text="Pay our one-time $39 matching fee." />
+                <MatchStep number="2" text="Receive your matched Disney sale-page link by email." />
+                <MatchStep number="3" text="Buy your park tickets directly from Disney." />
+              </div>
+
+              <div className="mt-4 flex items-start gap-3 rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] px-4 py-3">
+                <ShieldCheck className="mt-0.5 shrink-0 text-[#5d45b5]" size={22} aria-hidden="true" />
+                <p className="text-sm font-black leading-6 text-[#120f17]">
+                  Money-back guarantee: save versus Disney&apos;s regular ticket price after our fee,
+                  or your money back.
+                </p>
+              </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
                 <label className="grid gap-2 text-sm font-bold">
@@ -470,10 +485,13 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
                   disabled={status === "checkout"}
                   className="inline-flex h-12 items-center justify-center gap-2 self-end rounded-[16px] border-4 border-[#120f17] bg-[#8f72f2] px-5 font-bold text-white shadow-[5px_5px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[7px_7px_0_#120f17] disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  <ShoppingCart size={18} aria-hidden="true" />
-                  {status === "checkout" ? "Opening..." : "Continue to Checkout"}
+                  <ExternalLink size={18} aria-hidden="true" />
+                  {status === "checkout" ? "Opening..." : "Get My Discount Link - $39"}
                 </button>
               </div>
+              <p className="mt-3 text-center text-xs font-bold leading-5 text-[#3e304d]">
+                One-time fee. No subscription. Secure payment powered by Square.
+              </p>
             </section>
           )}
 
@@ -670,6 +688,17 @@ function DesktopSavingsShowcase() {
         </div>
       </div>
     </section>
+  );
+}
+
+function MatchStep({ number, text }: { number: string; text: string }) {
+  return (
+    <div className="flex items-start gap-3 rounded-[16px] border-[3px] border-[#120f17] bg-white p-3">
+      <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#8f72f2] text-sm font-black text-white">
+        {number}
+      </span>
+      <p className="text-sm font-bold leading-5 text-[#3e304d]">{text}</p>
+    </div>
   );
 }
 

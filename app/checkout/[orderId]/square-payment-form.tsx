@@ -181,10 +181,9 @@ export function SquarePaymentForm({
           <CreditCard size={19} aria-hidden="true" />
         </span>
         <div>
-          <h2 className="text-lg font-black sm:text-xl">Secure Payment</h2>
+          <h2 className="text-lg font-black sm:text-xl">Secure Payment with Square</h2>
           <p className="mt-1 text-sm leading-6 font-semibold text-[#3e304d]">
-            Pay securely by card. Your card details are handled by Square and are never stored by
-            Secret Mouse Tickets.
+            Your card details are handled by Square and are never stored by Secret Mouse Tickets.
           </p>
         </div>
       </div>
@@ -248,8 +247,15 @@ export function SquarePaymentForm({
             : "Send My Discount Link"
           : status === "paying" || status === "paid"
             ? "Processing..."
-            : `Pay $${(amountCents / 100).toFixed(2)} Securely`}
+            : `Pay $${(amountCents / 100).toFixed(2)} & Email My Link`}
       </button>
+      <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1 text-center text-xs font-bold text-[#3e304d]">
+        <span>One-time payment</span>
+        <span aria-hidden="true">&bull;</span>
+        <span>Money-back guarantee</span>
+        <span aria-hidden="true">&bull;</span>
+        <span>Link emailed immediately</span>
+      </div>
     </div>
   );
 }
