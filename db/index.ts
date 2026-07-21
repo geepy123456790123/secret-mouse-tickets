@@ -176,6 +176,7 @@ async function createSchema() {
   await db.prepare("CREATE INDEX IF NOT EXISTS visits_source_idx ON visits (utm_source, utm_campaign)").run();
 
   const siteSettingSeeds = [
+    ["top_banner_enabled", "1"],
     ["top_banner_prefix", "25% off our fee through August 31, use code"],
     ["top_banner_highlight", "SUMMERDEAL25"],
     ["top_banner_suffix", "at checkout"],

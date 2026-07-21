@@ -160,6 +160,7 @@ type ManagedCoupon = {
 };
 
 type ManagedTopBanner = {
+  enabled: boolean;
   prefix: string;
   highlight: string;
   suffix: string;
@@ -333,32 +334,6 @@ export function AdminConversionsDashboard({
       setCouponError(caught instanceof Error ? caught.message : "Unable to delete coupon.");
     } finally {
       setCouponStatus("idle");
-    }
-  }
-
-  async function loadBannerSettings() {
-    setBannerStatus("loading");
-    setBannerError("");
-
-    try {
-      const response = await fetch("/admin/api/banner");
-      const payload = (await response.json()) as {
-        ok?: boolean;
-        banner?: ManagedTopBanner;
-        error?: string;
-      };
-
-      if (!response.ok || !payload.ok || !payload.banner) {
-        throw new Error(payload.error ?? "Unable to load banner settings.");
-      }
-
-      setBannerSettings(payload.banner);
-    } catch (caught) {
-      setBannerError(
-        caught instanceof Error ? caught.message : "Unable to load banner settings."
-      );
-    } finally {
-      setBannerStatus("idle");
     }
   }
 
@@ -817,7 +792,7 @@ export function AdminConversionsDashboard({
         <div className="border-b-4 border-[#120f17] px-5 py-4">
           <h2 className="text-2xl font-black">Top Banner</h2>
           <p className="mt-1 text-sm font-semibold leading-6 text-[#3e304d]">
-            Edit the homepage promo banner text and choose the main and highlighted text colors.
+            Show or hide the homepage promo banner, edit its text, and choose its colors.
           </p>
         </div>
 
@@ -834,21 +809,46 @@ export function AdminConversionsDashboard({
 
           {bannerSettings ? (
             <>
-              <div
-                className="w-fit max-w-full rounded-[18px] border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2.5 text-center text-lg font-black shadow-[5px_5px_0_#120f17] sm:px-6 sm:text-xl"
-                style={{ color: bannerSettings.textColor }}
-              >
-                {bannerSettings.prefix}{" "}
-                <span style={{ color: bannerSettings.highlightColor }}>
-                  {bannerSettings.highlight}
-                </span>{" "}
-                {bannerSettings.suffix}
-              </div>
+              {bannerSettings.enabled ? (
+                <div
+                  className="w-fit max-w-full rounded-[18px] border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2.5 text-center text-lg font-black shadow-[5px_5px_0_#120f17] sm:px-6 sm:text-xl"
+                  style={{ color: bannerSettings.textColor }}
+                >
+                  {bannerSettings.prefix}{" "}
+                  <span style={{ color: bannerSettings.highlightColor }}>
+                    {bannerSettings.highlight}
+                  </span>{" "}
+                  {bannerSettings.suffix}
+                </div>
+              ) : (
+                <p className="w-fit rounded-[14px] border-[3px] border-dashed border-[#6a6170] bg-[#f3eff7] px-4 py-2 text-sm font-black text-[#6a6170]">
+                  Banner hidden on homepage
+                </p>
+              )}
 
               <form
                 onSubmit={saveBannerSettings}
                 className="grid gap-4 rounded-[18px] border-[3px] border-[#120f17] bg-[#fffaf0] p-4 lg:grid-cols-2"
               >
+                <label className="flex items-center justify-between gap-4 rounded-[14px] border-[3px] border-[#120f17] bg-white px-4 py-3 text-sm font-black lg:col-span-2">
+                  <span>
+                    Show banner on homepage
+                    <span className="mt-1 block text-xs font-semibold text-[#6a6170]">
+                      Turn this off to hide the banner without deleting its text or colors.
+                    </span>
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={bannerSettings.enabled}
+                    onChange={(event) =>
+                      setBannerSettings((current) =>
+                        current ? { ...current, enabled: event.target.checked } : current
+                      )
+                    }
+                    className="h-6 w-6 shrink-0 accent-[#8f72f2]"
+                    disabled={bannerStatus !== "idle"}
+                  />
+                </label>
                 <label className="grid gap-2 text-sm font-bold lg:col-span-2">
                   Text Before Highlight
                   <input

@@ -1,6 +1,7 @@
 import { ensureDatabase, getRawDb } from "@/db";
 
 export type TopBannerSettings = {
+  enabled: boolean;
   prefix: string;
   highlight: string;
   suffix: string;
@@ -9,6 +10,7 @@ export type TopBannerSettings = {
 };
 
 const DEFAULT_TOP_BANNER_SETTINGS: TopBannerSettings = {
+  enabled: true,
   prefix: "25% off our fee through August 31, use code",
   highlight: "SUMMERDEAL25",
   suffix: "at checkout",
@@ -17,6 +19,7 @@ const DEFAULT_TOP_BANNER_SETTINGS: TopBannerSettings = {
 };
 
 const TOP_BANNER_SETTING_KEYS = {
+  enabled: "top_banner_enabled",
   prefix: "top_banner_prefix",
   highlight: "top_banner_highlight",
   suffix: "top_banner_suffix",
@@ -38,14 +41,27 @@ function normalizeColor(value: string | null | undefined, fallback: string) {
   return /^#[0-9a-fA-F]{6}$/.test(trimmed) ? trimmed : fallback;
 }
 
+function normalizeEnabled(value: string | null | undefined, fallback: boolean) {
+  if (value === "1" || value === "true") {
+    return true;
+  }
+
+  if (value === "0" || value === "false") {
+    return false;
+  }
+
+  return fallback;
+}
+
 export async function getTopBannerSettings(): Promise<TopBannerSettings> {
   await ensureDatabase();
 
   const rows = await getRawDb()
     .prepare(
-      `SELECT key, value FROM site_settings WHERE key IN (?, ?, ?, ?, ?)`
+      `SELECT key, value FROM site_settings WHERE key IN (?, ?, ?, ?, ?, ?)`
     )
     .bind(
+      TOP_BANNER_SETTING_KEYS.enabled,
       TOP_BANNER_SETTING_KEYS.prefix,
       TOP_BANNER_SETTING_KEYS.highlight,
       TOP_BANNER_SETTING_KEYS.suffix,
@@ -57,6 +73,10 @@ export async function getTopBannerSettings(): Promise<TopBannerSettings> {
   const values = new Map((rows.results ?? []).map((row) => [row.key, row.value]));
 
   return {
+    enabled: normalizeEnabled(
+      values.get(TOP_BANNER_SETTING_KEYS.enabled),
+      DEFAULT_TOP_BANNER_SETTINGS.enabled
+    ),
     prefix: values.get(TOP_BANNER_SETTING_KEYS.prefix) ?? DEFAULT_TOP_BANNER_SETTINGS.prefix,
     highlight:
       values.get(TOP_BANNER_SETTING_KEYS.highlight) ?? DEFAULT_TOP_BANNER_SETTINGS.highlight,
@@ -82,6 +102,7 @@ export async function saveTopBannerSettings(
     ...input,
   };
 
+  next.enabled = typeof next.enabled === "boolean" ? next.enabled : true;
   next.prefix = next.prefix.trim();
   next.highlight = next.highlight.trim();
   next.suffix = next.suffix.trim();
@@ -92,6 +113,11 @@ export async function saveTopBannerSettings(
   );
 
   await getRawDb().batch([
+    getRawDb()
+      .prepare(
+        "INSERT INTO site_settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP"
+      )
+      .bind(TOP_BANNER_SETTING_KEYS.enabled, next.enabled ? "1" : "0"),
     getRawDb()
       .prepare(
         "INSERT INTO site_settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP"

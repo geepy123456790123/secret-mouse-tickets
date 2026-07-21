@@ -223,16 +223,18 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
 
   return (
     <main className="brand-page min-h-screen text-[#120f17]">
-      <div className="mx-auto flex w-full max-w-7xl justify-center px-5 pt-5 lg:px-8">
-        <div
-          className="w-fit rounded-[18px] border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2.5 text-center text-lg font-black shadow-[5px_5px_0_#120f17] sm:px-6 sm:text-xl"
-          style={{ color: topBanner.textColor }}
-        >
-          {topBanner.prefix}{" "}
-          <span style={{ color: topBanner.highlightColor }}>{topBanner.highlight}</span>{" "}
-          {topBanner.suffix}
+      {topBanner.enabled ? (
+        <div className="mx-auto flex w-full max-w-7xl justify-center px-5 pt-5 lg:px-8">
+          <div
+            className="w-fit rounded-[18px] border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2.5 text-center text-lg font-black shadow-[5px_5px_0_#120f17] sm:px-6 sm:text-xl"
+            style={{ color: topBanner.textColor }}
+          >
+            {topBanner.prefix}{" "}
+            <span style={{ color: topBanner.highlightColor }}>{topBanner.highlight}</span>{" "}
+            {topBanner.suffix}
+          </div>
         </div>
-      </div>
+      ) : null}
 
       <section className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-5 py-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-start lg:px-8">
         <div className="flex flex-col items-center justify-center gap-3 px-1 pb-4 pt-1 text-center sm:px-4 lg:self-start lg:justify-start lg:pb-0 lg:pt-6">

@@ -8,12 +8,17 @@ export async function GET() {
 export async function PATCH(request: Request) {
   try {
     const body = (await request.json()) as {
+      enabled?: boolean;
       prefix?: string;
       highlight?: string;
       suffix?: string;
       textColor?: string;
       highlightColor?: string;
     };
+
+    if (body.enabled !== undefined && typeof body.enabled !== "boolean") {
+      throw new Error("Banner visibility must be true or false.");
+    }
 
     const banner = await saveTopBannerSettings(body);
     return Response.json({ ok: true, banner });
