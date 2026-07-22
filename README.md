@@ -23,6 +23,9 @@ Copy `.env.example` to `.env.local` for local work. In production, configure the
 - `SQUARE_LOCATION_ID`
 - `SQUARE_WEBHOOK_SIGNATURE_KEY`
 - `SQUARE_WEBHOOK_NOTIFICATION_URL` (optional, use only if Square's configured URL differs from the request URL seen by the app)
+- `PAYPAL_CLIENT_ID`
+- `PAYPAL_CLIENT_SECRET`
+- `PAYPAL_ENVIRONMENT` (`sandbox` or `production`)
 - `RESEND_API_KEY`
 - `FROM_EMAIL`
 - `GOOGLE_SEARCH_CONSOLE_CLIENT_EMAIL`
@@ -38,7 +41,7 @@ Copy `.env.example` to `.env.local` for local work. In production, configure the
 - `SEARCH_NORMALIZER_PROVIDER`
 - `TRUSTPILOT_REVIEW_URL` (optional, defaults to `https://www.trustpilot.com/evaluate/secretmousetickets.com`)
 
-When Square credentials are absent, checkout uses a local demo confirmation page. When Square credentials are present, `/api/checkout` creates a Square hosted checkout link.
+Checkout supports Square card and wallet payments plus PayPal. PayPal uses server-side Orders API calls to create and capture each payment before the existing confirmation and fulfillment flow runs.
 
 Square production webhooks should point to:
 

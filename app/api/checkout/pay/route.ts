@@ -80,6 +80,7 @@ export async function POST(request: Request) {
         db,
         orderId: order.id,
         origin: new URL(request.url).origin,
+        paymentProvider: "no_charge",
         squarePaymentStatus: "NO_CHARGE",
       });
 
@@ -153,6 +154,7 @@ export async function POST(request: Request) {
       db,
       orderId: order.id,
       origin: new URL(request.url).origin,
+      paymentProvider: "square",
       squarePaymentId: square.id,
       squareOrderId: square.orderId,
       squarePaymentStatus: square.status,

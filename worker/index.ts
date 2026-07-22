@@ -84,15 +84,15 @@ function withSecurityHeaders(response: Response) {
       "default-src 'self'",
       "base-uri 'self'",
       "frame-ancestors 'none'",
-      "script-src 'self' 'unsafe-inline' https://*.squarecdn.com",
+      "script-src 'self' 'unsafe-inline' https://*.squarecdn.com https://www.paypal.com https://*.paypal.com https://www.paypalobjects.com https://*.paypalobjects.com",
       "style-src 'self' 'unsafe-inline' https://*.squarecdn.com",
-      "img-src 'self' data: https://*.squarecdn.com https://*.squareup.com https://*.squareupsandbox.com",
+      "img-src 'self' data: https://*.squarecdn.com https://*.squareup.com https://*.squareupsandbox.com https://www.paypal.com https://*.paypal.com https://www.paypalobjects.com https://*.paypalobjects.com",
       "font-src 'self' https://square-fonts-production-f.squarecdn.com https://d1g145x70srn7h.cloudfront.net",
-      "connect-src 'self' https://*.squarecdn.com https://*.squareup.com https://*.squareupsandbox.com https://o160250.ingest.sentry.io",
-      "frame-src 'self' https://*.squarecdn.com https://*.squareup.com https://*.squareupsandbox.com",
-      "child-src 'self' https://*.squarecdn.com https://*.squareup.com https://*.squareupsandbox.com",
+      "connect-src 'self' https://*.squarecdn.com https://*.squareup.com https://*.squareupsandbox.com https://www.paypal.com https://*.paypal.com https://www.paypalobjects.com https://*.paypalobjects.com https://o160250.ingest.sentry.io",
+      "frame-src 'self' https://*.squarecdn.com https://*.squareup.com https://*.squareupsandbox.com https://www.paypal.com https://*.paypal.com",
+      "child-src 'self' https://*.squarecdn.com https://*.squareup.com https://*.squareupsandbox.com https://www.paypal.com https://*.paypal.com",
       "worker-src 'self' blob:",
-      "form-action 'self' https://*.squareup.com https://*.squareupsandbox.com",
+      "form-action 'self' https://*.squareup.com https://*.squareupsandbox.com https://www.paypal.com https://*.paypal.com",
     ].join("; ")
   );
   headers.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups");

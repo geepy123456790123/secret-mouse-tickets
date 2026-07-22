@@ -9,6 +9,7 @@ type OrderDetails = EventRecord & {
   lead_id: string;
   status: string;
   amount_cents: number;
+  confirmation_number: string | null;
   coupon_code: string | null;
   recipient_email: string;
   theme_park_days: number;
@@ -21,6 +22,10 @@ export type MarkOrderPaidInput = {
   squarePaymentId?: string | null;
   squareOrderId?: string | null;
   squarePaymentStatus?: string | null;
+  paymentProvider?: "square" | "paypal" | "no_charge" | null;
+  paypalOrderId?: string | null;
+  paypalCaptureId?: string | null;
+  paypalPaymentStatus?: string | null;
 };
 
 export async function markOrderPaidAndSendConfirmation({
@@ -30,10 +35,14 @@ export async function markOrderPaidAndSendConfirmation({
   squarePaymentId = null,
   squareOrderId = null,
   squarePaymentStatus = null,
+  paymentProvider = null,
+  paypalOrderId = null,
+  paypalCaptureId = null,
+  paypalPaymentStatus = null,
 }: MarkOrderPaidInput) {
   const details = await db
     .prepare(
-      "SELECT orders.id AS order_id, orders.lead_id, orders.status, orders.amount_cents, orders.coupon_code, leads.email AS recipient_email, leads.theme_park_days, events.* FROM orders JOIN leads ON leads.id = orders.lead_id JOIN events ON events.id = orders.event_id WHERE orders.id = ? LIMIT 1"
+      "SELECT orders.id AS order_id, orders.lead_id, orders.status, orders.amount_cents, orders.confirmation_number, orders.coupon_code, leads.email AS recipient_email, leads.theme_park_days, events.* FROM orders JOIN leads ON leads.id = orders.lead_id JOIN events ON events.id = orders.event_id WHERE orders.id = ? LIMIT 1"
     )
     .bind(orderId)
     .first<OrderDetails>();
@@ -45,9 +54,18 @@ export async function markOrderPaidAndSendConfirmation({
   if (details.status === "paid") {
     await db
       .prepare(
-        "UPDATE orders SET square_payment_id = COALESCE(square_payment_id, ?), square_order_id = COALESCE(square_order_id, ?), square_payment_status = COALESCE(square_payment_status, ?) WHERE id = ?"
+        "UPDATE orders SET payment_provider = COALESCE(payment_provider, ?), square_payment_id = COALESCE(square_payment_id, ?), square_order_id = COALESCE(square_order_id, ?), square_payment_status = COALESCE(square_payment_status, ?), paypal_order_id = COALESCE(paypal_order_id, ?), paypal_capture_id = COALESCE(paypal_capture_id, ?), paypal_payment_status = COALESCE(paypal_payment_status, ?) WHERE id = ?"
       )
-      .bind(squarePaymentId, squareOrderId, squarePaymentStatus, orderId)
+      .bind(
+        paymentProvider,
+        squarePaymentId,
+        squareOrderId,
+        squarePaymentStatus,
+        paypalOrderId,
+        paypalCaptureId,
+        paypalPaymentStatus,
+        orderId
+      )
       .run();
 
     return { ok: true as const, alreadyPaid: true, confirmationNumber: details.confirmation_number };
@@ -56,12 +74,36 @@ export async function markOrderPaidAndSendConfirmation({
   const confirmationNumber = `SMS-${Date.now().toString(36).toUpperCase()}`;
   const paidAt = new Date().toISOString();
 
-  await db
+  const paidUpdate = await db
     .prepare(
-      "UPDATE orders SET status = 'paid', confirmation_number = ?, paid_at = ?, square_payment_id = COALESCE(?, square_payment_id), square_order_id = COALESCE(?, square_order_id), square_payment_status = COALESCE(?, square_payment_status) WHERE id = ?"
+      "UPDATE orders SET status = 'paid', confirmation_number = ?, paid_at = ?, payment_provider = COALESCE(?, payment_provider), square_payment_id = COALESCE(?, square_payment_id), square_order_id = COALESCE(?, square_order_id), square_payment_status = COALESCE(?, square_payment_status), paypal_order_id = COALESCE(?, paypal_order_id), paypal_capture_id = COALESCE(?, paypal_capture_id), paypal_payment_status = COALESCE(?, paypal_payment_status) WHERE id = ? AND status != 'paid'"
     )
-    .bind(confirmationNumber, paidAt, squarePaymentId, squareOrderId, squarePaymentStatus, orderId)
+    .bind(
+      confirmationNumber,
+      paidAt,
+      paymentProvider,
+      squarePaymentId,
+      squareOrderId,
+      squarePaymentStatus,
+      paypalOrderId,
+      paypalCaptureId,
+      paypalPaymentStatus,
+      orderId
+    )
     .run();
+
+  if ((paidUpdate.meta.changes ?? 0) === 0) {
+    const paidOrder = await db
+      .prepare("SELECT confirmation_number FROM orders WHERE id = ? LIMIT 1")
+      .bind(orderId)
+      .first<{ confirmation_number: string | null }>();
+
+    return {
+      ok: true as const,
+      alreadyPaid: true,
+      confirmationNumber: paidOrder?.confirmation_number ?? confirmationNumber,
+    };
+  }
 
   if (details.coupon_code) {
     await db

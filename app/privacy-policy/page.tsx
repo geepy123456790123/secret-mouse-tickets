@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   },
 };
 
-const effectiveDate = "July 3, 2026";
+const effectiveDate = "July 21, 2026";
 
 export default function PrivacyPolicyPage() {
   return (
@@ -66,7 +66,7 @@ export default function PrivacyPolicyPage() {
               the service, including with:
             </p>
             <ul className="list-disc space-y-2 pl-5">
-              <li>payment providers that process your card transaction, including Square,</li>
+              <li>payment providers that process your transaction, including Square and PayPal,</li>
               <li>email delivery providers that send confirmations and service messages,</li>
               <li>hosting and infrastructure providers that power the site, and</li>
               <li>
@@ -81,8 +81,8 @@ export default function PrivacyPolicyPage() {
 
           <PolicySection title="Payments">
             <p>
-              Card payments are processed by Square. Secret Mouse Tickets does not store your full
-              payment card number in our database.
+              Payments are processed by Square or PayPal. Secret Mouse Tickets does not store your
+              full payment card number or PayPal login credentials in our database.
             </p>
           </PolicySection>
 

@@ -46,6 +46,9 @@ export default async function CheckoutPage({
     SQUARE_ACCESS_TOKEN?: string;
     SQUARE_LOCATION_ID?: string;
     SQUARE_ENVIRONMENT?: string;
+    PAYPAL_CLIENT_ID?: string;
+    PAYPAL_CLIENT_SECRET?: string;
+    PAYPAL_ENVIRONMENT?: string;
     GOOGLE_ADS_TAG_ID?: string;
     GOOGLE_ADS_BEGIN_CHECKOUT_LABEL?: string;
     GOOGLE_ADS_PURCHASE_LABEL?: string;
@@ -54,6 +57,11 @@ export default async function CheckoutPage({
   const isSquareProduction =
     Boolean(runtime.SQUARE_ACCESS_TOKEN && runtime.SQUARE_APPLICATION_ID && runtime.SQUARE_LOCATION_ID) &&
     runtime.SQUARE_ENVIRONMENT === "production";
+  const isPayPalConfigured = Boolean(
+    runtime.PAYPAL_CLIENT_ID?.trim() &&
+      runtime.PAYPAL_CLIENT_SECRET?.trim() &&
+      ["sandbox", "production"].includes(runtime.PAYPAL_ENVIRONMENT?.trim() ?? "")
+  );
   const isPaid = order.status === "paid";
   const isZeroDollarOrder = order.amount_cents <= 0;
   const googleAdsTagId = runtime.GOOGLE_ADS_TAG_ID?.trim() || null;
@@ -190,7 +198,7 @@ export default async function CheckoutPage({
               amountCents={order.amount_cents}
               couponCode={order.coupon_code}
             />
-          ) : isSquareProduction || order.amount_cents <= 0 ? (
+          ) : isSquareProduction || isPayPalConfigured || order.amount_cents <= 0 ? (
             <SquarePaymentForm
               orderId={order.order_id}
               amountCents={order.amount_cents}
@@ -199,6 +207,8 @@ export default async function CheckoutPage({
               applicationId={runtime.SQUARE_APPLICATION_ID ?? null}
               locationId={runtime.SQUARE_LOCATION_ID ?? null}
               environment={runtime.SQUARE_ENVIRONMENT ?? "sandbox"}
+              paypalClientId={isPayPalConfigured ? runtime.PAYPAL_CLIENT_ID?.trim() ?? null : null}
+              paypalEnvironment={runtime.PAYPAL_ENVIRONMENT?.trim() ?? "sandbox"}
             />
           ) : (
             <CheckoutConfirm

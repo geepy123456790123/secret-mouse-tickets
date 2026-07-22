@@ -59,7 +59,7 @@ export default function TermsOfServicePage() {
           <PolicySection title="Pricing and payment">
             <p>
               The checkout price shown on the site is the fee for Secret Mouse Tickets&apos; service.
-              Payment is processed securely by our payment provider.
+              Payment is processed securely by Square or PayPal.
             </p>
             <p>
               Your purchase of our service does not include the cost of Disney tickets, hotel stays,

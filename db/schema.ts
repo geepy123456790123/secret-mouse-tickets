@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const events = sqliteTable(
   "events",
@@ -106,10 +106,14 @@ export const orders = sqliteTable(
     currency: text("currency").notNull().default("USD"),
     confirmationNumber: text("confirmation_number"),
     couponCode: text("coupon_code"),
+    paymentProvider: text("payment_provider"),
     squarePaymentLinkId: text("square_payment_link_id"),
     squareOrderId: text("square_order_id"),
     squarePaymentId: text("square_payment_id"),
     squarePaymentStatus: text("square_payment_status"),
+    paypalOrderId: text("paypal_order_id"),
+    paypalCaptureId: text("paypal_capture_id"),
+    paypalPaymentStatus: text("paypal_payment_status"),
     checkoutUrl: text("checkout_url"),
     checkoutReminderSentAt: text("checkout_reminder_sent_at"),
     checkoutReminderFollowupSentAt: text("checkout_reminder_followup_sent_at"),
@@ -121,6 +125,8 @@ export const orders = sqliteTable(
     index("orders_square_payment_link_idx").on(table.squarePaymentLinkId),
     index("orders_square_order_idx").on(table.squareOrderId),
     index("orders_square_payment_idx").on(table.squarePaymentId),
+    uniqueIndex("orders_paypal_order_idx").on(table.paypalOrderId),
+    uniqueIndex("orders_paypal_capture_idx").on(table.paypalCaptureId),
   ]
 );
 

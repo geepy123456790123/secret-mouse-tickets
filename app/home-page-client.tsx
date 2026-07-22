@@ -492,7 +492,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
                 </button>
               </div>
               <p className="mt-3 text-center text-xs font-bold leading-5 text-[#3e304d]">
-                One-time fee. No subscription. Secure payment powered by Square.
+                One-time fee. No subscription. Secure payment through Square or PayPal.
               </p>
             </section>
           )}

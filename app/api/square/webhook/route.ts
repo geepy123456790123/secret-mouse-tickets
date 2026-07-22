@@ -110,6 +110,7 @@ export async function POST(request: Request) {
     db,
     orderId: order.id,
     origin: new URL(request.url).origin,
+    paymentProvider: "square",
     squarePaymentId,
     squareOrderId,
     squarePaymentStatus,

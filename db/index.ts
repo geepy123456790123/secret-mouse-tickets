@@ -46,7 +46,7 @@ async function createSchema() {
       "CREATE TABLE IF NOT EXISTS coupons (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT NOT NULL UNIQUE, discount_cents INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1, max_redemptions INTEGER, redemption_count INTEGER NOT NULL DEFAULT 0, expires_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
     ),
     db.prepare(
-      "CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, lead_id TEXT NOT NULL, event_id INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'pending', amount_cents INTEGER NOT NULL DEFAULT 3900, currency TEXT NOT NULL DEFAULT 'USD', confirmation_number TEXT, coupon_code TEXT, square_payment_link_id TEXT, square_order_id TEXT, square_payment_id TEXT, square_payment_status TEXT, checkout_url TEXT, checkout_reminder_sent_at TEXT, checkout_reminder_followup_sent_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, paid_at TEXT)"
+      "CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, lead_id TEXT NOT NULL, event_id INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'pending', amount_cents INTEGER NOT NULL DEFAULT 3900, currency TEXT NOT NULL DEFAULT 'USD', confirmation_number TEXT, coupon_code TEXT, payment_provider TEXT, square_payment_link_id TEXT, square_order_id TEXT, square_payment_id TEXT, square_payment_status TEXT, paypal_order_id TEXT, paypal_capture_id TEXT, paypal_payment_status TEXT, checkout_url TEXT, checkout_reminder_sent_at TEXT, checkout_reminder_followup_sent_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, paid_at TEXT)"
     ),
     db.prepare(
       "CREATE INDEX IF NOT EXISTS orders_paid_at_idx ON orders (paid_at)"
@@ -122,14 +122,18 @@ async function createSchema() {
 
   const orderColumns = await db.prepare("PRAGMA table_info(orders)").all<{ name: string }>();
   const existingOrderColumns = new Set(orderColumns.results?.map((column) => column.name) ?? []);
-  const squareColumns = [
+  const paymentColumns = [
+    ["payment_provider", "TEXT"],
     ["square_payment_id", "TEXT"],
     ["square_payment_status", "TEXT"],
+    ["paypal_order_id", "TEXT"],
+    ["paypal_capture_id", "TEXT"],
+    ["paypal_payment_status", "TEXT"],
     ["checkout_reminder_sent_at", "TEXT"],
     ["checkout_reminder_followup_sent_at", "TEXT"],
   ] as const;
 
-  for (const [name, type] of squareColumns) {
+  for (const [name, type] of paymentColumns) {
     if (!existingOrderColumns.has(name)) {
       await db.prepare(`ALTER TABLE orders ADD COLUMN ${name} ${type}`).run();
     }
@@ -170,6 +174,8 @@ async function createSchema() {
   await db.prepare("CREATE INDEX IF NOT EXISTS orders_square_payment_link_idx ON orders (square_payment_link_id)").run();
   await db.prepare("CREATE INDEX IF NOT EXISTS orders_square_order_idx ON orders (square_order_id)").run();
   await db.prepare("CREATE INDEX IF NOT EXISTS orders_square_payment_idx ON orders (square_payment_id)").run();
+  await db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS orders_paypal_order_idx ON orders (paypal_order_id)").run();
+  await db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS orders_paypal_capture_idx ON orders (paypal_capture_id)").run();
   await db.prepare("CREATE INDEX IF NOT EXISTS visits_created_at_idx ON visits (created_at)").run();
   await db.prepare("CREATE INDEX IF NOT EXISTS visits_session_id_idx ON visits (session_id)").run();
   await db.prepare("CREATE INDEX IF NOT EXISTS visits_visitor_id_idx ON visits (visitor_id)").run();
