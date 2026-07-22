@@ -101,6 +101,7 @@ export function SquarePaymentForm({
   const [squareReady, setSquareReady] = useState(false);
   const [wallets, setWallets] = useState({ applePay: false, googlePay: false });
   const [paypalReady, setPaypalReady] = useState(false);
+  const [couponMessage, setCouponMessage] = useState("");
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -405,6 +406,7 @@ export function SquarePaymentForm({
 
   async function applyCoupon() {
     setCouponStatus("applying");
+    setCouponMessage("");
     setMessage("");
 
     try {
@@ -421,7 +423,7 @@ export function SquarePaymentForm({
 
       window.location.reload();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Unable to apply coupon code.");
+      setCouponMessage(error instanceof Error ? error.message : "Unable to apply coupon code.");
       setCouponStatus("idle");
     }
   }
@@ -446,22 +448,36 @@ export function SquarePaymentForm({
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:mt-5 sm:grid-cols-[1fr_auto] sm:items-end">
-        <label className="grid gap-2 text-sm font-bold">
+      <div className="mt-4 grid gap-3 sm:mt-5 sm:grid-cols-[1fr_auto] sm:grid-rows-[auto_auto] sm:items-end">
+        <label className="grid gap-2 text-sm font-bold sm:col-start-1 sm:row-start-1">
           Coupon Code
           <input
             value={couponCode}
-            onChange={(event) => setCouponCode(event.target.value.toUpperCase())}
+            onChange={(event) => {
+              setCouponCode(event.target.value.toUpperCase());
+              setCouponMessage("");
+            }}
             className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-white px-3 text-base font-semibold uppercase"
             placeholder="Optional"
             disabled={isWorking}
+            aria-invalid={Boolean(couponMessage)}
+            aria-describedby={couponMessage ? "coupon-code-error" : undefined}
           />
         </label>
+        {couponMessage ? (
+          <p
+            id="coupon-code-error"
+            role="alert"
+            className="rounded-[16px] border-[3px] border-[#120f17] bg-[#ffdfe7] px-4 py-3 text-sm font-bold sm:col-start-1 sm:row-start-2"
+          >
+            {couponMessage}
+          </p>
+        ) : null}
         <button
           type="button"
           onClick={applyCoupon}
           disabled={isWorking}
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-[16px] border-4 border-[#120f17] bg-white px-5 font-bold text-[#120f17] shadow-[4px_4px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#120f17] disabled:cursor-not-allowed disabled:opacity-70"
+          className="inline-flex h-12 items-center justify-center gap-2 rounded-[16px] border-4 border-[#120f17] bg-white px-5 font-bold text-[#120f17] shadow-[4px_4px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#120f17] disabled:cursor-not-allowed disabled:opacity-70 sm:col-start-2 sm:row-start-1"
         >
           {couponStatus === "applying" ? (
             <Loader2 size={18} className="animate-spin" aria-hidden="true" />

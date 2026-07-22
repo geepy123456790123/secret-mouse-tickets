@@ -15,6 +15,9 @@ type PayPalOrderResponse = {
   status?: string;
 };
 
+const PAYPAL_BRAND_NAME = "Secret Mouse Tickets";
+const PAYPAL_SOFT_DESCRIPTOR = "SECRETMOUSETICKETS";
+
 export async function POST(request: Request) {
   try {
     await ensureDatabase();
@@ -67,6 +70,7 @@ export async function POST(request: Request) {
             reference_id: order.id,
             custom_id: order.id,
             description: "Secret Mouse Tickets access",
+            soft_descriptor: PAYPAL_SOFT_DESCRIPTOR,
             amount: {
               currency_code: order.currency,
               value: (order.amount_cents / 100).toFixed(2),
@@ -76,7 +80,7 @@ export async function POST(request: Request) {
         payment_source: {
           paypal: {
             experience_context: {
-              brand_name: "Secret Mouse Tickets",
+              brand_name: PAYPAL_BRAND_NAME,
               shipping_preference: "NO_SHIPPING",
               user_action: "PAY_NOW",
               return_url: `${origin}/checkout/${order.id}`,
