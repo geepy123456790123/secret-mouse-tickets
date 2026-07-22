@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ArrowDown,
   BadgeCheck,
+  ChevronDown,
   CircleCheck,
   ExternalLink,
   Mail,
@@ -15,7 +16,7 @@ import {
   Star,
   Waves,
 } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import { formatDate } from "@/lib/dates";
 import { SiteFooter } from "@/components/site-footer";
 import type { TopBannerSettings } from "@/lib/site-settings";
@@ -245,7 +246,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
             height={607}
             unoptimized
             priority
-            className="h-auto w-full max-w-[400px] object-contain"
+            className="h-auto w-full max-w-[320px] object-contain sm:max-w-[340px]"
           />
 
           <div className="max-w-xl space-y-3 lg:-mt-2">
@@ -264,61 +265,15 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
             regular park ticket prices - even after our fee - or your money back.
           </div>
 
-          <DesktopSavingsShowcase />
         </div>
 
-        <div className="grid content-center gap-5">
-          <section className="cartoon-panel grid gap-3 rounded-[22px] bg-white/95 p-5">
-            <div className="flex gap-3">
-              <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[3px] border-[#120f17] bg-[#ffbd38]">
-                <Sparkles size={18} aria-hidden="true" />
-              </span>
-              <div>
-                <h2 className="text-base font-black">Savings Disney Doesn&apos;t Advertise</h2>
-                <p className="text-sm font-semibold leading-6 text-[#3e304d]">
-                  Save up to 20%* when you buy eligible 1-day and multi-day tickets directly
-                  from Disney through our discounted ticket links.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[3px] border-[#120f17] bg-[#d8c6ff]">
-                <Waves size={18} aria-hidden="true" />
-              </span>
-              <div>
-                <h2 className="text-base font-black">Free Bonus Water Park Days</h2>
-                <p className="text-sm font-semibold leading-6 text-[#3e304d]">
-                  Multi-day Disney tickets include an extra Water Park Fun &amp; More Visit pass.
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[3px] border-[#120f17] bg-[#fff7de]">
-                <ShieldCheck size={18} aria-hidden="true" />
-              </span>
-              <div>
-                <h2 className="text-base font-black">Our Guarantee</h2>
-                <p className="text-sm font-semibold leading-6 text-[#3e304d]">
-                  Disney uses dynamic pricing that changes daily, so we can&apos;t promise an exact
-                  percent savings ahead of time. Here&apos;s what we do promise: if you don&apos;t
-                  come out ahead of Disney&apos;s regular price after our fee, contact us and
-                  we&apos;ll make it right.
-                </p>
-              </div>
-            </div>
-            <div className="rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] px-4 py-3 text-sm font-bold leading-6 text-[#3e304d]">
-              Secret Mouse Tickets finds Disney Group &amp; Convention discount ticket offers that
-              match your Walt Disney World visit dates. You do not need to attend a convention or
-              belong to a group to use these offers. Tickets are purchased directly from Disney.
-            </div>
-          </section>
-
+        <div className="grid content-start gap-5">
           <form
             onSubmit={submitForm}
             className="cartoon-panel rounded-[24px] bg-white p-5 sm:p-6"
           >
             <div className="mb-5 flex items-center justify-between gap-4">
-              <h2 className="text-2xl font-bold">Visit Details</h2>
+              <h2 className="text-2xl font-bold">Check Your Dates</h2>
               <span className="rounded-full border-[3px] border-[#120f17] bg-[#d8c6ff] px-3 py-1 text-sm font-bold">
                 {totalGuests} guests
               </span>
@@ -416,6 +371,30 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
               Free to check. You&apos;ll see our fee before you pay anything.
             </p>
           </form>
+
+          <section className="cartoon-panel grid gap-3 rounded-[22px] bg-white/95 p-5">
+            <CompactBenefit
+              icon={<Sparkles size={18} aria-hidden="true" />}
+              iconBackground="bg-[#ffbd38]"
+              text="Save up to 20%* through eligible Disney discount links."
+            />
+            <CompactBenefit
+              icon={<Waves size={18} aria-hidden="true" />}
+              iconBackground="bg-[#d8c6ff]"
+              text="Eligible multi-day tickets include an extra Water Park Fun & More Visit pass."
+            />
+            <CompactBenefit
+              icon={<BadgeCheck size={18} aria-hidden="true" />}
+              iconBackground="bg-[#fff7de]"
+              text="Buy your actual park tickets directly from Disney."
+            />
+            <p className="border-t-[3px] border-[#120f17] pt-3 text-sm font-bold leading-6 text-[#3e304d]">
+              We match your dates to Disney Group &amp; Convention discount offers. You do not need
+              to attend a convention or belong to a group.
+            </p>
+          </section>
+
+          <DesktopSavingsShowcase />
 
           {error && (
             <p className="rounded-[18px] border-4 border-[#120f17] bg-[#ffdfe7] px-4 py-3 text-sm font-bold text-[#120f17] shadow-[5px_5px_0_#120f17]">
@@ -524,10 +503,10 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
           </h2>
         </div>
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-3">
+        <div className="mt-8 grid gap-6 lg:grid-cols-3">
           {testimonials.map((testimonial) => (
-            <article key={testimonial.name} className="grid gap-7">
-              <div className="cartoon-panel relative min-h-[260px] rounded-[24px] bg-white p-5 sm:p-6">
+            <article key={testimonial.name} className="grid gap-6">
+              <div className="cartoon-panel relative min-h-[220px] rounded-[24px] bg-white p-5">
                 <div className="absolute -bottom-4 left-10 h-8 w-8 rotate-45 border-b-4 border-r-4 border-[#120f17] bg-white" />
                 <div className="relative z-10">
                   <div className="mb-4 flex items-center gap-2">
@@ -577,56 +556,41 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
             </h2>
           </div>
 
-          <div className="mt-6 grid gap-4 lg:grid-cols-2">
-            {faqItems.map((item) => (
-              <article
+          <div className="mt-6 grid gap-3">
+            {faqItems.map((item, index) => (
+              <details
                 key={item.question}
-                className="rounded-[18px] border-[3px] border-[#120f17] bg-[#fffaf0] px-4 py-4"
+                open={index === 0}
+                className="group rounded-[18px] border-[3px] border-[#120f17] bg-[#fffaf0] px-4 py-3"
               >
-                <h3 className="text-lg font-black text-[#120f17]">{item.question}</h3>
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-black text-[#120f17] marker:content-none">
+                  <span>{item.question}</span>
+                  <ChevronDown
+                    size={20}
+                    strokeWidth={3}
+                    className="shrink-0 transition-transform group-open:rotate-180"
+                    aria-hidden="true"
+                  />
+                </summary>
                 <p className="mt-2 text-sm font-semibold leading-6 text-[#3e304d]">
                   {item.answer}
                 </p>
-              </article>
+              </details>
             ))}
           </div>
-        </div>
-      </section>
 
-      <section className="mx-auto w-full max-w-7xl px-5 pb-8 lg:px-8 lg:pb-12">
-        <div className="cartoon-panel grid gap-4 rounded-[24px] bg-white p-5 sm:p-6 lg:grid-cols-2">
-          <div className="grid gap-2">
-            <p className="text-sm font-bold uppercase text-[#5d45b5]">Learn More</p>
-            <h2 className="text-2xl font-bold leading-tight">
-              Here&apos;s how Secret Mouse Tickets works.
-            </h2>
-            <p className="text-sm font-semibold leading-6 text-[#3e304d]">
-              Start here for a clear overview of the service, what you&apos;re paying for, and how
-              matching Disney discount pages can help lower your ticket cost.
-            </p>
-          </div>
-          <div className="grid gap-3">
+          <div className="mt-5 flex flex-wrap justify-center gap-x-6 gap-y-3 border-t-[3px] border-[#120f17] pt-5 text-sm font-black text-[#5d45b5]">
             <Link
               href="/how-it-works"
-              className="rounded-[18px] border-[3px] border-[#120f17] bg-[#fff7de] px-4 py-3 text-left shadow-[4px_4px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#120f17]"
+              className="underline decoration-2 underline-offset-4"
             >
-              <span className="block text-base font-black text-[#120f17]">
-                How Secret Mouse Tickets Works
-              </span>
-              <span className="mt-1 block text-sm font-semibold leading-6 text-[#3e304d]">
-                See the step-by-step process from date check to your Disney purchase link.
-              </span>
+              How Secret Mouse Tickets Works
             </Link>
             <Link
               href="/disney-world-group-convention-tickets"
-              className="rounded-[18px] border-[3px] border-[#120f17] bg-[#efe8ff] px-4 py-3 text-left shadow-[4px_4px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#120f17]"
+              className="underline decoration-2 underline-offset-4"
             >
-              <span className="block text-base font-black text-[#120f17]">
-                Disney World Group And Convention Tickets Explained
-              </span>
-              <span className="mt-1 block text-sm font-semibold leading-6 text-[#3e304d]">
-                Learn what these Disney ticket offers are and how to use them.
-              </span>
+              Group &amp; Convention Tickets Explained
             </Link>
           </div>
         </div>
@@ -662,7 +626,7 @@ function DesktopSavingsShowcase() {
   const activeExample = priceComparisonExamples[activeIndex];
 
   return (
-    <section className="hidden w-full max-w-xl pt-3 lg:block">
+    <section className="hidden w-full lg:block">
       <div className="cartoon-panel overflow-hidden rounded-[24px] bg-white/95 p-5">
         <div
           className={`flex items-center justify-between gap-4 transition-opacity duration-500 ${
@@ -690,6 +654,27 @@ function DesktopSavingsShowcase() {
         </div>
       </div>
     </section>
+  );
+}
+
+function CompactBenefit({
+  icon,
+  iconBackground,
+  text,
+}: {
+  icon: ReactNode;
+  iconBackground: string;
+  text: string;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <span
+        className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[3px] border-[#120f17] ${iconBackground}`}
+      >
+        {icon}
+      </span>
+      <p className="text-sm font-black leading-6 text-[#3e304d]">{text}</p>
+    </div>
   );
 }
 
