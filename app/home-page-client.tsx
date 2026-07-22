@@ -372,30 +372,6 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
             </p>
           </form>
 
-          <section className="cartoon-panel grid gap-3 rounded-[22px] bg-white/95 p-5">
-            <CompactBenefit
-              icon={<Sparkles size={18} aria-hidden="true" />}
-              iconBackground="bg-[#ffbd38]"
-              text="Save up to 20%* through eligible Disney discount links."
-            />
-            <CompactBenefit
-              icon={<Waves size={18} aria-hidden="true" />}
-              iconBackground="bg-[#d8c6ff]"
-              text="Eligible multi-day tickets include an extra Water Park Fun & More Visit pass."
-            />
-            <CompactBenefit
-              icon={<BadgeCheck size={18} aria-hidden="true" />}
-              iconBackground="bg-[#fff7de]"
-              text="Buy your actual park tickets directly from Disney."
-            />
-            <p className="border-t-[3px] border-[#120f17] pt-3 text-sm font-bold leading-6 text-[#3e304d]">
-              We match your dates to Disney Group &amp; Convention discount offers. You do not need
-              to attend a convention or belong to a group.
-            </p>
-          </section>
-
-          <DesktopSavingsShowcase />
-
           {error && (
             <p className="rounded-[18px] border-4 border-[#120f17] bg-[#ffdfe7] px-4 py-3 text-sm font-bold text-[#120f17] shadow-[5px_5px_0_#120f17]">
               {error}
@@ -475,6 +451,30 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
               </p>
             </section>
           )}
+
+          <section className="cartoon-panel grid gap-3 rounded-[22px] bg-white/95 p-5">
+            <CompactBenefit
+              icon={<Sparkles size={18} aria-hidden="true" />}
+              iconBackground="bg-[#ffbd38]"
+              text="Save up to 20%* through eligible Disney discount links."
+            />
+            <CompactBenefit
+              icon={<Waves size={18} aria-hidden="true" />}
+              iconBackground="bg-[#d8c6ff]"
+              text="Eligible multi-day tickets include an extra Water Park Fun & More Visit pass."
+            />
+            <CompactBenefit
+              icon={<BadgeCheck size={18} aria-hidden="true" />}
+              iconBackground="bg-[#fff7de]"
+              text="Buy your actual park tickets directly from Disney."
+            />
+            <p className="border-t-[3px] border-[#120f17] pt-3 text-sm font-bold leading-6 text-[#3e304d]">
+              We match your dates to Disney Group &amp; Convention discount offers. You do not need
+              to attend a convention or belong to a group.
+            </p>
+          </section>
+
+          <DesktopSavingsShowcase />
 
           <p className="rounded-[18px] bg-[#fff7de]/80 px-4 py-2 text-center text-xs font-semibold leading-5 text-[#3e304d]">
             Secret Mouse Tickets is an independent service and is not affiliated with Disney.{" "}
