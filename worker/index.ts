@@ -95,6 +95,7 @@ function withSecurityHeaders(response: Response) {
       "form-action 'self' https://*.squareup.com https://*.squareupsandbox.com",
     ].join("; ")
   );
+  headers.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set("X-Content-Type-Options", "nosniff");
 

@@ -40,6 +40,20 @@ select:focus-visible {
   outline-offset: 2px;
 }
 
+#apple-pay-button {
+  -webkit-appearance: -apple-pay-button;
+  -apple-pay-button-type: pay;
+  -apple-pay-button-style: black;
+  display: block;
+  min-height: 48px;
+  width: 100%;
+  cursor: pointer;
+}
+
+#apple-pay-button:disabled {
+  cursor: not-allowed;
+}
+
 .brand-page {
   background:
     radial-gradient(circle at 18px 18px, rgba(255, 255, 255, 0.48) 0 2px, transparent 3px),
