@@ -92,7 +92,7 @@ export default function HowItWorksPage() {
               we&apos;ll sort it out.
             </p>
             <p>
-              And if you do not come out ahead of Disney&apos;s regular price for the same tickets
+              And if you don&apos;t come out ahead of Disney&apos;s regular price for the same tickets
               after our fee, we&apos;ll review it under our refund policy.
             </p>
           </ContentSection>

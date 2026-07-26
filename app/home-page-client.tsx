@@ -475,7 +475,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
               text="Buy your actual park tickets directly from Disney."
             />
             <p className="border-t-[3px] border-[#120f17] pt-3 text-sm font-bold leading-6 text-[#3e304d]">
-              We match your dates to Disney Group &amp; Convention discount offers. You do not need
+              We match your dates to Disney Group &amp; Convention discount offers. You don&apos;t need
               to attend a convention or belong to a group.
             </p>
           </section>

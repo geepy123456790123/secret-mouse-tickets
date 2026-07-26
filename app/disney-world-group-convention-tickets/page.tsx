@@ -77,7 +77,7 @@ export default function DisneyWorldGroupConventionTicketsPage() {
             <p>
               Not for the offers Secret Mouse Tickets is built around. We focus on Disney Group and
               Convention ticket pages that can still be used for qualifying public purchase when the
-              dates line up. You do not need to attend a convention or belong to a formal group to
+              dates line up. You don&apos;t need to attend a convention or belong to a formal group to
               use an eligible link we provide.
             </p>
           </ContentSection>

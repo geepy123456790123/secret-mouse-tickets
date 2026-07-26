@@ -179,7 +179,7 @@ async function discoverCandidateUrls() {
     return [...new Set(links)];
   }
 
-  throw new Error("Set EVENT_URLS or SEARCH_PROVIDER_ENDPOINT. Do not scrape Google HTML results.");
+  throw new Error("Set EVENT_URLS or SEARCH_PROVIDER_ENDPOINT. Don't scrape Google HTML results.");
 }
 
 function parseEventPage(url, html) {

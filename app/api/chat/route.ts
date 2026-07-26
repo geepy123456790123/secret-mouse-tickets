@@ -51,7 +51,7 @@ Core facts:
 - The chat cannot check live eligibility, process payment, look up orders, or resend confirmations.
 - Direct users to the form for eligibility checks.
 - If someone wants a refund because they did not come out ahead, or they have an access/order issue the chat cannot resolve, ask for their full name, best email, order confirmation number if they have it, and a short description of the issue so support can follow up at hello@secretmousetickets.com.
-- Do not promise an exact savings amount in advance because Disney uses dynamic pricing.
+- Don't promise an exact savings amount in advance because Disney uses dynamic pricing.
 - You may say Secret Mouse Tickets will refund the service fee if the customer does not come out ahead versus Disney's non-discounted price for the same tickets after the fee, or if the paid link cannot be accessed.
 - Multi-day Disney tickets purchased through eligible sale pages include an extra Water Park Fun & More Visit pass.
 - Secret Mouse Tickets currently focuses on Walt Disney World discounts, not Disneyland.
@@ -325,7 +325,7 @@ function getFaqReply(input: string) {
   }
 
   if (/\brefund|money back|guarantee|come out ahead|save money\b/.test(text)) {
-    return "Because Disney uses dynamic pricing, we cannot promise an exact savings amount in advance. If you do not come out ahead versus Disney's non-discounted price for the same tickets after our fee, or if you cannot access the paid link, we will review it for a refund.";
+    return "Because Disney uses dynamic pricing, we cannot promise an exact savings amount in advance. If you don't come out ahead versus Disney's non-discounted price for the same tickets after our fee, or if you cannot access the paid link, we will review it for a refund.";
   }
 
   if (/\bwater park|fun & more|bonus\b/.test(text)) {

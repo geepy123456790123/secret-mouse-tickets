@@ -77,7 +77,7 @@ export function CheckoutConfirm({
               {isZeroDollarUnlock
                 ? "Your coupon covered the full Secret Mouse Tickets fee, and your Disney discount link and confirmation details have been sent."
                 : "Your Disney discount link and confirmation details have been sent."}{" "}
-              If you do not see the email within a few minutes, check spam or promotions.
+              If you don&apos;t see the email within a few minutes, check spam or promotions.
             </p>
           </div>
         </div>

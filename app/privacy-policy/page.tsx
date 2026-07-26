@@ -62,7 +62,7 @@ export default function PrivacyPolicyPage() {
 
           <PolicySection title="How your information is shared">
             <p>
-              We do not sell your personal information. We share information only as needed to run
+              We don&apos;t sell your personal information. We share information only as needed to run
               the service, including with:
             </p>
             <ul className="list-disc space-y-2 pl-5">
@@ -105,7 +105,7 @@ export default function PrivacyPolicyPage() {
 
           <PolicySection title="Children">
             <p>
-              Secret Mouse Tickets is not directed to children under 13, and we do not knowingly
+              Secret Mouse Tickets is not directed to children under 13, and we don&apos;t knowingly
               collect personal information directly from children under 13.
             </p>
           </PolicySection>

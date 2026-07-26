@@ -39,7 +39,7 @@ export default function TermsOfServicePage() {
               linked page so you can purchase your actual tickets directly from Disney.
             </p>
             <p>
-              We do not sell Disney tickets ourselves. We sell access to our matching and delivery
+              We don&apos;t sell Disney tickets ourselves. We sell access to our matching and delivery
               service.
             </p>
           </PolicySection>
@@ -72,7 +72,7 @@ export default function TermsOfServicePage() {
             <ul className="list-disc space-y-2 pl-5">
               <li>you are unable to access the paid-for linked page we provide, or</li>
               <li>
-                you do not come out ahead financially after factoring in the fee you paid to Secret
+                you don&apos;t come out ahead financially after factoring in the fee you paid to Secret
                 Mouse Tickets.
               </li>
             </ul>
@@ -91,7 +91,7 @@ export default function TermsOfServicePage() {
 
           <PolicySection title="No guarantee of availability">
             <p>
-              We do not guarantee that a matching page will exist for every trip, that a linked page
+              We don&apos;t guarantee that a matching page will exist for every trip, that a linked page
               will remain available indefinitely, or that Disney will continue offering any specific
               discount, ticket type, or booking terms.
             </p>

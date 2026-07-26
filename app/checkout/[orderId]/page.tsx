@@ -180,7 +180,7 @@ export default async function CheckoutPage({
               />
               <CheckoutStep
                 icon={<ShieldCheck size={19} aria-hidden="true" />}
-                text="If you do not save versus Disney's regular ticket price after our fee, we'll refund you."
+                text="If you don't save versus Disney's regular ticket price after our fee, we'll refund you."
               />
             </div>
           ) : (
