@@ -20,6 +20,7 @@ import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
 import { formatDate } from "@/lib/dates";
 import { SiteFooter } from "@/components/site-footer";
 import type { TopBannerSettings } from "@/lib/site-settings";
+import type { TicketOfferPreview } from "@/lib/ticket-offers";
 import { SupportChat } from "./support-chat";
 
 type EventSummary = {
@@ -29,6 +30,7 @@ type EventSummary = {
   eventEndDate: string;
   validStartDate: string;
   validEndDate: string;
+  ticketOfferPreview: TicketOfferPreview | null;
 };
 
 type EligibilityResult =
@@ -412,6 +414,10 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
                 </p>
               </div>
 
+              {result.event.ticketOfferPreview && (
+                <TicketOfferExamples preview={result.event.ticketOfferPreview} />
+              )}
+
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 <MatchStep number="1" text="Pay our one-time $39 matching fee." />
                 <MatchStep number="2" text="Receive your matched Disney sale-page link by email." />
@@ -601,6 +607,63 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
       <SupportChat />
     </main>
   );
+}
+
+function TicketOfferExamples({ preview }: { preview: TicketOfferPreview }) {
+  return (
+    <div className="mt-4 rounded-[18px] border-[3px] border-[#120f17] bg-[#fff7de] p-4">
+      <div className="flex items-start gap-3">
+        <Sparkles className="mt-0.5 shrink-0 text-[#5d45b5]" size={21} aria-hidden="true" />
+        <div>
+          <h3 className="text-lg font-black leading-6 text-[#120f17]">
+            Ticket offers available through your matched link
+          </h3>
+          <p className="mt-1 text-sm font-semibold leading-5 text-[#3e304d]">
+            Representative prices from the Disney Group &amp; Convention ticket page.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        {preview.offers.map((offer) => (
+          <div
+            key={`${offer.productName}-${offer.priceCents}`}
+            className="rounded-[14px] border-[3px] border-[#120f17] bg-white px-3 py-3"
+          >
+            <p className="text-sm font-black leading-5 text-[#120f17]">{offer.productName}</p>
+            <p className="mt-1 text-xl font-black text-[#5d45b5]">
+              {formatOfferPrice(offer.priceCents, offer.currency, offer.priceBasis)}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <p className="mt-3 text-xs font-bold leading-5 text-[#3e304d]">
+        Prices and availability can change. Exact pricing depends on your dates, number of ticket
+        days, parks, ages, and selected options. Pricing checked{" "}
+        {new Intl.DateTimeFormat("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }).format(new Date(preview.collectedAt))}
+        .
+      </p>
+    </div>
+  );
+}
+
+function formatOfferPrice(
+  priceCents: number,
+  currency: string,
+  priceBasis: "from" | "per_day" | "per_ticket"
+) {
+  const price = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+  }).format(priceCents / 100);
+  const suffix =
+    priceBasis === "per_day" ? " per day" : priceBasis === "per_ticket" ? " per ticket" : "";
+  return `From ${price}${suffix}`;
 }
 
 function DesktopSavingsShowcase() {

@@ -28,7 +28,7 @@ async function createSchema() {
 
   await db.batch([
     db.prepare(
-      "CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, event_page_url TEXT NOT NULL UNIQUE, info_banner_first TEXT NOT NULL, info_banner_second TEXT NOT NULL, event_start_date TEXT NOT NULL, event_end_date TEXT NOT NULL, valid_start_date TEXT NOT NULL, valid_end_date TEXT NOT NULL, destination TEXT NOT NULL DEFAULT 'disney_world', hotel_special_rate_available INTEGER NOT NULL DEFAULT 0, hotel_name TEXT, hotel_booking_url TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
+      "CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, event_page_url TEXT NOT NULL UNIQUE, info_banner_first TEXT NOT NULL, info_banner_second TEXT NOT NULL, event_start_date TEXT NOT NULL, event_end_date TEXT NOT NULL, valid_start_date TEXT NOT NULL, valid_end_date TEXT NOT NULL, destination TEXT NOT NULL DEFAULT 'disney_world', ticket_booking_url TEXT, ticket_campaign_code TEXT, ticket_price_status TEXT NOT NULL DEFAULT 'not_configured', ticket_prices_json TEXT, ticket_prices_collected_at TEXT, ticket_price_error TEXT, hotel_special_rate_available INTEGER NOT NULL DEFAULT 0, hotel_name TEXT, hotel_booking_url TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
     ),
     db.prepare(
       "CREATE INDEX IF NOT EXISTS events_valid_window_idx ON events (valid_start_date, valid_end_date)"
@@ -72,6 +72,22 @@ async function createSchema() {
     await db
       .prepare("ALTER TABLE events ADD COLUMN destination TEXT NOT NULL DEFAULT 'disney_world'")
       .run();
+  }
+
+  const existingEventColumns = new Set(columns.results?.map((column) => column.name) ?? []);
+  const ticketPriceColumns = [
+    ["ticket_booking_url", "TEXT"],
+    ["ticket_campaign_code", "TEXT"],
+    ["ticket_price_status", "TEXT NOT NULL DEFAULT 'not_configured'"],
+    ["ticket_prices_json", "TEXT"],
+    ["ticket_prices_collected_at", "TEXT"],
+    ["ticket_price_error", "TEXT"],
+  ] as const;
+
+  for (const [name, type] of ticketPriceColumns) {
+    if (!existingEventColumns.has(name)) {
+      await db.prepare(`ALTER TABLE events ADD COLUMN ${name} ${type}`).run();
+    }
   }
 
   await db.prepare("CREATE INDEX IF NOT EXISTS events_destination_idx ON events (destination)").run();

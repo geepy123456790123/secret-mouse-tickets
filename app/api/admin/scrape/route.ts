@@ -10,10 +10,14 @@ import {
   getSearchProvider,
   isCandidateEventUrl,
 } from "@/lib/disneyevent-search";
+import {
+  collectTicketPrices,
+  TicketPriceCollection,
+} from "@/lib/ticket-price-collector";
 
 type EventDestination = "disney_world" | "disneyland" | "unknown";
 
-type ScrapedEvent = {
+type ScrapedEvent = TicketPriceCollection & {
   eventPageUrl: string;
   infoBannerFirst: string;
   infoBannerSecond: string;
@@ -22,6 +26,8 @@ type ScrapedEvent = {
   validStartDate: string;
   validEndDate: string;
   destination: EventDestination;
+  ticketBookingUrl: string | null;
+  ticketCampaignCode: string | null;
   excluded?: boolean;
 };
 
@@ -37,7 +43,11 @@ const EXCLUDED_BROCHURE_SRC =
   "https://258ade6f769e5102661c-d0ee5722296a6e07a9b11bb4054abd10.ssl.cf2.rackcdn.com/thumbs/yBcDUZZON5KjxryAb3o2uizUnHfloBHeBrochure.png";
 
 export async function POST(request: Request) {
-  const runtime = env as typeof env & { SERPER_API_KEY?: string };
+  const runtime = env as typeof env & {
+    SERPER_API_KEY?: string;
+    TICKET_PRICE_COLLECTOR_ENDPOINT?: string;
+    TICKET_PRICE_COLLECTOR_TOKEN?: string;
+  };
   if (!runtime.SERPER_API_KEY) {
     return Response.json({ error: "SERPER_API_KEY is not configured." }, { status: 500 });
   }
@@ -77,7 +87,10 @@ export async function POST(request: Request) {
       runId,
       urls.map((url) => ({ url, status: "candidate", reason: null }))
     );
-    const { events, skipped } = await scrapeCandidateUrls(urls, concurrency);
+    const { events, skipped } = await scrapeCandidateUrls(urls, concurrency, {
+      endpoint: runtime.TICKET_PRICE_COLLECTOR_ENDPOINT,
+      token: runtime.TICKET_PRICE_COLLECTOR_TOKEN,
+    });
     const ingest = await upsertEvents(db, events);
     const reasonSummary = summarizeReasons([
       ...skipped.map((item) => item.reason),
@@ -144,12 +157,18 @@ export async function POST(request: Request) {
       ingest,
       skipReasonSummary: reasonSummary,
       warnings: discovery.warnings,
+      pricing: summarizePricing(events),
       sampleEvents: events.slice(0, 5).map((event) => ({
         eventPageUrl: event.eventPageUrl,
         infoBannerFirst: event.infoBannerFirst,
         eventStartDate: event.eventStartDate,
         eventEndDate: event.eventEndDate,
         destination: event.destination,
+        ticketBookingUrl: event.ticketBookingUrl,
+        ticketCampaignCode: event.ticketCampaignCode,
+        ticketPriceStatus: event.ticketPriceStatus,
+        ticketPricesCollectedAt: event.ticketPricesCollectedAt,
+        ticketPriceError: event.ticketPriceError,
       })),
       sampleSkipped: skipped.slice(0, 10),
     });
@@ -195,7 +214,11 @@ async function discoverCandidateUrls({
   };
 }
 
-async function scrapeCandidateUrls(urls: string[], concurrency: number) {
+async function scrapeCandidateUrls(
+  urls: string[],
+  concurrency: number,
+  priceCollector: { endpoint?: string; token?: string }
+) {
   const events: ScrapedEvent[] = [];
   const skipped: SkippedUrl[] = [];
   let nextIndex = 0;
@@ -230,7 +253,21 @@ async function scrapeCandidateUrls(urls: string[], concurrency: number) {
           continue;
         }
 
-        events.push(event);
+        const priceCollection = await collectTicketPrices({
+          ...priceCollector,
+          event: {
+            eventPageUrl: event.eventPageUrl,
+            eventName: event.infoBannerFirst,
+            eventStartDate: event.eventStartDate,
+            eventEndDate: event.eventEndDate,
+            validStartDate: event.validStartDate,
+            validEndDate: event.validEndDate,
+            ticketBookingUrl: event.ticketBookingUrl,
+            ticketCampaignCode: event.ticketCampaignCode,
+          },
+        });
+
+        events.push({ ...event, ...priceCollection });
       } catch (error) {
         skipped.push({
           url,
@@ -274,7 +311,7 @@ async function upsertEvents(db: ReturnType<typeof getRawDb>, events: ScrapedEven
 
     await db
       .prepare(
-        "INSERT INTO events (event_page_url, info_banner_first, info_banner_second, event_start_date, event_end_date, valid_start_date, valid_end_date, destination, hotel_special_rate_available, hotel_name, hotel_booking_url, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP) ON CONFLICT(event_page_url) DO UPDATE SET info_banner_first = excluded.info_banner_first, info_banner_second = excluded.info_banner_second, event_start_date = excluded.event_start_date, event_end_date = excluded.event_end_date, valid_start_date = excluded.valid_start_date, valid_end_date = excluded.valid_end_date, destination = excluded.destination, hotel_special_rate_available = excluded.hotel_special_rate_available, hotel_name = excluded.hotel_name, hotel_booking_url = excluded.hotel_booking_url, updated_at = CURRENT_TIMESTAMP"
+        "INSERT INTO events (event_page_url, info_banner_first, info_banner_second, event_start_date, event_end_date, valid_start_date, valid_end_date, destination, ticket_booking_url, ticket_campaign_code, ticket_price_status, ticket_prices_json, ticket_prices_collected_at, ticket_price_error, hotel_special_rate_available, hotel_name, hotel_booking_url, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP) ON CONFLICT(event_page_url) DO UPDATE SET info_banner_first = excluded.info_banner_first, info_banner_second = excluded.info_banner_second, event_start_date = excluded.event_start_date, event_end_date = excluded.event_end_date, valid_start_date = excluded.valid_start_date, valid_end_date = excluded.valid_end_date, destination = excluded.destination, ticket_booking_url = excluded.ticket_booking_url, ticket_campaign_code = excluded.ticket_campaign_code, ticket_price_status = CASE WHEN excluded.ticket_price_status = 'not_configured' AND events.ticket_prices_json IS NOT NULL THEN events.ticket_price_status ELSE excluded.ticket_price_status END, ticket_prices_json = COALESCE(excluded.ticket_prices_json, events.ticket_prices_json), ticket_prices_collected_at = COALESCE(excluded.ticket_prices_collected_at, events.ticket_prices_collected_at), ticket_price_error = excluded.ticket_price_error, hotel_special_rate_available = excluded.hotel_special_rate_available, hotel_name = excluded.hotel_name, hotel_booking_url = excluded.hotel_booking_url, updated_at = CURRENT_TIMESTAMP"
       )
       .bind(
         event.eventPageUrl,
@@ -285,6 +322,12 @@ async function upsertEvents(db: ReturnType<typeof getRawDb>, events: ScrapedEven
         event.validStartDate,
         event.validEndDate,
         event.destination,
+        event.ticketBookingUrl,
+        event.ticketCampaignCode,
+        event.ticketPriceStatus,
+        event.ticketPricesJson,
+        event.ticketPricesCollectedAt,
+        event.ticketPriceError,
         0,
         null,
         null
@@ -320,6 +363,12 @@ function parseEventPage(url: string, html: string): ScrapedEvent | null {
       validStartDate: "1970-01-01",
       validEndDate: "1970-01-01",
       destination: "unknown",
+      ticketBookingUrl: null,
+      ticketCampaignCode: null,
+      ticketPriceStatus: "not_configured",
+      ticketPricesJson: null,
+      ticketPricesCollectedAt: null,
+      ticketPriceError: null,
       excluded: true,
     };
   }
@@ -347,6 +396,7 @@ function parseNextEventPage($: ReturnType<typeof load>, url: string, html: strin
   const eventEndDate = isoFromTimestamp(eventEnd);
   const infoBannerSecond = formatDateRange(eventStartDate, eventEndDate);
   const destination = classifyDestination(`${payload}\n${html}\n${infoBannerFirst}`);
+  const ticketBookingUrl = extractTicketBookingUrl(payload) ?? extractTicketBookingUrl(html);
 
   return {
     eventPageUrl: url,
@@ -357,8 +407,37 @@ function parseNextEventPage($: ReturnType<typeof load>, url: string, html: strin
     validStartDate: addDays(eventStartDate, -7),
     validEndDate: addDays(eventEndDate, 7),
     destination,
+    ticketBookingUrl,
+    ticketCampaignCode: extractTicketCampaignCode(ticketBookingUrl),
+    ticketPriceStatus: "not_configured" as const,
+    ticketPricesJson: null,
+    ticketPricesCollectedAt: null,
+    ticketPriceError: null,
     excluded: destination !== "disney_world",
   };
+}
+
+function extractTicketBookingUrl(text: string) {
+  const decoded = decodeEscapedValue(text);
+  const match = decoded.match(
+    /https:\/\/disneyworld\.disney\.go\.com\/reservations\/[^"'\\\s<]+/i
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  const value = match[0].replace(/\\u0026/gi, "&").replace(/\\\//g, "/");
+  return URL.canParse(value) ? value : null;
+}
+
+function extractTicketCampaignCode(ticketBookingUrl: string | null) {
+  if (!ticketBookingUrl) {
+    return null;
+  }
+
+  const url = new URL(ticketBookingUrl);
+  return url.searchParams.get("CMP") ?? url.searchParams.get("cmp");
 }
 
 function classifyDestination(text: string): EventDestination {
@@ -563,4 +642,28 @@ function summarizeReasons(reasons: string[]) {
     .sort((left, right) => right[1] - left[1])
     .slice(0, 10)
     .map(([reason, count]) => ({ reason, count }));
+}
+
+function summarizePricing(events: ScrapedEvent[]) {
+  const summary = {
+    bookingUrlsFound: 0,
+    collected: 0,
+    empty: 0,
+    failed: 0,
+    notConfigured: 0,
+  };
+
+  for (const event of events) {
+    if (event.ticketBookingUrl) {
+      summary.bookingUrlsFound += 1;
+    }
+
+    if (event.ticketPriceStatus === "not_configured") {
+      summary.notConfigured += 1;
+    } else {
+      summary[event.ticketPriceStatus] += 1;
+    }
+  }
+
+  return summary;
 }

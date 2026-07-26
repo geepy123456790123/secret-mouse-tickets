@@ -39,6 +39,9 @@ Copy `.env.example` to `.env.local` for local work. In production, configure the
 - `SERPER_API_KEY`
 - `GOOGLE_SEARCH_URL`
 - `SEARCH_NORMALIZER_PROVIDER`
+- `TICKET_PRICE_COLLECTOR_ENDPOINT` (optional browser-capable ticket-price collector)
+- `TICKET_PRICE_COLLECTOR_TOKEN` (optional bearer token for the collector)
+- `BROWSERLESS_API_TOKEN` (preferred Browserless token for referral-session price collection)
 - `TRUSTPILOT_REVIEW_URL` (optional, defaults to `https://www.trustpilot.com/evaluate/secretmousetickets.com`)
 
 Checkout supports Square card and wallet payments plus PayPal. PayPal uses server-side Orders API calls to create and capture each payment before the existing confirmation and fulfillment flow runs.
@@ -63,6 +66,28 @@ The `/api/search/disneyevent` endpoint defaults to Serper, requests the `site:di
 
 Parsed events are posted to `INGEST_ENDPOINT` when set, usually `/api/admin/events`. Duplicate event URLs are upserted. Expired events and pages with the excluded brochure image are deleted/ignored.
 
+The event parser also stores each qualifying page's Disney ticket-store URL and campaign code. Because Disney's ticket storefront rejects ordinary server-side HTTP requests, the scheduled ingest can use `BROWSERLESS_API_TOKEN` to open the event referral, continue into Disney's admission catalog, and collect representative offer cards. `TICKET_PRICE_COLLECTOR_ENDPOINT` remains available as an override for a separate collector. A collector must return either `prices` or `products` with normalized rows:
+
+```json
+{
+  "collectedAt": "2026-07-22T12:00:00.000Z",
+  "prices": [
+    {
+      "productName": "1-Day Magic Kingdom Ticket",
+      "priceCents": 16560,
+      "currency": "USD",
+      "ticketDays": 1,
+      "park": "Magic Kingdom",
+      "parkHopper": false,
+      "ageBand": "10+",
+      "validDate": "2026-07-25"
+    }
+  ]
+}
+```
+
+Only `productName` and `priceCents` are required. A failed or unconfigured collection attempt does not prevent event ingestion and does not erase the last successful price snapshot.
+
 Production scrape runs can be triggered from `/admin/scrape`. The page runs one search page at a time to stay within Cloudflare Worker subrequest limits.
 
 ## Daily production ingest
@@ -86,6 +111,9 @@ Recommended GitHub Actions configuration:
 
 - Repository variable `SITE_BASE_URL`
 - Repository secret `SITE_BYPASS_TOKEN` when the chosen host is protected
+- Repository variable `TICKET_PRICE_COLLECTOR_ENDPOINT` when automated prices are enabled
+- Repository secret `TICKET_PRICE_COLLECTOR_TOKEN` when the collector requires authentication
+- Repository secret `BROWSERLESS_API_TOKEN` when the built-in referral-session collector is enabled
 - If `SITE_BYPASS_TOKEN` is set, the workflow sends it as `OAI-Sites-Authorization: Bearer ...`
 
 This external job avoids Cloudflare's per-invocation subrequest cap while still using the live production search and ingest endpoints.

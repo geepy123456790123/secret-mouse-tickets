@@ -23,12 +23,24 @@ type ScrapeResult = {
     count: number;
   }>;
   warnings?: string[];
+  pricing?: {
+    bookingUrlsFound: number;
+    collected: number;
+    empty: number;
+    failed: number;
+    notConfigured: number;
+  };
   batchRuns?: number[];
   sampleEvents?: Array<{
     eventPageUrl: string;
     infoBannerFirst: string;
     eventStartDate: string;
     eventEndDate: string;
+    ticketBookingUrl?: string | null;
+    ticketCampaignCode?: string | null;
+    ticketPriceStatus?: string;
+    ticketPricesCollectedAt?: string | null;
+    ticketPriceError?: string | null;
   }>;
   sampleSkipped?: Array<{
     url: string;
@@ -134,11 +146,13 @@ export function AdminScrapePanel({ showHeader = true }: AdminScrapePanelProps) {
 
       {result ? (
         <section className="grid gap-4 rounded-[18px] border-[3px] border-[#120f17] bg-[#fffaf0] p-4">
-          <div className="grid gap-3 sm:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
             <Metric label="Discovered" value={result.discovered ?? 0} />
             <Metric label="Parsed" value={result.parsed ?? 0} />
             <Metric label="Upserted" value={result.ingest?.upserted ?? 0} />
             <Metric label="Ignored" value={result.ingest?.ignored ?? 0} />
+            <Metric label="Ticket URLs" value={result.pricing?.bookingUrlsFound ?? 0} />
+            <Metric label="Prices Collected" value={result.pricing?.collected ?? 0} />
           </div>
 
           {result.error ? (
@@ -235,6 +249,19 @@ async function runScrapeBatches({
     },
     skipReasonSummary: summarizeReasonCounts(batchResults),
     warnings: [...new Set(batchResults.flatMap((item) => item.warnings ?? []))],
+    pricing: {
+      bookingUrlsFound: batchResults.reduce(
+        (sum, item) => sum + (item.pricing?.bookingUrlsFound ?? 0),
+        0
+      ),
+      collected: batchResults.reduce((sum, item) => sum + (item.pricing?.collected ?? 0), 0),
+      empty: batchResults.reduce((sum, item) => sum + (item.pricing?.empty ?? 0), 0),
+      failed: batchResults.reduce((sum, item) => sum + (item.pricing?.failed ?? 0), 0),
+      notConfigured: batchResults.reduce(
+        (sum, item) => sum + (item.pricing?.notConfigured ?? 0),
+        0
+      ),
+    },
     sampleEvents: batchResults.flatMap((item) => item.sampleEvents ?? []).slice(0, 5),
     sampleSkipped: batchResults.flatMap((item) => item.sampleSkipped ?? []).slice(0, 10),
   } satisfies ScrapeResult;

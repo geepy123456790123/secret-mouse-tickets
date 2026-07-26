@@ -13,6 +13,12 @@ export const events = sqliteTable(
     validStartDate: text("valid_start_date").notNull(),
     validEndDate: text("valid_end_date").notNull(),
     destination: text("destination").notNull().default("disney_world"),
+    ticketBookingUrl: text("ticket_booking_url"),
+    ticketCampaignCode: text("ticket_campaign_code"),
+    ticketPriceStatus: text("ticket_price_status").notNull().default("not_configured"),
+    ticketPricesJson: text("ticket_prices_json"),
+    ticketPricesCollectedAt: text("ticket_prices_collected_at"),
+    ticketPriceError: text("ticket_price_error"),
     hotelSpecialRateAvailable: integer("hotel_special_rate_available")
       .notNull()
       .default(0),

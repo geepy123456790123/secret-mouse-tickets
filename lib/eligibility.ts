@@ -19,6 +19,8 @@ export type EventRecord = {
   valid_start_date: string;
   valid_end_date: string;
   destination: "disney_world" | "disneyland" | "unknown";
+  ticket_prices_json: string | null;
+  ticket_prices_collected_at: string | null;
 };
 
 export type ValidationResult =

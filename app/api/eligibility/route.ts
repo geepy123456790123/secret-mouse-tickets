@@ -5,6 +5,7 @@ import {
   type EventRecord,
 } from "@/lib/eligibility";
 import { todayIso } from "@/lib/dates";
+import { parseTicketOfferPreview } from "@/lib/ticket-offers";
 
 type AttributionInput = {
   visitId: string | null;
@@ -95,6 +96,10 @@ export async function POST(request: Request) {
         eventEndDate: event.event_end_date,
         validStartDate: event.valid_start_date,
         validEndDate: event.valid_end_date,
+        ticketOfferPreview: parseTicketOfferPreview(
+          event.ticket_prices_json,
+          event.ticket_prices_collected_at
+        ),
       },
     });
   } catch (error) {

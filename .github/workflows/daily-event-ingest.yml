@@ -31,6 +31,9 @@ jobs:
           ADMIN_INGEST_TOKEN: ${{ secrets.ADMIN_INGEST_TOKEN }}
           SITE_BASE_URL: ${{ vars.SITE_BASE_URL }}
           SITE_BYPASS_TOKEN: ${{ secrets.SITE_BYPASS_TOKEN }}
+          TICKET_PRICE_COLLECTOR_ENDPOINT: ${{ vars.TICKET_PRICE_COLLECTOR_ENDPOINT }}
+          TICKET_PRICE_COLLECTOR_TOKEN: ${{ secrets.TICKET_PRICE_COLLECTOR_TOKEN }}
+          BROWSERLESS_API_TOKEN: ${{ secrets.BROWSERLESS_API_TOKEN }}
         run: |
           BASE_URL="${SITE_BASE_URL:-https://secretmousetickets.com}"
           if [ -n "${SITE_BYPASS_TOKEN:-}" ]; then

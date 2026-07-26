@@ -1,4 +1,5 @@
 import { load } from "cheerio";
+import { collectBrowserlessTicketPrices } from "./browserless-ticket-price-collector.mjs";
 
 const EXCLUDED_BROCHURE_SRC =
   "https://258ade6f769e5102661c-d0ee5722296a6e07a9b11bb4054abd10.ssl.cf2.rackcdn.com/thumbs/yBcDUZZON5KjxryAb3o2uizUnHfloBHeBrochure.png";
@@ -64,7 +65,8 @@ async function main() {
         continue;
       }
 
-      events.push(event);
+      const priceCollection = await collectTicketPrices(event);
+      events.push({ ...event, ...priceCollection });
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error);
       skipped.push({ url, reason });
@@ -128,6 +130,11 @@ async function main() {
           eventStartDate: event.eventStartDate,
           eventEndDate: event.eventEndDate,
           destination: event.destination,
+          ticketBookingUrl: event.ticketBookingUrl,
+          ticketCampaignCode: event.ticketCampaignCode,
+          ticketPriceStatus: event.ticketPriceStatus,
+          ticketPricesCollectedAt: event.ticketPricesCollectedAt,
+          ticketPriceError: event.ticketPriceError,
         })),
         sampleSkipped: skipped.slice(0, 10),
       },
@@ -188,6 +195,12 @@ function parseEventPage(url, html) {
       validStartDate: "1970-01-01",
       validEndDate: "1970-01-01",
       destination: "unknown",
+      ticketBookingUrl: null,
+      ticketCampaignCode: null,
+      ticketPriceStatus: "not_configured",
+      ticketPricesJson: null,
+      ticketPricesCollectedAt: null,
+      ticketPriceError: null,
       excluded: true,
     };
   }
@@ -201,6 +214,7 @@ function parseEventPage(url, html) {
 
   const [eventStartDate, eventEndDate] = parseDateRange(infoBannerSecond);
   const destination = classifyDestination(`${html}\n${infoBannerFirst}\n${infoBannerSecond}`);
+  const ticketBookingUrl = extractTicketBookingUrl(html);
 
   return {
     eventPageUrl: url,
@@ -211,6 +225,12 @@ function parseEventPage(url, html) {
     validStartDate: addDays(eventStartDate, -7),
     validEndDate: addDays(eventEndDate, 7),
     destination,
+    ticketBookingUrl,
+    ticketCampaignCode: extractTicketCampaignCode(ticketBookingUrl),
+    ticketPriceStatus: "not_configured",
+    ticketPricesJson: null,
+    ticketPricesCollectedAt: null,
+    ticketPriceError: null,
     excluded: destination !== "disney_world",
   };
 }
@@ -235,6 +255,7 @@ function parseNextEventPage($, url, html) {
   const eventEndDate = isoFromTimestamp(eventEnd);
   const infoBannerSecond = formatDateRange(eventStartDate, eventEndDate);
   const destination = classifyDestination(`${payload}\n${html}\n${infoBannerFirst}`);
+  const ticketBookingUrl = extractTicketBookingUrl(payload) ?? extractTicketBookingUrl(html);
 
   return {
     eventPageUrl: url,
@@ -245,8 +266,178 @@ function parseNextEventPage($, url, html) {
     validStartDate: addDays(eventStartDate, -7),
     validEndDate: addDays(eventEndDate, 7),
     destination,
+    ticketBookingUrl,
+    ticketCampaignCode: extractTicketCampaignCode(ticketBookingUrl),
+    ticketPriceStatus: "not_configured",
+    ticketPricesJson: null,
+    ticketPricesCollectedAt: null,
+    ticketPriceError: null,
     excluded: destination !== "disney_world",
   };
+}
+
+function extractTicketBookingUrl(text) {
+  const decoded = decodeEscapedValue(text);
+  const match = decoded.match(
+    /https:\/\/disneyworld\.disney\.go\.com\/reservations\/[^"'\\\s<]+/i
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  const value = match[0].replace(/\\u0026/gi, "&").replace(/\\\//g, "/");
+  return URL.canParse(value) ? value : null;
+}
+
+function extractTicketCampaignCode(ticketBookingUrl) {
+  if (!ticketBookingUrl) {
+    return null;
+  }
+
+  const url = new URL(ticketBookingUrl);
+  return url.searchParams.get("CMP") ?? url.searchParams.get("cmp");
+}
+
+async function collectTicketPrices(event) {
+  const endpoint = process.env.TICKET_PRICE_COLLECTOR_ENDPOINT;
+  const browserlessToken = process.env.BROWSERLESS_API_TOKEN;
+
+  if ((!endpoint && !browserlessToken) || !event.ticketBookingUrl) {
+    return emptyPriceCollection("not_configured");
+  }
+
+  try {
+    const collectorInput = {
+      eventPageUrl: event.eventPageUrl,
+      eventName: event.infoBannerFirst,
+      eventStartDate: event.eventStartDate,
+      eventEndDate: event.eventEndDate,
+      validStartDate: event.validStartDate,
+      validEndDate: event.validEndDate,
+      ticketBookingUrl: event.ticketBookingUrl,
+      ticketCampaignCode: event.ticketCampaignCode,
+    };
+    const payload = endpoint
+      ? await collectFromEndpoint(endpoint, collectorInput)
+      : await collectBrowserlessTicketPrices(collectorInput, browserlessToken);
+
+    const rawPrices = Array.isArray(payload?.prices)
+      ? payload.prices
+      : Array.isArray(payload?.products)
+        ? payload.products
+        : null;
+
+    if (!rawPrices) {
+      throw new Error("Price collector response must include a prices array.");
+    }
+
+    const prices = rawPrices.map(normalizeTicketPrice);
+    const collectedAt =
+      typeof payload.collectedAt === "string" && !Number.isNaN(Date.parse(payload.collectedAt))
+        ? new Date(payload.collectedAt).toISOString()
+        : new Date().toISOString();
+
+    return {
+      ticketPriceStatus: prices.length ? "collected" : "empty",
+      ticketPricesJson: JSON.stringify({
+        sourceUrl: payload.sourceUrl ?? event.ticketBookingUrl,
+        campaignCode: event.ticketCampaignCode,
+        prices,
+      }),
+      ticketPricesCollectedAt: collectedAt,
+      ticketPriceError: null,
+    };
+  } catch (error) {
+    return {
+      ...emptyPriceCollection("failed"),
+      ticketPriceError: String(error instanceof Error ? error.message : error).slice(0, 500),
+    };
+  }
+}
+
+function normalizeTicketPrice(value, index) {
+  if (!value || typeof value !== "object") {
+    throw new Error(`Price row ${index + 1} is not an object.`);
+  }
+
+  const productName = firstString(value.productName, value.name, value.ticketType);
+  const cents = Number(value.priceCents);
+  const dollars = Number(value.price);
+  const priceCents =
+    Number.isInteger(cents) && cents >= 0
+      ? cents
+      : Number.isFinite(dollars) && dollars >= 0
+        ? Math.round(dollars * 100)
+        : null;
+
+  if (!productName || priceCents === null) {
+    throw new Error(`Price row ${index + 1} must include productName and priceCents.`);
+  }
+
+  return {
+    productName,
+    priceCents,
+    currency: firstString(value.currency)?.toUpperCase() ?? "USD",
+    priceBasis: normalizePriceBasis(value.priceBasis),
+    ticketDays: positiveInteger(value.ticketDays),
+    park: firstString(value.park),
+    parkHopper: optionalBoolean(value.parkHopper),
+    ageBand: firstString(value.ageBand),
+    validDate: firstString(value.validDate),
+    details: firstString(value.details, value.description, value.restrictions),
+  };
+}
+
+async function collectFromEndpoint(endpoint, event) {
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(process.env.TICKET_PRICE_COLLECTOR_TOKEN
+        ? { Authorization: `Bearer ${process.env.TICKET_PRICE_COLLECTOR_TOKEN}` }
+        : {}),
+    },
+    body: JSON.stringify(event),
+  });
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(
+      payload?.error ?? payload?.message ?? `Price collector returned HTTP ${response.status}.`
+    );
+  }
+
+  return payload;
+}
+
+function normalizePriceBasis(value) {
+  return value === "per_day" || value === "per_ticket" ? value : "from";
+}
+
+function emptyPriceCollection(ticketPriceStatus) {
+  return {
+    ticketPriceStatus,
+    ticketPricesJson: null,
+    ticketPricesCollectedAt: null,
+    ticketPriceError: null,
+  };
+}
+
+function firstString(...values) {
+  return values.find((value) => typeof value === "string" && value.trim())?.trim() ?? null;
+}
+
+function positiveInteger(value) {
+  const number = Number(value);
+  return Number.isInteger(number) && number > 0 ? number : null;
+}
+
+function optionalBoolean(value) {
+  if (typeof value === "boolean") return value;
+  if (value === "true" || value === 1) return true;
+  if (value === "false" || value === 0) return false;
+  return null;
 }
 
 function classifyDestination(text) {
