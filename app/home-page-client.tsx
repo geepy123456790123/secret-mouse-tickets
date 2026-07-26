@@ -449,7 +449,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
                   className="inline-flex h-12 items-center justify-center gap-2 self-end rounded-[16px] border-4 border-[#120f17] bg-[#8f72f2] px-5 font-bold text-white shadow-[5px_5px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[7px_7px_0_#120f17] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   <ExternalLink size={18} aria-hidden="true" />
-                  {status === "checkout" ? "Opening..." : "Get My Discount Link - $39"}
+                  {status === "checkout" ? "Opening..." : "Unlock My Disney Discount Link - $39"}
                 </button>
               </div>
               <p className="mt-3 text-center text-xs font-bold leading-5 text-[#3e304d]">
