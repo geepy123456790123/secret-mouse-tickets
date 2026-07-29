@@ -150,11 +150,11 @@ export function SquarePaymentForm({
             label: "Secret Mouse Tickets",
           },
         };
+        // Square's digital-wallet methods are designed to share one request.
+        const walletPaymentRequest = payments.paymentRequest(paymentRequestOptions);
 
         try {
-          const applePay = await payments.applePay(
-            payments.paymentRequest(paymentRequestOptions)
-          );
+          const applePay = await payments.applePay(walletPaymentRequest);
 
           if (isMounted) {
             applePayRef.current = applePay;
@@ -169,9 +169,7 @@ export function SquarePaymentForm({
         let googlePay: SquareAttachablePaymentMethod | null = null;
 
         try {
-          googlePay = await payments.googlePay(
-            payments.paymentRequest(paymentRequestOptions)
-          );
+          googlePay = await payments.googlePay(walletPaymentRequest);
 
           if (!isMounted) {
             await googlePay.destroy?.();
