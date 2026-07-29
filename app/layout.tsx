@@ -5,6 +5,12 @@ import "./globals.css";
 import { MarketingScripts } from "@/components/marketing-scripts";
 
 const siteUrl = "https://secretmousetickets.com";
+const shareImage = {
+  url: "/secret-mouse-tickets-share.png",
+  width: 1200,
+  height: 630,
+  alt: "Secret Mouse Tickets - Disney World ticket offers matched to your visit",
+};
 
 const fredoka = Fredoka({
   variable: "--font-fredoka",
@@ -38,16 +44,38 @@ export const metadata: Metadata = {
     title: "Secret Mouse Tickets",
     description:
       "Find hidden Walt Disney World Group and Convention discount ticket offers for eligible visit dates.",
+    images: [shareImage],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Secret Mouse Tickets",
     description:
       "Find hidden Walt Disney World Group and Convention discount ticket offers for eligible visit dates.",
+    images: [shareImage.url],
   },
   icons: {
-    icon: "/sparkles-favicon.svg",
-    shortcut: "/sparkles-favicon.svg",
+    icon: [
+      {
+        url: "/favicon-32x32.png",
+        type: "image/png",
+        sizes: "32x32",
+      },
+      {
+        url: "/favicon-48x48.png",
+        type: "image/png",
+        sizes: "48x48",
+      },
+      {
+        url: "/sparkles-favicon.svg",
+        type: "image/svg+xml",
+      },
+    ],
+    shortcut: "/favicon-32x32.png",
+    apple: {
+      url: "/apple-touch-icon.png",
+      sizes: "180x180",
+      type: "image/png",
+    },
   },
 };
 

@@ -3,6 +3,12 @@ import { HomePageClient } from "./home-page-client";
 import { getTopBannerSettings } from "@/lib/site-settings";
 
 const siteUrl = "https://secretmousetickets.com";
+const shareImage = {
+  url: "/secret-mouse-tickets-share.png",
+  width: 1200,
+  height: 630,
+  alt: "Secret Mouse Tickets - Disney World ticket offers matched to your visit",
+};
 
 export const metadata: Metadata = {
   title: "Disney World Discount Tickets",
@@ -16,11 +22,14 @@ export const metadata: Metadata = {
     description:
       "Find hidden Walt Disney World Group and Convention discount ticket offers for your visit dates and buy your actual tickets directly from Disney.",
     url: siteUrl,
+    images: [shareImage],
   },
   twitter: {
+    card: "summary_large_image",
     title: "Disney World Discount Tickets | Secret Mouse Tickets",
     description:
       "Find hidden Walt Disney World Group and Convention discount ticket offers for your visit dates.",
+    images: [shareImage.url],
   },
 };
 
