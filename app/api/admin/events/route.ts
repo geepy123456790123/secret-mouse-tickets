@@ -22,10 +22,15 @@ type IncomingEvent = {
   excluded?: boolean;
 };
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = authorize(request);
+  if (!auth.ok) {
+    return auth.response;
+  }
+
   await ensureDatabase();
   const rows = await getRawDb()
-    .prepare("SELECT * FROM events ORDER BY event_start_date ASC LIMIT 100")
+    .prepare("SELECT * FROM events ORDER BY event_start_date ASC LIMIT 500")
     .all();
   return Response.json({ events: rows.results });
 }

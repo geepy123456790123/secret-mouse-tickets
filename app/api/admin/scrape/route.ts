@@ -37,6 +37,14 @@ type SkippedUrl = {
   status?: number;
 };
 
+type ExistingPriceState = {
+  ticketBookingUrl: string | null;
+  ticketPriceStatus: TicketPriceCollection["ticketPriceStatus"];
+  ticketPricesJson: string | null;
+  ticketPricesCollectedAt: string | null;
+  ticketPriceError: string | null;
+};
+
 const DEFAULT_CONCURRENCY = 6;
 const DEFAULT_RESULTS_PER_PAGE = 10;
 const EXCLUDED_BROCHURE_SRC =
@@ -87,10 +95,16 @@ export async function POST(request: Request) {
       runId,
       urls.map((url) => ({ url, status: "candidate", reason: null }))
     );
-    const { events, skipped } = await scrapeCandidateUrls(urls, concurrency, {
-      endpoint: runtime.TICKET_PRICE_COLLECTOR_ENDPOINT,
-      token: runtime.TICKET_PRICE_COLLECTOR_TOKEN,
-    });
+    const existingPrices = await loadExistingPriceState(db);
+    const { events, skipped } = await scrapeCandidateUrls(
+      urls,
+      concurrency,
+      {
+        endpoint: runtime.TICKET_PRICE_COLLECTOR_ENDPOINT,
+        token: runtime.TICKET_PRICE_COLLECTOR_TOKEN,
+      },
+      existingPrices
+    );
     const ingest = await upsertEvents(db, events);
     const reasonSummary = summarizeReasons([
       ...skipped.map((item) => item.reason),
@@ -217,7 +231,8 @@ async function discoverCandidateUrls({
 async function scrapeCandidateUrls(
   urls: string[],
   concurrency: number,
-  priceCollector: { endpoint?: string; token?: string }
+  priceCollector: { endpoint?: string; token?: string },
+  existingPrices: Map<string, ExistingPriceState>
 ) {
   const events: ScrapedEvent[] = [];
   const skipped: SkippedUrl[] = [];
@@ -253,19 +268,22 @@ async function scrapeCandidateUrls(
           continue;
         }
 
-        const priceCollection = await collectTicketPrices({
-          ...priceCollector,
-          event: {
-            eventPageUrl: event.eventPageUrl,
-            eventName: event.infoBannerFirst,
-            eventStartDate: event.eventStartDate,
-            eventEndDate: event.eventEndDate,
-            validStartDate: event.validStartDate,
-            validEndDate: event.validEndDate,
-            ticketBookingUrl: event.ticketBookingUrl,
-            ticketCampaignCode: event.ticketCampaignCode,
-          },
-        });
+        const priceEvent = {
+          eventPageUrl: event.eventPageUrl,
+          eventName: event.infoBannerFirst,
+          eventStartDate: event.eventStartDate,
+          eventEndDate: event.eventEndDate,
+          validStartDate: event.validStartDate,
+          validEndDate: event.validEndDate,
+          ticketBookingUrl: event.ticketBookingUrl,
+          ticketCampaignCode: event.ticketCampaignCode,
+        };
+        const priceCollection =
+          getReusablePriceCollection(event, existingPrices.get(event.eventPageUrl)) ??
+          (await collectTicketPrices({
+            ...priceCollector,
+            event: priceEvent,
+          }));
 
         events.push({ ...event, ...priceCollection });
       } catch (error) {
@@ -339,6 +357,71 @@ async function upsertEvents(db: ReturnType<typeof getRawDb>, events: ScrapedEven
   }
 
   return { ok: true, upserted, ignored, ignoredItems, upsertedUrls };
+}
+
+async function loadExistingPriceState(db: ReturnType<typeof getRawDb>) {
+  const rows = await db
+    .prepare(
+      "SELECT event_page_url, ticket_booking_url, ticket_price_status, ticket_prices_json, ticket_prices_collected_at, ticket_price_error FROM events"
+    )
+    .all<{
+      event_page_url: string;
+      ticket_booking_url: string | null;
+      ticket_price_status: ExistingPriceState["ticketPriceStatus"];
+      ticket_prices_json: string | null;
+      ticket_prices_collected_at: string | null;
+      ticket_price_error: string | null;
+    }>();
+  const state = new Map<string, ExistingPriceState>();
+
+  for (const row of rows.results ?? []) {
+    state.set(row.event_page_url, {
+      ticketBookingUrl: row.ticket_booking_url,
+      ticketPriceStatus: row.ticket_price_status,
+      ticketPricesJson: row.ticket_prices_json,
+      ticketPricesCollectedAt: row.ticket_prices_collected_at,
+      ticketPriceError: row.ticket_price_error,
+    });
+  }
+
+  return state;
+}
+
+function getReusablePriceCollection(
+  event: ScrapedEvent,
+  existingPriceState: ExistingPriceState | undefined
+): TicketPriceCollection | null {
+  if (!existingPriceState || existingPriceState.ticketBookingUrl !== event.ticketBookingUrl) {
+    return null;
+  }
+
+  const { ticketPriceStatus, ticketPricesCollectedAt } = existingPriceState;
+
+  if (
+    (ticketPriceStatus === "collected" || ticketPriceStatus === "empty") &&
+    isWithinDays(ticketPricesCollectedAt, 14)
+  ) {
+    return existingPriceState;
+  }
+
+  if (ticketPriceStatus === "failed" && isWithinDays(ticketPricesCollectedAt, 7)) {
+    return existingPriceState;
+  }
+
+  return null;
+}
+
+function isWithinDays(value: string | null, days: number) {
+  if (!value) {
+    return false;
+  }
+
+  const timestamp = Date.parse(value);
+  if (Number.isNaN(timestamp)) {
+    return false;
+  }
+
+  return Date.now() - timestamp < days * 24 * 60 * 60 * 1000;
 }
 
 async function cleanupNonProductionEvents(db: ReturnType<typeof getRawDb>) {

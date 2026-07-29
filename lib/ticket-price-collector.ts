@@ -92,7 +92,7 @@ export async function collectTicketPrices({
     return {
       ticketPriceStatus: "failed",
       ticketPricesJson: null,
-      ticketPricesCollectedAt: null,
+      ticketPricesCollectedAt: new Date().toISOString(),
       ticketPriceError: truncateError(error instanceof Error ? error.message : String(error)),
     };
   }

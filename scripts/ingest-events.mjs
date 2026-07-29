@@ -37,42 +37,62 @@ async function main() {
   const urls = await discoverCandidateUrls();
   const events = [];
   const skipped = [];
+  const concurrency = normalizeConcurrency(process.env.EVENT_SCRAPE_CONCURRENCY);
+  const endpoint = process.env.INGEST_ENDPOINT;
+  const existingPrices = endpoint ? await loadExistingPriceState(endpoint) : new Map();
+  let nextIndex = 0;
+  let completed = 0;
 
-  for (const url of urls) {
-    try {
-      const response = await fetch(url, {
-        headers: {
-          "User-Agent":
-            "SecretMouseTicketsBot/0.1 authorized event indexing contact=hello@secretmousetickets.com",
-        },
-      });
+  console.log(`Discovered ${urls.length} candidate URLs; processing ${concurrency} at a time.`);
 
-      if (!response.ok) {
-        console.warn(`Skipped ${url}: ${response.status}`);
-        continue;
+  async function worker() {
+    while (nextIndex < urls.length) {
+      const url = urls[nextIndex];
+      nextIndex += 1;
+
+      try {
+        const response = await fetch(url, {
+          headers: {
+            "User-Agent":
+              "SecretMouseTicketsBot/0.1 authorized event indexing contact=hello@secretmousetickets.com",
+          },
+        });
+
+        if (!response.ok) {
+          skipped.push({ url, reason: `HTTP ${response.status}` });
+          continue;
+        }
+
+        const html = await response.text();
+        if (!hasBuyTicketsButton(html)) {
+          skipped.push({ url, reason: "No Buy Tickets button found." });
+          continue;
+        }
+
+        const event = parseEventPage(normalizeEventPageUrl(url), html);
+
+        if (!event) {
+          skipped.push({ url, reason: "No event date payload found." });
+          continue;
+        }
+
+        const priceCollection = await collectTicketPrices(
+          event,
+          existingPrices.get(event.eventPageUrl)
+        );
+        events.push({ ...event, ...priceCollection });
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : String(error);
+        skipped.push({ url, reason });
+        console.warn(`Skipped ${url}: ${reason}`);
+      } finally {
+        completed += 1;
+        console.log(`Processed ${completed}/${urls.length}: ${url}`);
       }
-
-      const html = await response.text();
-      if (!hasBuyTicketsButton(html)) {
-        skipped.push({ url, reason: "No Buy Tickets button found." });
-        continue;
-      }
-
-      const event = parseEventPage(normalizeEventPageUrl(url), html);
-
-      if (!event) {
-        skipped.push({ url, reason: "No event date payload found." });
-        continue;
-      }
-
-      const priceCollection = await collectTicketPrices(event);
-      events.push({ ...event, ...priceCollection });
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error);
-      skipped.push({ url, reason });
-      console.warn(`Skipped ${url}: ${reason}`);
     }
   }
+
+  await Promise.all(Array.from({ length: concurrency }, () => worker()));
 
   if (!events.length) {
     console.log(
@@ -91,7 +111,6 @@ async function main() {
     return;
   }
 
-  const endpoint = process.env.INGEST_ENDPOINT;
   if (!endpoint) {
     console.log(JSON.stringify(events, null, 2));
     return;
@@ -101,19 +120,24 @@ async function main() {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(process.env.ADMIN_INGEST_TOKEN
-        ? { Authorization: `Bearer ${process.env.ADMIN_INGEST_TOKEN}` }
-        : {}),
-      ...(process.env.OAI_SITES_AUTHORIZATION
-        ? { "OAI-Sites-Authorization": process.env.OAI_SITES_AUTHORIZATION }
-        : {}),
+      ...ingestRequestHeaders(),
     },
     body: JSON.stringify(events),
   });
-  const payload = await response.json().catch(() => ({}));
+  const responseText = await response.text();
+  const payload = (() => {
+    try {
+      return JSON.parse(responseText);
+    } catch {
+      return null;
+    }
+  })();
 
-  if (!response.ok) {
-    throw new Error(payload.error ?? `Ingest API returned ${response.status}`);
+  if (!response.ok || !payload || typeof payload !== "object" || payload.ok !== true) {
+    throw new Error(
+      payload?.error ??
+        `Ingest API returned an invalid response (${response.status}): ${responseText.slice(0, 200)}`
+    );
   }
 
   console.log(
@@ -142,6 +166,54 @@ async function main() {
       2
     )
   );
+}
+
+function normalizeConcurrency(value) {
+  const parsed = Number.parseInt(value ?? "", 10);
+  return Number.isInteger(parsed) ? Math.min(Math.max(parsed, 1), 5) : 1;
+}
+
+async function loadExistingPriceState(endpoint) {
+  const response = await fetch(endpoint, {
+    headers: ingestRequestHeaders(),
+  });
+
+  if (!response.ok) {
+    console.warn(`Unable to load existing event pricing state: HTTP ${response.status}`);
+    return new Map();
+  }
+
+  const payload = await response.json().catch(() => null);
+  const rows = Array.isArray(payload?.events) ? payload.events : [];
+  const state = new Map();
+
+  for (const row of rows) {
+    if (typeof row.event_page_url !== "string") {
+      continue;
+    }
+
+    state.set(row.event_page_url, {
+      ticketBookingUrl: firstString(row.ticket_booking_url),
+      ticketPriceStatus: firstString(row.ticket_price_status) ?? "not_configured",
+      ticketPricesJson: firstString(row.ticket_prices_json),
+      ticketPricesCollectedAt: firstString(row.ticket_prices_collected_at),
+      ticketPriceError: firstString(row.ticket_price_error),
+    });
+  }
+
+  console.log(`Loaded existing pricing state for ${state.size} events.`);
+  return state;
+}
+
+function ingestRequestHeaders() {
+  return {
+    ...(process.env.ADMIN_INGEST_TOKEN
+      ? { Authorization: `Bearer ${process.env.ADMIN_INGEST_TOKEN}` }
+      : {}),
+    ...(process.env.OAI_SITES_AUTHORIZATION
+      ? { "OAI-Sites-Authorization": process.env.OAI_SITES_AUTHORIZATION }
+      : {}),
+  };
 }
 
 async function discoverCandidateUrls() {
@@ -299,12 +371,17 @@ function extractTicketCampaignCode(ticketBookingUrl) {
   return url.searchParams.get("CMP") ?? url.searchParams.get("cmp");
 }
 
-async function collectTicketPrices(event) {
+async function collectTicketPrices(event, existingPriceState) {
   const endpoint = process.env.TICKET_PRICE_COLLECTOR_ENDPOINT;
   const browserlessToken = process.env.BROWSERLESS_API_TOKEN;
 
   if ((!endpoint && !browserlessToken) || !event.ticketBookingUrl) {
     return emptyPriceCollection("not_configured");
+  }
+
+  const reusablePriceCollection = getReusablePriceCollection(event, existingPriceState);
+  if (reusablePriceCollection) {
+    return reusablePriceCollection;
   }
 
   try {
@@ -350,10 +427,56 @@ async function collectTicketPrices(event) {
     };
   } catch (error) {
     return {
-      ...emptyPriceCollection("failed"),
+      ticketPriceStatus: "failed",
+      ticketPricesJson: null,
+      ticketPricesCollectedAt: new Date().toISOString(),
       ticketPriceError: String(error instanceof Error ? error.message : error).slice(0, 500),
     };
   }
+}
+
+function getReusablePriceCollection(event, existingPriceState) {
+  if (!existingPriceState || existingPriceState.ticketBookingUrl !== event.ticketBookingUrl) {
+    return null;
+  }
+
+  const status = existingPriceState.ticketPriceStatus;
+  const collectedAt = existingPriceState.ticketPricesCollectedAt;
+
+  if ((status === "collected" || status === "empty") && isWithinDays(collectedAt, 14)) {
+    console.log(`Reusing ${status} ticket pricing for ${event.eventPageUrl}`);
+    return {
+      ticketPriceStatus: status,
+      ticketPricesJson: existingPriceState.ticketPricesJson,
+      ticketPricesCollectedAt: collectedAt,
+      ticketPriceError: existingPriceState.ticketPriceError,
+    };
+  }
+
+  if (status === "failed" && isWithinDays(collectedAt, 7)) {
+    console.log(`Skipping recent failed ticket pricing attempt for ${event.eventPageUrl}`);
+    return {
+      ticketPriceStatus: status,
+      ticketPricesJson: existingPriceState.ticketPricesJson,
+      ticketPricesCollectedAt: collectedAt,
+      ticketPriceError: existingPriceState.ticketPriceError,
+    };
+  }
+
+  return null;
+}
+
+function isWithinDays(value, days) {
+  if (!value) {
+    return false;
+  }
+
+  const timestamp = Date.parse(value);
+  if (Number.isNaN(timestamp)) {
+    return false;
+  }
+
+  return Date.now() - timestamp < days * 24 * 60 * 60 * 1000;
 }
 
 function normalizeTicketPrice(value, index) {
