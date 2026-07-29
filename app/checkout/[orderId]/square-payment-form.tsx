@@ -157,8 +157,8 @@ export function SquarePaymentForm({
           } else {
             await applePay.destroy?.();
           }
-        } catch {
-          // Apple Pay is only shown on supported devices and verified domains.
+        } catch (error) {
+          console.info("Apple Pay is unavailable on this device/browser.", formatPaymentError(error));
         }
 
         let googlePay: SquareAttachablePaymentMethod | null = null;
@@ -181,7 +181,8 @@ export function SquarePaymentForm({
             buttonType: "pay",
           });
           googlePayRef.current = googlePay;
-        } catch {
+        } catch (error) {
+          console.warn("Google Pay is unavailable or could not be attached.", formatPaymentError(error));
           await googlePay?.destroy?.();
 
           if (isMounted) {
@@ -584,6 +585,14 @@ function waitForPaint() {
   return new Promise<void>((resolve) => {
     requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
   });
+}
+
+function formatPaymentError(error: unknown) {
+  if (error instanceof Error) {
+    return { name: error.name, message: error.message };
+  }
+
+  return error;
 }
 
 function loadSquareScript(environment: string) {
