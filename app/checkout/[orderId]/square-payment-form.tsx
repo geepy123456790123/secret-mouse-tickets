@@ -57,6 +57,11 @@ type PayPalButtonsActions = {
 
 declare global {
   interface Window {
+    __smtWalletDiagnostics?: Array<{
+      paymentMethod: string;
+      error: unknown;
+      timestamp: string;
+    }>;
     Square?: {
       payments(applicationId: string, locationId: string): SquarePayments;
     };
@@ -158,7 +163,7 @@ export function SquarePaymentForm({
             await applePay.destroy?.();
           }
         } catch (error) {
-          console.info("Apple Pay is unavailable on this device/browser.", formatPaymentError(error));
+          recordWalletDiagnostic("Apple Pay", error, "info");
         }
 
         let googlePay: SquareAttachablePaymentMethod | null = null;
@@ -182,7 +187,7 @@ export function SquarePaymentForm({
           });
           googlePayRef.current = googlePay;
         } catch (error) {
-          console.warn("Google Pay is unavailable or could not be attached.", formatPaymentError(error));
+          recordWalletDiagnostic("Google Pay", error, "warn");
           await googlePay?.destroy?.();
 
           if (isMounted) {
@@ -588,11 +593,59 @@ function waitForPaint() {
 }
 
 function formatPaymentError(error: unknown) {
+  const serializeValue = (value: unknown, depth = 0): unknown => {
+    if (value == null || typeof value !== "object") {
+      return value;
+    }
+
+    if (depth > 2) {
+      return "[MaxDepth]";
+    }
+
+    if (Array.isArray(value)) {
+      return value.map((item) => serializeValue(item, depth + 1));
+    }
+
+    const record = value as Record<string, unknown>;
+    const output: Record<string, unknown> = {};
+
+    for (const key of Object.getOwnPropertyNames(record)) {
+      output[key] = serializeValue(record[key], depth + 1);
+    }
+
+    return output;
+  };
+
   if (error instanceof Error) {
-    return { name: error.name, message: error.message };
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      details: serializeValue(error),
+    };
   }
 
-  return error;
+  return serializeValue(error);
+}
+
+function recordWalletDiagnostic(
+  paymentMethod: string,
+  error: unknown,
+  level: "info" | "warn"
+) {
+  const diagnostic = {
+    paymentMethod,
+    error: formatPaymentError(error),
+    timestamp: new Date().toISOString(),
+  };
+
+  window.__smtWalletDiagnostics = [
+    ...(window.__smtWalletDiagnostics ?? []),
+    diagnostic,
+  ];
+
+  const message = `${paymentMethod} is unavailable or could not be attached.`;
+  console[level](message, JSON.stringify(diagnostic));
 }
 
 function loadSquareScript(environment: string) {
