@@ -40,5 +40,5 @@ jobs:
             export OAI_SITES_AUTHORIZATION="Bearer ${SITE_BYPASS_TOKEN}"
           fi
           export SEARCH_PROVIDER_ENDPOINT="${BASE_URL}/api/search/disneyevent"
-          export INGEST_ENDPOINT="${BASE_URL}/api/admin/events"
+          export INGEST_ENDPOINT="${BASE_URL}/api/ingest/events"
           npm run ingest:events

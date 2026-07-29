@@ -616,10 +616,10 @@ function TicketOfferExamples({ preview }: { preview: TicketOfferPreview }) {
         <Sparkles className="mt-0.5 shrink-0 text-[#5d45b5]" size={21} aria-hidden="true" />
         <div>
           <h3 className="text-lg font-black leading-6 text-[#120f17]">
-            Ticket offers available through your matched link
+            Here&apos;s the kind of Disney pricing available through your matched link
           </h3>
           <p className="mt-1 text-sm font-semibold leading-5 text-[#3e304d]">
-            Representative prices from the Disney Group &amp; Convention ticket page.
+            Current offers may include:
           </p>
         </div>
       </div>
@@ -639,10 +639,15 @@ function TicketOfferExamples({ preview }: { preview: TicketOfferPreview }) {
       </div>
 
       <p className="mt-3 text-xs font-bold leading-5 text-[#3e304d]">
-        Prices and availability can change. Exact pricing depends on your dates, number of ticket
-        days, parks, ages, and selected options. Pricing checked{" "}
+        Your exact price depends on your dates, number of ticket days, parks, guest ages, and
+        selected options. Disney will show all available tickets and final prices after you open
+        your matched link.
+      </p>
+      <p className="mt-2 text-xs font-bold leading-5 text-[#3e304d]">
+        Prices shown are current examples from this matched Disney Group &amp; Convention ticket
+        page, not a personalized quote. Prices and availability can change. Pricing checked{" "}
         {new Intl.DateTimeFormat("en-US", {
-          month: "short",
+          month: "long",
           day: "numeric",
           year: "numeric",
         }).format(new Date(preview.collectedAt))}
@@ -663,7 +668,7 @@ function formatOfferPrice(
   }).format(priceCents / 100);
   const suffix =
     priceBasis === "per_day" ? " per day" : priceBasis === "per_ticket" ? " per ticket" : "";
-  return `From ${price}${suffix}`;
+  return `from ${price}${suffix}`;
 }
 
 function DesktopSavingsShowcase() {
@@ -766,7 +771,7 @@ function SavingsComparisonCard({
 
     const discountTimer = window.setTimeout(() => {
       setPhase("discounted");
-    }, 5000);
+    }, 3800);
 
     return () => {
       window.clearTimeout(crossTimer);
