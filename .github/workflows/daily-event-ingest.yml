@@ -36,6 +36,9 @@ jobs:
           BROWSERLESS_API_TOKEN: ${{ secrets.BROWSERLESS_API_TOKEN }}
         run: |
           BASE_URL="${SITE_BASE_URL:-https://secretmousetickets.com}"
+          if [[ "$BASE_URL" == *".chatgpt.site"* ]]; then
+            BASE_URL="https://secretmousetickets.com"
+          fi
           if [ -n "${SITE_BYPASS_TOKEN:-}" ]; then
             export OAI_SITES_AUTHORIZATION="Bearer ${SITE_BYPASS_TOKEN}"
           fi
