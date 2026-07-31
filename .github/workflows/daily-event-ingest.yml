@@ -4,6 +4,16 @@ on:
   schedule:
     - cron: "15 10 * * *"
   workflow_dispatch:
+    inputs:
+      event_urls:
+        description: "Optional comma-separated disneyevent.com URLs for a focused smoke test"
+        required: false
+        type: string
+      price_collection_limit:
+        description: "Maximum number of events to attempt Browserless ticket pricing for"
+        required: false
+        default: "5"
+        type: string
 
 concurrency:
   group: daily-event-ingest
@@ -34,6 +44,8 @@ jobs:
           TICKET_PRICE_COLLECTOR_ENDPOINT: ${{ vars.TICKET_PRICE_COLLECTOR_ENDPOINT }}
           TICKET_PRICE_COLLECTOR_TOKEN: ${{ secrets.TICKET_PRICE_COLLECTOR_TOKEN }}
           BROWSERLESS_API_TOKEN: ${{ secrets.BROWSERLESS_API_TOKEN }}
+          EVENT_URLS: ${{ inputs.event_urls }}
+          EVENT_PRICE_COLLECTION_LIMIT: ${{ inputs.price_collection_limit }}
         run: |
           BASE_URL="${SITE_BASE_URL:-https://secretmousetickets.com}"
           if [[ "$BASE_URL" == *".chatgpt.site"* ]]; then

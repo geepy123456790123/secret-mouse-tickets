@@ -40,6 +40,7 @@ async function main() {
   const concurrency = normalizeConcurrency(process.env.EVENT_SCRAPE_CONCURRENCY);
   const endpoint = process.env.INGEST_ENDPOINT;
   const existingPrices = endpoint ? await loadExistingPriceState(endpoint) : new Map();
+  const priceCollectionLimiter = createPriceCollectionLimiter(process.env.EVENT_PRICE_COLLECTION_LIMIT);
   let nextIndex = 0;
   let completed = 0;
 
@@ -78,7 +79,8 @@ async function main() {
 
         const priceCollection = await collectTicketPrices(
           event,
-          existingPrices.get(event.eventPageUrl)
+          existingPrices.get(event.eventPageUrl),
+          priceCollectionLimiter
         );
         events.push({ ...event, ...priceCollection });
       } catch (error) {
@@ -171,6 +173,36 @@ async function main() {
 function normalizeConcurrency(value) {
   const parsed = Number.parseInt(value ?? "", 10);
   return Number.isInteger(parsed) ? Math.min(Math.max(parsed, 1), 5) : 1;
+}
+
+function createPriceCollectionLimiter(value) {
+  const parsed = Number.parseInt(value ?? "", 10);
+  const limit = Number.isInteger(parsed) ? Math.max(parsed, 0) : 5;
+  let attempts = 0;
+
+  return {
+    limit,
+    get attempts() {
+      return attempts;
+    },
+    tryReserve(eventPageUrl) {
+      if (limit === 0) {
+        console.log(`Ticket pricing collection disabled; leaving ${eventPageUrl} not configured.`);
+        return false;
+      }
+
+      if (attempts >= limit) {
+        console.log(
+          `Ticket pricing collection limit reached (${limit}); leaving ${eventPageUrl} not configured.`
+        );
+        return false;
+      }
+
+      attempts += 1;
+      console.log(`Collecting ticket pricing ${attempts}/${limit}: ${eventPageUrl}`);
+      return true;
+    },
+  };
 }
 
 async function loadExistingPriceState(endpoint) {
@@ -371,7 +403,7 @@ function extractTicketCampaignCode(ticketBookingUrl) {
   return url.searchParams.get("CMP") ?? url.searchParams.get("cmp");
 }
 
-async function collectTicketPrices(event, existingPriceState) {
+async function collectTicketPrices(event, existingPriceState, priceCollectionLimiter) {
   const endpoint = process.env.TICKET_PRICE_COLLECTOR_ENDPOINT;
   const browserlessToken = process.env.BROWSERLESS_API_TOKEN;
 
@@ -382,6 +414,10 @@ async function collectTicketPrices(event, existingPriceState) {
   const reusablePriceCollection = getReusablePriceCollection(event, existingPriceState);
   if (reusablePriceCollection) {
     return reusablePriceCollection;
+  }
+
+  if (!priceCollectionLimiter.tryReserve(event.eventPageUrl)) {
+    return emptyPriceCollection("not_configured");
   }
 
   try {
@@ -430,7 +466,7 @@ async function collectTicketPrices(event, existingPriceState) {
       ticketPriceStatus: "failed",
       ticketPricesJson: null,
       ticketPricesCollectedAt: new Date().toISOString(),
-      ticketPriceError: String(error instanceof Error ? error.message : error).slice(0, 500),
+      ticketPriceError: String(error instanceof Error ? error.message : error).slice(0, 2000),
     };
   }
 }
