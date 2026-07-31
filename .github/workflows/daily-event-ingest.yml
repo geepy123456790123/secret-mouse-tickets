@@ -14,6 +14,11 @@ on:
         required: false
         default: "5"
         type: string
+      force_price_refresh:
+        description: "Retry ticket pricing even if a recent collected/failed result exists"
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: daily-event-ingest
@@ -46,6 +51,7 @@ jobs:
           BROWSERLESS_API_TOKEN: ${{ secrets.BROWSERLESS_API_TOKEN }}
           EVENT_URLS: ${{ inputs.event_urls }}
           EVENT_PRICE_COLLECTION_LIMIT: ${{ inputs.price_collection_limit }}
+          FORCE_TICKET_PRICE_REFRESH: ${{ inputs.force_price_refresh }}
         run: |
           BASE_URL="${SITE_BASE_URL:-https://secretmousetickets.com}"
           if [[ "$BASE_URL" == *".chatgpt.site"* ]]; then

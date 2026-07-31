@@ -411,7 +411,11 @@ async function collectTicketPrices(event, existingPriceState, priceCollectionLim
     return emptyPriceCollection("not_configured");
   }
 
-  const reusablePriceCollection = getReusablePriceCollection(event, existingPriceState);
+  const reusablePriceCollection = getReusablePriceCollection(
+    event,
+    existingPriceState,
+    isEnabled(process.env.FORCE_TICKET_PRICE_REFRESH)
+  );
   if (reusablePriceCollection) {
     return reusablePriceCollection;
   }
@@ -471,13 +475,18 @@ async function collectTicketPrices(event, existingPriceState, priceCollectionLim
   }
 }
 
-function getReusablePriceCollection(event, existingPriceState) {
+function getReusablePriceCollection(event, existingPriceState, forceRefresh = false) {
   if (!existingPriceState || existingPriceState.ticketBookingUrl !== event.ticketBookingUrl) {
     return null;
   }
 
   const status = existingPriceState.ticketPriceStatus;
   const collectedAt = existingPriceState.ticketPricesCollectedAt;
+
+  if (forceRefresh) {
+    console.log(`Force-refreshing ticket pricing for ${event.eventPageUrl}`);
+    return null;
+  }
 
   if ((status === "collected" || status === "empty") && isWithinDays(collectedAt, 14)) {
     console.log(`Reusing ${status} ticket pricing for ${event.eventPageUrl}`);
@@ -500,6 +509,10 @@ function getReusablePriceCollection(event, existingPriceState) {
   }
 
   return null;
+}
+
+function isEnabled(value) {
+  return /^(1|true|yes|on)$/i.test(String(value ?? "").trim());
 }
 
 function isWithinDays(value, days) {
