@@ -460,7 +460,7 @@ function attachNetworkOfferCollector(browser) {
         summary = `${summary} Candidate URLs: ${interestingUrls.slice(0, 5).join(", ")}`;
       }
 
-      return { offers: cachedOffers.sort(compareTicketOffers).slice(0, 12), summary };
+      return { offers: normalizeCollectedOffers(cachedOffers), summary };
     },
   };
 }
@@ -496,11 +496,6 @@ async function extractOfferMenu(page, networkOffers) {
   let lastDataSummary = "";
 
   while (Date.now() < deadline) {
-    const networkResult = networkOffers?.getOffers();
-    if (networkResult?.offers.length) {
-      return networkResult.offers;
-    }
-
     for (const frame of page.frames()) {
       const frameText = await frame
         .evaluate(() => (document.body?.innerText || "").replace(/\s+/g, " ").trim())
@@ -508,7 +503,7 @@ async function extractOfferMenu(page, networkOffers) {
 
       const offers = frameText.includes("$") ? await extractRenderedOffers(frame) : [];
       if (offers.length) {
-        return offers;
+        return normalizeCollectedOffers(offers);
       }
 
       const dataResult = await frame
@@ -522,7 +517,7 @@ async function extractOfferMenu(page, networkOffers) {
         const parsedOffers = extractOffersFromPageData(dataResult);
         lastDataSummary = parsedOffers.summary;
         if (parsedOffers.offers.length) {
-          return parsedOffers.offers;
+          return normalizeCollectedOffers(parsedOffers.offers);
         }
       }
     }
@@ -545,7 +540,7 @@ async function extractOfferMenu(page, networkOffers) {
   if (networkResult) {
     lastDataSummary = `${lastDataSummary} ${networkResult.summary}`.trim();
     if (networkResult.offers.length) {
-      return networkResult.offers;
+      return normalizeCollectedOffers(networkResult.offers);
     }
   }
 
@@ -561,6 +556,8 @@ async function extractRenderedOffers(frame) {
   return frame.evaluate(() => {
     const normalize = (value) => value.replace(/\s+/g, " ").trim();
     const pricePattern = /\$\s?(\d{1,4}(?:,\d{3})*(?:\.\d{2})?)/;
+    const knownTicketNamePattern =
+      /(After [14]\s?P\.?M\.?[^$]{0,80}?Ticket|2[-\s]?Day,\s*2[-\s]?Park[^$]{0,80}?Ticket|2[-\s]?Day[^$]{0,120}?2[-\s]?Park[^$]{0,80}?Ticket|4[-\s]?Park Magic[^$]{0,80}?Ticket|Theme Park[^$]{0,80}?Ticket|Standard\s+1\s*-\s*to\s*10[^$]{0,80}?Ticket)/i;
     const candidates = [
       ...document.querySelectorAll(
         "article, li, [role='listitem'], [class*='card'], [class*='product'], [class*='ticket']"
@@ -575,7 +572,10 @@ async function extractRenderedOffers(frame) {
       if (!priceMatch || text.length < 15 || text.length > 1800) continue;
 
       const heading = element.querySelector("h1,h2,h3,h4,h5,h6,[role='heading']");
-      const productName = normalize(heading?.textContent || text.split(/\$|From /i)[0] || "");
+      const knownName = text.match(knownTicketNamePattern)?.[1];
+      const productName = normalize(
+        knownName || heading?.textContent || text.split(/\$|From /i)[0] || ""
+      );
       if (!productName || productName.length > 180) continue;
 
       const key = `${productName.toLowerCase()}|${priceMatch[1]}`;
@@ -603,7 +603,7 @@ async function extractRenderedOffers(frame) {
       });
     }
 
-    return rows.slice(0, 12);
+    return rows.slice(0, 24);
   });
 }
 
@@ -932,6 +932,100 @@ function buildOffer({ productName, price, details }) {
     validDate: null,
     details: normalizeText(details).slice(0, 700),
   };
+}
+
+function normalizeCollectedOffers(offers) {
+  const byProduct = new Map();
+
+  for (const rawOffer of offers) {
+    const offer = normalizeOffer(rawOffer);
+    if (!offer || !Number.isFinite(offer.price)) continue;
+
+    const key = canonicalOfferKey(offer.productName);
+    const existing = byProduct.get(key);
+    if (!existing || compareNormalizedOfferPreference(offer, existing) < 0) {
+      byProduct.set(key, offer);
+    }
+  }
+
+  return [...byProduct.values()].sort(compareTicketOffers).slice(0, 6);
+}
+
+function normalizeOffer(rawOffer) {
+  const productName = canonicalProductName(rawOffer.productName);
+  if (!productName) return null;
+
+  const ticketDays = inferTicketDays(productName, rawOffer.ticketDays);
+  let price = Number(rawOffer.price);
+  let priceBasis = rawOffer.priceBasis || "from";
+
+  if (ticketDays && price >= ticketDays * 75) {
+    price = Number((price / ticketDays).toFixed(2));
+    priceBasis = "per_day";
+  }
+
+  return {
+    ...rawOffer,
+    productName,
+    price,
+    priceBasis,
+    ticketDays,
+  };
+}
+
+function canonicalProductName(value) {
+  const normalized = normalizeText(value)
+    .replace(/modal;?type=onesource/gi, "")
+    .replace(/modalitytype=onesource/gi, "")
+    .replace(/type=onesource/gi, "")
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const lower = normalized.toLowerCase();
+
+  if (lower.includes("after 4") && lower.includes("ticket")) {
+    return "After 4 PM Tickets";
+  }
+
+  if (lower.includes("after 1") && lower.includes("ticket")) {
+    return "After 1 PM Tickets";
+  }
+
+  if ((lower.includes("2 day") || lower.includes("2-day")) && lower.includes("2 park")) {
+    return "2-Day, 2-Park tickets";
+  }
+
+  if (lower.includes("4 park magic") || lower.includes("4-park magic")) {
+    return "4-Park Magic Tickets";
+  }
+
+  if (lower.includes("theme park") || lower.includes("standard 1") || lower.includes("one day")) {
+    return "Theme park tickets";
+  }
+
+  if (!isUsefulProductName(normalized)) return "";
+
+  return normalized.replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function inferTicketDays(productName, explicitTicketDays) {
+  const explicit = Number(explicitTicketDays);
+  if (Number.isInteger(explicit) && explicit > 0) return explicit;
+
+  const lower = productName.toLowerCase();
+  if (lower.includes("2-day") || lower.includes("2 day")) return 2;
+  if (lower.includes("4-park magic")) return 4;
+
+  return null;
+}
+
+function canonicalOfferKey(productName) {
+  return canonicalProductName(productName).toLowerCase();
+}
+
+function compareNormalizedOfferPreference(a, b) {
+  const basisRank = (offer) => (offer.priceBasis === "per_day" ? 0 : 1);
+  return basisRank(a) - basisRank(b) || a.price - b.price;
 }
 
 function extractOffersFromText(text) {
