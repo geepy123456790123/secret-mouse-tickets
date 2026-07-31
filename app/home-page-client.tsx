@@ -618,9 +618,6 @@ function TicketOfferExamples({ preview }: { preview: TicketOfferPreview }) {
           <h3 className="text-lg font-black leading-6 text-[#120f17]">
             Here&apos;s the kind of Disney pricing available through your matched link
           </h3>
-          <p className="mt-1 text-sm font-semibold leading-5 text-[#3e304d]">
-            Current offers may include:
-          </p>
         </div>
       </div>
 
@@ -628,9 +625,11 @@ function TicketOfferExamples({ preview }: { preview: TicketOfferPreview }) {
         {preview.offers.map((offer) => (
           <div
             key={`${offer.productName}-${offer.priceCents}`}
-            className="rounded-[14px] border-[3px] border-[#120f17] bg-white px-3 py-3"
+            className="flex min-h-[112px] flex-col justify-between rounded-[14px] border-[3px] border-[#120f17] bg-white px-3 py-3"
           >
-            <p className="text-sm font-black leading-5 text-[#120f17]">{offer.productName}</p>
+            <p className="text-sm font-black leading-5 text-[#120f17]">
+              {formatOfferProductName(offer.productName)}
+            </p>
             <p className="mt-1 text-xl font-black text-[#5d45b5]">
               {formatOfferPrice(offer.priceCents, offer.currency, offer.priceBasis)}
             </p>
@@ -639,11 +638,6 @@ function TicketOfferExamples({ preview }: { preview: TicketOfferPreview }) {
       </div>
 
       <p className="mt-3 text-xs font-bold leading-5 text-[#3e304d]">
-        Your exact price depends on your dates, number of ticket days, parks, guest ages, and
-        selected options. Disney will show all available tickets and final prices after you open
-        your matched link.
-      </p>
-      <p className="mt-2 text-xs font-bold leading-5 text-[#3e304d]">
         Prices shown are current examples from this matched Disney Group &amp; Convention ticket
         page, not a personalized quote. Prices and availability can change. Pricing checked{" "}
         {new Intl.DateTimeFormat("en-US", {
@@ -655,6 +649,31 @@ function TicketOfferExamples({ preview }: { preview: TicketOfferPreview }) {
       </p>
     </div>
   );
+}
+
+function formatOfferProductName(productName: string) {
+  const normalized = productName.toLowerCase().replace(/\s+/g, " ").trim();
+
+  if (normalized.includes("2-day") && normalized.includes("2-park")) {
+    return "2-Day, 2-Park tickets";
+  }
+
+  if (normalized.includes("4-park-magic")) {
+    return "4-Park Magic Tickets";
+  }
+
+  if (normalized.includes("theme park only")) {
+    return "Theme park tickets";
+  }
+
+  return productName
+    .replace(/modal;?type=onesource/gi, "")
+    .replace(/modalitytype=onesource/gi, "")
+    .replace(/type=onesource/gi, "")
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function formatOfferPrice(
