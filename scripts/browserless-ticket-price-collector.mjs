@@ -222,6 +222,7 @@ async function waitForAdmissionPage(browser) {
 
 async function clickTicketSelection(page) {
   const deadline = Date.now() + 25_000;
+  const originalUrl = page.url();
 
   while (Date.now() < deadline) {
     for (const frame of page.frames()) {
@@ -249,13 +250,20 @@ async function clickTicketSelection(page) {
           });
 
           if (!control) return false;
+          if (control.href && /\/admission\/tickets\/?/.test(control.href)) {
+            window.location.assign(control.href);
+            return true;
+          }
           control.click();
           return true;
         })
         .catch(() => false);
 
       if (clicked) {
-        await sleep(1_000);
+        await sleep(3_000);
+        if (!page.url().includes("/admission/tickets")) {
+          await openTicketSelectionPage(page, originalUrl);
+        }
         return;
       }
     }
@@ -263,13 +271,48 @@ async function clickTicketSelection(page) {
     await sleep(750);
   }
 
-  const state = await getPageState(page);
-  throw new Error(
-    `Disney Select Tickets button was not found. Page: ${state.url}; visible text: ${state.text.slice(
-      0,
-      350
-    )}`
-  );
+  await openTicketSelectionPage(page, originalUrl);
+}
+
+async function openTicketSelectionPage(page, fallbackUrl) {
+  const currentUrl = page.url() || fallbackUrl;
+  const ticketUrl = buildTicketSelectionUrl(currentUrl);
+  if (!ticketUrl) {
+    const state = await getPageState(page);
+    throw new Error(
+      `Disney Select Tickets button was not found. Page: ${state.url}; visible text: ${state.text.slice(
+        0,
+        350
+      )}`
+    );
+  }
+
+  await page.goto(ticketUrl, { waitUntil: "domcontentloaded", timeout: 25_000 }).catch(() => {
+    // waitForTicketPage will report the last loaded Disney pages if this fallback does not land.
+  });
+  await page.waitForNetworkIdle({ idleTime: 1_000, timeout: 12_000 }).catch(() => undefined);
+}
+
+function buildTicketSelectionUrl(value) {
+  try {
+    const url = new URL(value);
+    if (!url.hostname.includes("disneyworld.disney.go.com")) {
+      return null;
+    }
+
+    url.hash = "";
+    url.search = "";
+    url.pathname = url.pathname.replace(/\/+$/, "");
+    if (url.pathname.endsWith("/admission/tickets")) {
+      return `${url.origin}${url.pathname}/`;
+    }
+    if (url.pathname.endsWith("/admission")) {
+      return `${url.origin}${url.pathname}/tickets/`;
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 async function waitForTicketPage(browser) {
