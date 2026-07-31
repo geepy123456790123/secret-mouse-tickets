@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     const today = todayIso();
     const event = await db
       .prepare(
-        "SELECT * FROM events WHERE destination = 'disney_world' AND valid_start_date <= ? AND valid_end_date >= ? AND event_start_date > ? ORDER BY event_start_date ASC LIMIT 1"
+        "SELECT * FROM events WHERE destination = 'disney_world' AND valid_start_date <= ? AND valid_end_date >= ? AND event_start_date > ? ORDER BY CASE WHEN ticket_price_status = 'collected' AND ticket_prices_json IS NOT NULL THEN 0 ELSE 1 END, event_start_date ASC LIMIT 1"
       )
       .bind(input.visitStartDate, input.visitEndDate, today)
       .first<EventRecord>();
