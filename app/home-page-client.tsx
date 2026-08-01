@@ -609,7 +609,7 @@ function TicketOfferExamples({ preview }: { preview: TicketOfferPreview }) {
         <Sparkles className="mt-0.5 shrink-0 text-[#5d45b5]" size={21} aria-hidden="true" />
         <div>
           <h3 className="text-lg font-black leading-6 text-[#120f17]">
-            Here&apos;s the kind of Disney pricing available through your matched link
+            Here&apos;s the special Disney ticket pricing available through your matched link
           </h3>
         </div>
       </div>
