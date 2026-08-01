@@ -4,9 +4,9 @@ import { getTopBannerSettings } from "@/lib/site-settings";
 
 const siteUrl = "https://secretmousetickets.com";
 const shareImage = {
-  url: "/secret-mouse-tickets-share.png",
+  url: "/secret-mouse-tickets-og-facebook.png",
   width: 1200,
-  height: 630,
+  height: 628,
   alt: "Secret Mouse Tickets - Disney World ticket offers matched to your visit",
 };
 
