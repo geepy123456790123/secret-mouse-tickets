@@ -494,11 +494,9 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
             Disney tickets.
           </p>
           <div className="mt-5 flex justify-center">
-            <Image
+            <img
               src="/trustpilot-badge.png"
               alt="Trustpilot five-star rating"
-              width={320}
-              height={136}
               className="h-auto w-56 sm:w-64"
             />
           </div>
