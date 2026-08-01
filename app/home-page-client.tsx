@@ -631,7 +631,7 @@ function TicketOfferExamples({ preview }: { preview: TicketOfferPreview }) {
         <div className="flex min-h-[88px] flex-col rounded-[14px] border-[3px] border-[#120f17] bg-white px-3 py-3">
           <p className="text-sm font-black leading-5 text-[#120f17]">Bonus Disney Magic</p>
           <p className="mt-2 text-base font-black leading-5 text-[#5d45b5]">
-            Multi-day tickets include a free Water Park Fun &amp; More Visit pass.
+            Multi-day tickets include a free Water Park Fun &amp; More pass.
           </p>
         </div>
       </div>
