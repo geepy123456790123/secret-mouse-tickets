@@ -3,15 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  ArrowDown,
   BadgeCheck,
   ChevronDown,
-  CircleCheck,
   ExternalLink,
   Mail,
   Quote,
   Search,
-  ShieldCheck,
   Sparkles,
   Star,
   Waves,
@@ -124,30 +121,6 @@ const faqItems = [
     question: "What if my dates don't match an offer, or I don't actually come out ahead?",
     answer:
       "If nothing matches your dates, you're not charged. If we do find a match and you still don't come out ahead of Disney's regular price after our fee, contact us and we'll make it right under our guarantee.",
-  },
-] as const;
-
-const priceComparisonExamples = [
-  {
-    date: "July 25",
-    regularLabel: "Disney's Regular Price",
-    eventName: "HCAF Annual Conference & Trade Show",
-    regularItems: [{ label: "1-Day Magic Kingdom Ticket", price: "$184" }],
-    discountedItems: [{ label: "1-Day Magic Kingdom Ticket", price: "$165.60" }],
-  },
-  {
-    date: "October 10",
-    regularLabel: "Disney's Regular Price",
-    eventName: "MCE Conferences October Event",
-    regularItems: [{ label: "1-Day Hollywood Studios Ticket", price: "$199" }],
-    discountedItems: [{ label: "1-Day Hollywood Studios Ticket", price: "$179.10" }],
-  },
-  {
-    date: "December 19",
-    regularLabel: "Disney's Regular Price",
-    eventName: "MER Conferences - Orthopedic Medicine for Primary Care",
-    regularItems: [{ label: "1-Day Magic Kingdom Ticket", price: "$209" }],
-    discountedItems: [{ label: "1-Day Magic Kingdom Ticket", price: "$188.10" }],
   },
 ] as const;
 
@@ -444,14 +417,6 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
                 <MatchStep number="3" text="Buy your park tickets directly from Disney." />
               </div>
 
-              <div className="mt-4 flex items-start gap-3 rounded-[16px] border-[3px] border-[#120f17] bg-[#fff7de] px-4 py-3">
-                <ShieldCheck className="mt-0.5 shrink-0 text-[#5d45b5]" size={22} aria-hidden="true" />
-                <p className="text-sm font-black leading-6 text-[#120f17]">
-                  Money-back guarantee: save versus Disney&apos;s regular ticket price after our fee,
-                  or your money back.
-                </p>
-              </div>
-
               <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
                 <label className="grid gap-2 text-sm font-bold">
                   Coupon Code
@@ -499,8 +464,6 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
               to attend a convention or belong to a group.
             </p>
           </section>
-
-          <DesktopSavingsShowcase />
 
           <p className="rounded-[18px] bg-[#fff7de]/80 px-4 py-2 text-center text-xs font-semibold leading-5 text-[#3e304d]">
             Secret Mouse Tickets is an independent service and is not affiliated with Disney.{" "}
@@ -642,7 +605,7 @@ function TicketOfferExamples({ preview }: { preview: TicketOfferPreview }) {
       </div>
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
-        {preview.offers.map((offer) => (
+        {preview.offers.slice(0, 3).map((offer) => (
           <div
             key={`${offer.productName}-${offer.priceCents}`}
             className="flex min-h-[88px] flex-col rounded-[14px] border-[3px] border-[#120f17] bg-white px-3 py-3"
@@ -655,6 +618,12 @@ function TicketOfferExamples({ preview }: { preview: TicketOfferPreview }) {
             </p>
           </div>
         ))}
+        <div className="flex min-h-[88px] flex-col rounded-[14px] border-[3px] border-[#120f17] bg-white px-3 py-3">
+          <p className="text-sm font-black leading-5 text-[#120f17]">Bonus Disney Magic</p>
+          <p className="mt-2 text-lg font-black leading-6 text-[#5d45b5]">
+            Plus, multi-day tickets include an extra Water Park Fun &amp; More Visit pass.
+          </p>
+        </div>
       </div>
 
       <p className="mt-3 text-xs font-bold leading-5 text-[#3e304d]">
@@ -696,60 +665,6 @@ function formatOfferPrice(
   return `From ${price}${suffix}`;
 }
 
-function DesktopSavingsShowcase() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isFading, setIsFading] = useState(false);
-
-  useEffect(() => {
-    const fadeTimer = window.setTimeout(() => {
-      setIsFading(true);
-    }, 10400);
-
-    const nextTimer = window.setTimeout(() => {
-      setActiveIndex((current) => (current + 1) % priceComparisonExamples.length);
-      setIsFading(false);
-    }, 11000);
-
-    return () => {
-      window.clearTimeout(fadeTimer);
-      window.clearTimeout(nextTimer);
-    };
-  }, [activeIndex]);
-
-  const activeExample = priceComparisonExamples[activeIndex];
-
-  return (
-    <section className="hidden w-full lg:block">
-      <div className="cartoon-panel overflow-hidden rounded-[24px] bg-white/95 p-5">
-        <div
-          className={`flex items-center justify-between gap-4 transition-opacity duration-500 ${
-            isFading ? "opacity-0" : "opacity-100"
-          }`}
-        >
-          <h2 className="text-xl font-black text-[#120f17]">{activeExample.date} Ticket Prices</h2>
-          <div className="flex gap-2">
-            {priceComparisonExamples.map((example, index) => (
-              <span
-                key={example.date}
-                className={`h-2.5 rounded-full border-2 border-[#120f17] transition-all ${
-                  index === activeIndex ? "w-8 bg-[#8f72f2]" : "w-2.5 bg-[#fff7de]"
-                }`}
-                aria-hidden="true"
-              />
-            ))}
-          </div>
-        </div>
-
-        <div
-          className={`transition-opacity duration-500 ${isFading ? "opacity-0" : "opacity-100"}`}
-        >
-          <SavingsComparisonCard key={activeExample.date} example={activeExample} />
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function CompactBenefit({
   icon,
   iconBackground,
@@ -778,101 +693,6 @@ function MatchStep({ number, text }: { number: string; text: string }) {
         {number}
       </span>
       <p className="text-sm font-bold leading-5 text-[#3e304d]">{text}</p>
-    </div>
-  );
-}
-
-function SavingsComparisonCard({
-  example,
-}: {
-  example: (typeof priceComparisonExamples)[number];
-}) {
-  const [phase, setPhase] = useState<"regular" | "crossed" | "discounted">("regular");
-
-  useEffect(() => {
-    const crossTimer = window.setTimeout(() => {
-      setPhase("crossed");
-    }, 2800);
-
-    const discountTimer = window.setTimeout(() => {
-      setPhase("discounted");
-    }, 3800);
-
-    return () => {
-      window.clearTimeout(crossTimer);
-      window.clearTimeout(discountTimer);
-    };
-  }, []);
-
-  return (
-    <div className="mt-4 grid gap-4">
-      <div className="rounded-[18px] border-[3px] border-[#120f17] bg-[#fffaf0] p-4 text-left">
-        <p className="text-xs font-bold uppercase tracking-wide text-[#6a6170]">
-          {example.regularLabel}
-        </p>
-        <div className="mt-3 grid gap-3">
-          {example.regularItems.map((item) => (
-            <div
-              key={`${example.date}-${item.label}-regular`}
-              className="flex items-end justify-between gap-4 border-b-2 border-dashed border-[#d5cde0] pb-2 last:border-b-0 last:pb-0"
-            >
-              <span className="text-sm font-bold leading-6 text-[#3e304d]">{item.label}</span>
-              <span
-                className={`text-lg font-black text-[#120f17] transition-all duration-700 ${
-                  phase === "regular"
-                    ? "translate-y-0 opacity-100"
-                    : "translate-y-0 opacity-100 line-through decoration-2 decoration-[#ff7f98]"
-                }`}
-              >
-                {item.price}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div
-        className={`flex items-center justify-center gap-2 text-[#5d45b5] transition-all duration-500 ${
-          phase === "discounted"
-            ? "translate-y-0 opacity-100"
-            : "pointer-events-none translate-y-2 opacity-0"
-        }`}
-      >
-        <ArrowDown size={18} strokeWidth={3} aria-hidden="true" />
-        <span className="text-xs font-black uppercase tracking-[0.18em]">
-          Conference/Event Price
-        </span>
-        <ArrowDown size={18} strokeWidth={3} aria-hidden="true" />
-      </div>
-
-      <div
-        className={`rounded-[18px] border-[3px] border-[#120f17] bg-[#efe8ff] p-4 text-left shadow-[4px_4px_0_#120f17] transition-all duration-500 ${
-          phase === "discounted"
-            ? "translate-y-0 opacity-100"
-            : "pointer-events-none translate-y-3 opacity-0"
-        }`}
-      >
-        <p className="text-sm font-black leading-6 text-[#120f17]">{example.eventName}</p>
-        <div className="mt-3 grid gap-3">
-          {example.discountedItems.map((item) => (
-            <div
-              key={`${example.date}-${item.label}-discounted`}
-              className="flex items-end justify-between gap-4 border-b-2 border-dashed border-[#c7bae7] pb-2 last:border-b-0 last:pb-0"
-            >
-              <span className="text-sm font-bold leading-6 text-[#3e304d]">{item.label}</span>
-              <span className="inline-flex items-center gap-2 text-lg font-black text-[#5d45b5]">
-                <CircleCheck
-                  size={18}
-                  strokeWidth={2.6}
-                  className="text-[#8f72f2]"
-                  aria-hidden="true"
-                />
-                {item.price}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
