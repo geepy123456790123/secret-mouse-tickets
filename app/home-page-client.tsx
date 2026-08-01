@@ -263,16 +263,17 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
           </div>
 
           <div className="rounded-[18px] border-[3px] border-[#120f17] bg-[#fff7de] px-5 py-4 text-center text-base font-black leading-7 text-[#120f17] shadow-[4px_4px_0_#120f17] sm:text-lg sm:leading-8">
-            We guarantee you&apos;ll save money using Secret Mouse Tickets over Disney&apos;s
-            regular park ticket prices - even after our fee - or your money back.
-          </div>
-
-          <div className="mt-2 flex justify-center">
-            <img
-              src="/trustpilot-badge.png"
-              alt="Trustpilot five-star rating"
-              className="h-auto w-52 sm:w-60"
-            />
+            <p>
+              We guarantee you&apos;ll save money using Secret Mouse Tickets over Disney&apos;s
+              regular park ticket prices - even after our fee - or your money back.
+            </p>
+            <div className="mt-3 flex justify-center">
+              <img
+                src="/trustpilot-badge.png"
+                alt="Trustpilot five-star rating"
+                className="h-auto w-52 sm:w-60"
+              />
+            </div>
           </div>
 
         </div>
