@@ -2,9 +2,14 @@ import puppeteer from "puppeteer-core";
 
 const BROWSERLESS_HOST =
   process.env.BROWSERLESS_HOST ?? "https://production-sfo.browserless.io";
-const SESSION_TIMEOUT_MS = 120_000;
-const BQL_REQUEST_TIMEOUT_MS = 90_000;
-const COLLECTION_TIMEOUT_MS = 180_000;
+const SESSION_TIMEOUT_MS = positiveEnvInteger("BROWSERLESS_SESSION_TIMEOUT_MS", 180_000);
+const BQL_REQUEST_TIMEOUT_MS = positiveEnvInteger("BROWSERLESS_BQL_REQUEST_TIMEOUT_MS", 120_000);
+const COLLECTION_TIMEOUT_MS = positiveEnvInteger("BROWSERLESS_COLLECTION_TIMEOUT_MS", 240_000);
+
+function positiveEnvInteger(name, fallback) {
+  const value = Number(process.env[name]);
+  return Number.isInteger(value) && value > 0 ? value : fallback;
+}
 
 export async function collectBrowserlessTicketPrices(event, token) {
   if (!token || !event?.eventPageUrl) {
