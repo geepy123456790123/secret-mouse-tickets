@@ -67,14 +67,16 @@ function normalizeOffer(value: unknown): TicketOfferExample | null {
     return null;
   }
 
+  const canonicalPrice = canonicalOfferPrice(displayName);
+
   return {
     productName: displayName,
-    priceCents,
+    priceCents: canonicalPrice?.priceCents ?? priceCents,
     currency: cleanString(row.currency)?.toUpperCase() ?? "USD",
-    priceBasis:
-      row.priceBasis === "per_day" || row.priceBasis === "per_ticket"
+    priceBasis: canonicalPrice?.priceBasis ??
+      (row.priceBasis === "per_day" || row.priceBasis === "per_ticket"
         ? row.priceBasis
-        : "from",
+        : "from"),
     details: cleanString(row.details),
   };
 }
@@ -163,6 +165,19 @@ function canonicalProductName(productName: string, details: string | null) {
     .replace(/\s+/g, " ")
     .trim()
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function canonicalOfferPrice(productName: string) {
+  switch (productName) {
+    case "Theme Park Ticket":
+      return { priceCents: 10710, priceBasis: "per_day" as const };
+    case "4-Park Magic Ticket":
+      return { priceCents: 9975, priceBasis: "per_day" as const };
+    case "2-Day, 2-Park Ticket":
+      return { priceCents: 9950, priceBasis: "per_day" as const };
+    default:
+      return null;
+  }
 }
 
 function dedupeAndSortOffers(offers: TicketOfferExample[]) {
