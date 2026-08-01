@@ -469,10 +469,6 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
               iconBackground="bg-[#fff7de]"
               text="Buy your actual park tickets directly from Disney."
             />
-            <p className="border-t-[3px] border-[#120f17] pt-3 text-sm font-bold leading-6 text-[#3e304d]">
-              We match your dates to Disney Group &amp; Convention discount offers. You don&apos;t need
-              to attend a convention or belong to a group.
-            </p>
           </section>
 
           <p className="rounded-[18px] bg-[#fff7de]/80 px-4 py-2 text-center text-xs font-semibold leading-5 text-[#3e304d]">
@@ -638,7 +634,8 @@ function TicketOfferExamples({ preview }: { preview: TicketOfferPreview }) {
 
       <p className="mt-3 text-xs font-bold leading-5 text-[#3e304d]">
         Prices shown are current examples from this matched Disney Group &amp; Convention ticket
-        page, not a personalized quote. Prices and availability can change. Pricing checked{" "}
+        page. You&apos;re not required to attend a convention or belong to a group to use these
+        tickets. Prices and availability can change. Pricing checked{" "}
         {new Intl.DateTimeFormat("en-US", {
           month: "long",
           day: "numeric",
