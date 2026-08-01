@@ -16,7 +16,7 @@ import {
   Star,
   Waves,
 } from "lucide-react";
-import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { formatDate } from "@/lib/dates";
 import { SiteFooter } from "@/components/site-footer";
 import type { TopBannerSettings } from "@/lib/site-settings";
@@ -157,6 +157,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
   const [status, setStatus] = useState<"idle" | "checking" | "checkout">("idle");
   const [error, setError] = useState("");
   const [couponCode, setCouponCode] = useState("");
+  const matchCardRef = useRef<HTMLElement | null>(null);
 
   const totalGuests = useMemo(
     () => Number(form.guests10Plus) + Number(form.guests3To9),
@@ -176,6 +177,22 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
       keepalive: true,
     }).catch(() => undefined);
   }, []);
+
+  useEffect(() => {
+    if (result?.outcome !== "matched") return;
+
+    const handle = window.setTimeout(() => {
+      window.requestAnimationFrame(() => {
+        const matchCard = matchCardRef.current;
+        if (!matchCard) return;
+
+        const targetTop = matchCard.getBoundingClientRect().top + window.scrollY - 18;
+        window.scrollTo({ top: Math.max(targetTop, 0), behavior: "smooth" });
+      });
+    }, 100);
+
+    return () => window.clearTimeout(handle);
+  }, [result]);
 
   async function submitForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -387,7 +404,10 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
           )}
 
           {result?.outcome === "matched" && (
-            <section className="rounded-[24px] border-4 border-[#120f17] bg-[#efe8ff] p-5 shadow-[8px_8px_0_#120f17]">
+            <section
+              ref={matchCardRef}
+              className="rounded-[24px] border-4 border-[#120f17] bg-[#efe8ff] p-5 shadow-[8px_8px_0_#120f17]"
+            >
               <p className="inline-flex items-center gap-2 rounded-full border-[3px] border-[#120f17] bg-white px-3 py-2 text-sm font-bold text-[#5d45b5]">
                 <BadgeCheck size={17} aria-hidden="true" />
                 Match found
@@ -625,12 +645,12 @@ function TicketOfferExamples({ preview }: { preview: TicketOfferPreview }) {
         {preview.offers.map((offer) => (
           <div
             key={`${offer.productName}-${offer.priceCents}`}
-            className="flex min-h-[112px] flex-col justify-between rounded-[14px] border-[3px] border-[#120f17] bg-white px-3 py-3"
+            className="flex min-h-[88px] flex-col rounded-[14px] border-[3px] border-[#120f17] bg-white px-3 py-3"
           >
             <p className="text-sm font-black leading-5 text-[#120f17]">
               {formatOfferProductName(offer.productName)}
             </p>
-            <p className="mt-1 text-xl font-black text-[#5d45b5]">
+            <p className="mt-2 text-xl font-black leading-7 text-[#5d45b5]">
               {formatOfferPrice(offer.priceCents, offer.currency, offer.priceBasis)}
             </p>
           </div>
