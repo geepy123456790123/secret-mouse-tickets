@@ -493,6 +493,15 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
             200+ families have used Secret Mouse Tickets to save an average of $240 on their
             Disney tickets.
           </p>
+          <div className="mt-5 flex justify-center">
+            <Image
+              src="/trustpilot-badge.png"
+              alt="Trustpilot five-star rating"
+              width={320}
+              height={136}
+              className="h-auto w-56 sm:w-64"
+            />
+          </div>
           <h2 className="mt-5 text-3xl font-black leading-tight text-[#120f17] sm:text-4xl">
             Families use Secret Mouse Tickets to spend less on tickets and more on Disney magic.
           </h2>
