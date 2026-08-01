@@ -14,7 +14,7 @@ import {
   Waves,
 } from "lucide-react";
 import { FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { formatDate } from "@/lib/dates";
+import { addDays, formatDate } from "@/lib/dates";
 import { SiteFooter } from "@/components/site-footer";
 import type { TopBannerSettings } from "@/lib/site-settings";
 import type { TicketOfferPreview } from "@/lib/ticket-offers";
@@ -167,6 +167,16 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
     return () => window.clearTimeout(handle);
   }, [result]);
 
+  function updateVisitStartDate(visitStartDate: string) {
+    setForm((current) => ({
+      ...current,
+      visitStartDate,
+      visitEndDate: /^\d{4}-\d{2}-\d{2}$/.test(visitStartDate)
+        ? addDays(visitStartDate, 3)
+        : current.visitEndDate,
+    }));
+  }
+
   async function submitForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -278,8 +288,8 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
                   type="date"
                   required
                   value={form.visitStartDate}
-                  onChange={(event) => setForm({ ...form, visitStartDate: event.target.value })}
-                  className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-3 text-base font-semibold"
+                  onChange={(event) => updateVisitStartDate(event.target.value)}
+                  className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-3 text-base font-black"
                 />
               </label>
               <label className="grid gap-2 text-sm font-bold">
@@ -289,7 +299,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
                   required
                   value={form.visitEndDate}
                   onChange={(event) => setForm({ ...form, visitEndDate: event.target.value })}
-                  className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-3 text-base font-semibold"
+                  className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-[#fffaf0] px-3 text-base font-black"
                 />
               </label>
               <label className="grid gap-2 text-sm font-bold">
