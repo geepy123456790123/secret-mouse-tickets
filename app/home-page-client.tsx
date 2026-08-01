@@ -652,20 +652,6 @@ function TicketOfferExamples({ preview }: { preview: TicketOfferPreview }) {
 }
 
 function formatOfferProductName(productName: string) {
-  const normalized = productName.toLowerCase().replace(/\s+/g, " ").trim();
-
-  if (normalized.includes("2-day") && normalized.includes("2-park")) {
-    return "2-Day, 2-Park tickets";
-  }
-
-  if (normalized.includes("4-park-magic")) {
-    return "4-Park Magic Tickets";
-  }
-
-  if (normalized.includes("theme park only")) {
-    return "Theme park tickets";
-  }
-
   return productName
     .replace(/modal;?type=onesource/gi, "")
     .replace(/modalitytype=onesource/gi, "")
@@ -686,8 +672,8 @@ function formatOfferPrice(
     currency,
   }).format(priceCents / 100);
   const suffix =
-    priceBasis === "per_day" ? " per day" : priceBasis === "per_ticket" ? " per ticket" : "";
-  return `from ${price}${suffix}`;
+    priceBasis === "per_day" ? "/Day" : priceBasis === "per_ticket" ? "/Ticket" : "";
+  return `From ${price}${suffix}`;
 }
 
 function DesktopSavingsShowcase() {

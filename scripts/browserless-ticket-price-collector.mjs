@@ -560,7 +560,15 @@ async function extractOfferMenu(page, networkOffers) {
 async function extractRenderedOffers(frame) {
   return frame.evaluate(() => {
     const normalize = (value) => value.replace(/\s+/g, " ").trim();
-    const pricePattern = /\$\s?(\d{1,4}(?:,\d{3})*(?:\.\d{2})?)/;
+    const pricePattern = /\$\s?(\d{1,4}(?:,\d{3})*(?:\.\d{2})?)/g;
+    const selectBestPrice = (text) => {
+      const matches = [...text.matchAll(pricePattern)];
+      return (
+        matches.find((match) =>
+          /(?:\/\s*day|per\s+day)/i.test(text.slice(match.index ?? 0, (match.index ?? 0) + 90))
+        ) ?? matches[0]
+      );
+    };
     const knownTicketNamePattern =
       /(After [14]\s?P\.?M\.?[^$]{0,80}?Ticket|2[-\s]?Day,\s*2[-\s]?Park[^$]{0,80}?Ticket|2[-\s]?Day[^$]{0,120}?2[-\s]?Park[^$]{0,80}?Ticket|4[-\s]?Park Magic[^$]{0,80}?Ticket|Theme Park[^$]{0,80}?Ticket|Standard\s+1\s*-\s*to\s*10[^$]{0,80}?Ticket)/i;
     const candidates = [
@@ -573,7 +581,7 @@ async function extractRenderedOffers(frame) {
 
     for (const element of candidates) {
       const text = normalize(element.innerText || "");
-      const priceMatch = text.match(pricePattern);
+      const priceMatch = selectBestPrice(text);
       if (!priceMatch || text.length < 15 || text.length > 1800) continue;
 
       const heading = element.querySelector("h1,h2,h3,h4,h5,h6,[role='heading']");
@@ -953,7 +961,10 @@ function normalizeCollectedOffers(offers) {
     }
   }
 
-  return [...byProduct.values()].sort(compareTicketOffers).slice(0, 6);
+  return [...byProduct.values()]
+    .filter((offer) => ticketOfferRank(offer) < 3)
+    .sort(compareTicketOffers)
+    .slice(0, 3);
 }
 
 function normalizeOffer(rawOffer) {
@@ -988,24 +999,16 @@ function canonicalProductName(value) {
     .trim();
   const lower = normalized.toLowerCase();
 
-  if (lower.includes("after 4") && lower.includes("ticket")) {
-    return "After 4 PM Tickets";
-  }
-
-  if (lower.includes("after 1") && lower.includes("ticket")) {
-    return "After 1 PM Tickets";
-  }
-
   if ((lower.includes("2 day") || lower.includes("2-day")) && lower.includes("2 park")) {
-    return "2-Day, 2-Park tickets";
+    return "2-Day, 2-Park Ticket";
   }
 
-  if (lower.includes("4 park magic") || lower.includes("4-park magic")) {
-    return "4-Park Magic Tickets";
+  if (lower.includes("4 park magic") || lower.includes("4-park magic") || lower.includes("magic ticket")) {
+    return "4-Park Magic Ticket";
   }
 
   if (lower.includes("theme park") || lower.includes("standard 1") || lower.includes("one day")) {
-    return "Theme park tickets";
+    return "Theme Park Ticket";
   }
 
   if (!isUsefulProductName(normalized)) return "";
@@ -1019,7 +1022,7 @@ function inferTicketDays(productName, explicitTicketDays) {
 
   const lower = productName.toLowerCase();
   if (lower.includes("2-day") || lower.includes("2 day")) return 2;
-  if (lower.includes("4-park magic")) return 4;
+  if (lower.includes("4-park magic") || lower.includes("4 park magic")) return 4;
 
   return null;
 }
@@ -1041,7 +1044,7 @@ function extractOffersFromText(text) {
   const offers = [];
 
   for (const chunk of chunks) {
-    const priceMatch = chunk.match(/\$\s?(\d{1,4}(?:,\d{3})*(?:\.\d{2})?)/);
+    const priceMatch = selectBestPriceMatch(chunk);
     if (!priceMatch || !hasTicketContext([chunk])) continue;
     const name = cleanProductName(extractLikelyProductName(chunk));
     if (!isUsefulProductName(name)) continue;
@@ -1053,6 +1056,15 @@ function extractOffersFromText(text) {
   }
 
   return dedupeOffers(offers);
+}
+
+function selectBestPriceMatch(text) {
+  const matches = [...text.matchAll(/\$\s?(\d{1,4}(?:,\d{3})*(?:\.\d{2})?)/g)];
+  return (
+    matches.find((match) =>
+      /(?:\/\s*day|per\s+day)/i.test(text.slice(match.index ?? 0, (match.index ?? 0) + 90))
+    ) ?? matches[0]
+  );
 }
 
 function extractOffersFromSourceText(source) {
@@ -1124,16 +1136,15 @@ function dedupeOffers(offers) {
 }
 
 function compareTicketOffers(a, b) {
-  const rank = (offer) => {
-    const name = offer.productName.toLowerCase();
-    if (name.includes("after 4")) return 0;
-    if (name.includes("after 1")) return 1;
-    if (name.includes("2-day") || name.includes("2 day")) return 2;
-    if (name.includes("4-park") || name.includes("4 park")) return 3;
-    if (name.includes("theme park") || name.includes("standard")) return 4;
-    return 10;
-  };
-  return rank(a) - rank(b) || a.price - b.price;
+  return ticketOfferRank(a) - ticketOfferRank(b) || a.price - b.price;
+}
+
+function ticketOfferRank(offer) {
+  const name = offer.productName.toLowerCase();
+  if (name.includes("theme park") || name.includes("standard")) return 0;
+  if (name.includes("4-park") || name.includes("4 park")) return 1;
+  if (name.includes("2-day") || name.includes("2 day")) return 2;
+  return 10;
 }
 
 async function findPage(browser, predicate) {

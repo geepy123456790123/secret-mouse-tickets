@@ -29,18 +29,11 @@ export function parseTicketOfferPreview(
       return null;
     }
 
-    const offers = payload.prices
-      .map(normalizeOffer)
-      .filter((offer): offer is TicketOfferExample => offer !== null)
-      .filter(
-        (offer, index, rows) =>
-          rows.findIndex(
-            (row) =>
-              row.productName.toLowerCase() === offer.productName.toLowerCase() &&
-              row.priceCents === offer.priceCents
-          ) === index
-      )
-      .slice(0, 4);
+    const offers = dedupeAndSortOffers(
+      payload.prices
+        .map(normalizeOffer)
+        .filter((offer): offer is TicketOfferExample => offer !== null)
+    ).slice(0, 3);
 
     if (!offers.length) {
       return null;
@@ -68,8 +61,14 @@ function normalizeOffer(value: unknown): TicketOfferExample | null {
     return null;
   }
 
+  const displayName = canonicalProductName(productName, cleanString(row.details));
+
+  if (!displayName) {
+    return null;
+  }
+
   return {
-    productName,
+    productName: displayName,
     priceCents,
     currency: cleanString(row.currency)?.toUpperCase() ?? "USD",
     priceBasis:
@@ -82,4 +81,117 @@ function normalizeOffer(value: unknown): TicketOfferExample | null {
 
 function cleanString(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim().slice(0, 700) : null;
+}
+
+function canonicalProductName(productName: string, details: string | null) {
+  const normalized = `${productName} ${details ?? ""}`
+    .toLowerCase()
+    .replace(/modal;?type=onesource/g, "")
+    .replace(/modalitytype=onesource/g, "")
+    .replace(/type=onesource/g, "")
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (
+    normalized.includes("after 4") &&
+    normalized.includes("epcot") &&
+    normalized.includes("animal kingdom")
+  ) {
+    return "After 4PM Park Ticket for EPCOT or Disney's Animal Kingdom";
+  }
+
+  if (
+    normalized.includes("after 4") &&
+    (normalized.includes("magic kingdom") || normalized.includes("hollywood studios"))
+  ) {
+    return "After 4PM Park Ticket for Magic Kingdom or Disney's Hollywood Studios";
+  }
+
+  if (
+    normalized.includes("after 1") &&
+    normalized.includes("epcot") &&
+    normalized.includes("animal kingdom")
+  ) {
+    return "After 1PM Park Ticket for EPCOT or Disney's Animal Kingdom";
+  }
+
+  if (
+    normalized.includes("after 1") &&
+    (normalized.includes("magic kingdom") || normalized.includes("hollywood studios"))
+  ) {
+    return "After 1PM Park Ticket for Magic Kingdom or Disney's Hollywood Studios";
+  }
+
+  if (normalized.includes("after 4") && normalized.includes("ticket")) {
+    return "After 4PM Park Ticket";
+  }
+
+  if (normalized.includes("after 1") && normalized.includes("ticket")) {
+    return "After 1PM Park Ticket";
+  }
+
+  if (normalized.includes("2 day") && normalized.includes("2 park")) {
+    return "2-Day, 2-Park Ticket";
+  }
+
+  if (
+    normalized.includes("4 park magic") ||
+    normalized.includes("4 park magic tickets") ||
+    normalized.includes("magic ticket")
+  ) {
+    return "4-Park Magic Ticket";
+  }
+
+  if (
+    normalized.includes("theme park only") ||
+    normalized.includes("theme park ticket") ||
+    normalized.includes("standard 1 to 10")
+  ) {
+    return "Theme Park Ticket";
+  }
+
+  if (!/(ticket|park|magic|after|admission|pass|day)/i.test(productName)) {
+    return "";
+  }
+
+  return productName
+    .replace(/modal;?type=onesource/gi, "")
+    .replace(/modalitytype=onesource/gi, "")
+    .replace(/type=onesource/gi, "")
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function dedupeAndSortOffers(offers: TicketOfferExample[]) {
+  const byProduct = new Map<string, TicketOfferExample>();
+
+  for (const offer of offers.filter((offer) => offerRank(offer.productName) < 3)) {
+    const key = offer.productName.toLowerCase();
+    const existing = byProduct.get(key);
+    if (!existing || compareOfferPreference(offer, existing) < 0) {
+      byProduct.set(key, offer);
+    }
+  }
+
+  return [...byProduct.values()].sort(compareOfferOrder);
+}
+
+function compareOfferPreference(a: TicketOfferExample, b: TicketOfferExample) {
+  const basisRank = (offer: TicketOfferExample) => (offer.priceBasis === "per_day" ? 0 : 1);
+  return basisRank(a) - basisRank(b) || a.priceCents - b.priceCents;
+}
+
+function compareOfferOrder(a: TicketOfferExample, b: TicketOfferExample) {
+  return offerRank(a.productName) - offerRank(b.productName) || a.priceCents - b.priceCents;
+}
+
+function offerRank(productName: string) {
+  const normalized = productName.toLowerCase();
+  if (normalized.includes("theme park")) return 0;
+  if (normalized.includes("4-park magic")) return 1;
+  if (normalized.includes("2-day") && normalized.includes("2-park")) return 2;
+  return 10;
 }
