@@ -267,6 +267,14 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
             regular park ticket prices - even after our fee - or your money back.
           </div>
 
+          <div className="mt-2 flex justify-center">
+            <img
+              src="/trustpilot-badge.png"
+              alt="Trustpilot five-star rating"
+              className="h-auto w-52 sm:w-60"
+            />
+          </div>
+
         </div>
 
         <div className="grid content-start gap-5">
@@ -493,13 +501,6 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
             200+ families have used Secret Mouse Tickets to save an average of $240 on their
             Disney tickets.
           </p>
-          <div className="mt-5 flex justify-center">
-            <img
-              src="/trustpilot-badge.png"
-              alt="Trustpilot five-star rating"
-              className="h-auto w-56 sm:w-64"
-            />
-          </div>
           <h2 className="mt-5 text-3xl font-black leading-tight text-[#120f17] sm:text-4xl">
             Families use Secret Mouse Tickets to spend less on tickets and more on Disney magic.
           </h2>
