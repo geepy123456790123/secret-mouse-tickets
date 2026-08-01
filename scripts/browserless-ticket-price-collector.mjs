@@ -974,6 +974,12 @@ function normalizeOffer(rawOffer) {
   const ticketDays = inferTicketDays(productName, rawOffer.ticketDays);
   let price = Number(rawOffer.price);
   let priceBasis = rawOffer.priceBasis || "from";
+  const preferredPerDayPrice = extractPreferredPerDayPrice(productName, rawOffer.details);
+
+  if (Number.isFinite(preferredPerDayPrice)) {
+    price = preferredPerDayPrice;
+    priceBasis = "per_day";
+  }
 
   if (ticketDays && price >= ticketDays * 75) {
     price = Number((price / ticketDays).toFixed(2));
@@ -1023,6 +1029,25 @@ function inferTicketDays(productName, explicitTicketDays) {
   const lower = productName.toLowerCase();
   if (lower.includes("2-day") || lower.includes("2 day")) return 2;
   if (lower.includes("4-park magic") || lower.includes("4 park magic")) return 4;
+
+  return null;
+}
+
+function extractPreferredPerDayPrice(productName, details) {
+  if (!["Theme Park Ticket", "4-Park Magic Ticket", "2-Day, 2-Park Ticket"].includes(productName)) {
+    return null;
+  }
+
+  const text = normalizeText(details);
+  if (!text) return null;
+
+  const perDayPrices = [...text.matchAll(/\$\s?(\d{2,4}(?:,\d{3})*(?:\.\d{2})?)(?=[^$]{0,80}(?:\/\s*day|per\s+day))/gi)]
+    .map((match) => Number(match[1].replace(/,/g, "")))
+    .filter((price) => Number.isFinite(price) && price >= 50 && price <= 250);
+
+  if (perDayPrices.length) {
+    return Number(Math.min(...perDayPrices).toFixed(2));
+  }
 
   return null;
 }
