@@ -5,6 +5,9 @@ import "./globals.css";
 import { MarketingScripts } from "@/components/marketing-scripts";
 
 const siteUrl = "https://secretmousetickets.com";
+const siteName = "Secret Mouse Tickets";
+const defaultDescription =
+  "Secret Mouse Tickets helps Walt Disney World visitors find Disney Group and Convention discount ticket offers that match eligible visit dates.";
 const shareImage = {
   url: "/secret-mouse-tickets-og-facebook.png",
   width: 1200,
@@ -20,15 +23,19 @@ const fredoka = Fredoka({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  applicationName: siteName,
+  authors: [{ name: siteName, url: siteUrl }],
+  creator: siteName,
+  publisher: siteName,
   title: {
-    default: "Secret Mouse Tickets",
-    template: "%s | Secret Mouse Tickets",
+    default: siteName,
+    template: `%s | ${siteName}`,
   },
-  description:
-    "Secret Mouse Tickets helps guests find hidden Walt Disney World Group and Convention discount ticket offers for eligible visit dates.",
+  description: defaultDescription,
   alternates: {
     canonical: siteUrl,
   },
+  category: "travel",
   keywords: [
     "Disney World discount tickets",
     "Walt Disney World discount tickets",
@@ -36,21 +43,22 @@ export const metadata: Metadata = {
     "Disney convention tickets",
     "Disney World ticket savings",
     "Disney World group and convention tickets",
+    "Disney World ticket offers",
+    "Disney World vacation savings",
   ],
   openGraph: {
     type: "website",
     url: siteUrl,
-    siteName: "Secret Mouse Tickets",
-    title: "Secret Mouse Tickets",
-    description:
-      "Find hidden Walt Disney World Group and Convention discount ticket offers for eligible visit dates.",
+    siteName,
+    title: siteName,
+    description: defaultDescription,
     images: [shareImage],
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Secret Mouse Tickets",
-    description:
-      "Find hidden Walt Disney World Group and Convention discount ticket offers for eligible visit dates.",
+    title: siteName,
+    description: defaultDescription,
     images: [shareImage.url],
   },
   icons: {
@@ -82,20 +90,69 @@ export const metadata: Metadata = {
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "Secret Mouse Tickets",
+  name: siteName,
   url: siteUrl,
   email: "hello@secretmousetickets.com",
   logo: `${siteUrl}/secret-mouse-tickets-logo.png`,
+  contactPoint: [
+    {
+      "@type": "ContactPoint",
+      email: "hello@secretmousetickets.com",
+      contactType: "customer support",
+      areaServed: "US",
+      availableLanguage: "English",
+    },
+  ],
+  areaServed: {
+    "@type": "Country",
+    name: "United States",
+  },
+  knowsAbout: [
+    "Walt Disney World tickets",
+    "Disney Group and Convention tickets",
+    "Disney World ticket discounts",
+    "Disney World vacation planning",
+  ],
   sameAs: [],
 };
 
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "Secret Mouse Tickets",
+  name: siteName,
   url: siteUrl,
+  inLanguage: "en-US",
+  description: defaultDescription,
+};
+
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  name: "Secret Mouse Tickets Disney ticket offer matching",
+  serviceType: "Disney Group and Convention ticket offer matching",
+  provider: {
+    "@type": "Organization",
+    name: siteName,
+    url: siteUrl,
+  },
+  areaServed: {
+    "@type": "Country",
+    name: "United States",
+  },
+  audience: {
+    "@type": "Audience",
+    audienceType: "Walt Disney World visitors",
+  },
   description:
-    "Find hidden Walt Disney World Group and Convention discount ticket offers for eligible visit dates.",
+    "Secret Mouse Tickets checks Walt Disney World visit dates against active Disney Group and Convention discount ticket sale pages. When a match is available, customers can purchase access to the matching Disney sale-page link and buy actual tickets directly from Disney.",
+  offers: {
+    "@type": "Offer",
+    price: "39",
+    priceCurrency: "USD",
+    availability: "https://schema.org/InStock",
+    url: siteUrl,
+    category: "Ticket offer matching service",
+  },
 };
 
 export default function RootLayout({
@@ -120,6 +177,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
         />
       </head>
       <body className={`${fredoka.variable} antialiased`}>

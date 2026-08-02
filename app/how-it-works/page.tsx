@@ -3,18 +3,90 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2, Search, Ticket } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 
+const siteUrl = "https://secretmousetickets.com";
+const pageUrl = `${siteUrl}/how-it-works`;
+const pageDescription =
+  "Learn how Secret Mouse Tickets checks your Walt Disney World visit dates, matches eligible Disney Group and Convention ticket offers, and delivers your purchase link.";
+const shareImage = {
+  url: "/secret-mouse-tickets-og-facebook.png",
+  width: 1200,
+  height: 628,
+  alt: "Secret Mouse Tickets - Disney World ticket offers matched to your visit",
+};
+
 export const metadata: Metadata = {
   title: "How It Works",
-  description:
-    "Learn how Secret Mouse Tickets checks your Walt Disney World visit dates, matches eligible Disney Group and Convention ticket offers, and delivers your purchase link.",
+  description: pageDescription,
   alternates: {
-    canonical: "https://secretmousetickets.com/how-it-works",
+    canonical: pageUrl,
   },
+  openGraph: {
+    title: "How Secret Mouse Tickets Works",
+    description: pageDescription,
+    url: pageUrl,
+    images: [shareImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "How Secret Mouse Tickets Works",
+    description: pageDescription,
+    images: [shareImage.url],
+  },
+};
+
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: "How Secret Mouse Tickets works",
+  description: pageDescription,
+  url: pageUrl,
+  image: `${siteUrl}${shareImage.url}`,
+  author: {
+    "@type": "Organization",
+    name: "Secret Mouse Tickets",
+    url: siteUrl,
+  },
+  publisher: {
+    "@type": "Organization",
+    name: "Secret Mouse Tickets",
+    logo: {
+      "@type": "ImageObject",
+      url: `${siteUrl}/secret-mouse-tickets-logo.png`,
+    },
+  },
+  mainEntityOfPage: pageUrl,
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: siteUrl,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "How It Works",
+      item: pageUrl,
+    },
+  ],
 };
 
 export default function HowItWorksPage() {
   return (
     <main className="brand-page min-h-screen text-[#120f17]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <section className="mx-auto w-full max-w-4xl px-5 pb-8 pt-6 lg:px-8 lg:pt-10">
         <div className="cartoon-panel grid gap-6 rounded-[24px] bg-white p-5 sm:p-7">
           <div className="grid gap-3">

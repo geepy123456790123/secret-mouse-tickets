@@ -3,6 +3,8 @@ import { HomePageClient } from "./home-page-client";
 import { getTopBannerSettings } from "@/lib/site-settings";
 
 const siteUrl = "https://secretmousetickets.com";
+const pageDescription =
+  "Find Walt Disney World Group and Convention discount ticket offers for your visit dates. Check Disney World ticket eligibility, then buy your actual tickets directly from Disney.";
 const shareImage = {
   url: "/secret-mouse-tickets-og-facebook.png",
   width: 1200,
@@ -12,23 +14,27 @@ const shareImage = {
 
 export const metadata: Metadata = {
   title: "Disney World Discount Tickets",
-  description:
-    "Find hidden Walt Disney World Group and Convention discount ticket offers for your visit dates. Check Disney World ticket eligibility, then buy your actual tickets directly from Disney.",
+  description: pageDescription,
   alternates: {
     canonical: siteUrl,
   },
+  keywords: [
+    "Disney World discount tickets",
+    "Walt Disney World discount tickets",
+    "Disney Group and Convention tickets",
+    "Disney World ticket savings",
+    "Disney World ticket offers",
+  ],
   openGraph: {
     title: "Disney World Discount Tickets | Secret Mouse Tickets",
-    description:
-      "Find hidden Walt Disney World Group and Convention discount ticket offers for your visit dates and buy your actual tickets directly from Disney.",
+    description: pageDescription,
     url: siteUrl,
     images: [shareImage],
   },
   twitter: {
     card: "summary_large_image",
     title: "Disney World Discount Tickets | Secret Mouse Tickets",
-    description:
-      "Find hidden Walt Disney World Group and Convention discount ticket offers for your visit dates.",
+    description: pageDescription,
     images: [shareImage.url],
   },
 };
@@ -88,6 +94,43 @@ const faqSchema = {
   ],
 };
 
+const homePageSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "Disney World Discount Tickets",
+  url: siteUrl,
+  description: pageDescription,
+  inLanguage: "en-US",
+  isPartOf: {
+    "@type": "WebSite",
+    name: "Secret Mouse Tickets",
+    url: siteUrl,
+  },
+  about: [
+    {
+      "@type": "Thing",
+      name: "Walt Disney World discount tickets",
+    },
+    {
+      "@type": "Thing",
+      name: "Disney Group and Convention ticket offers",
+    },
+  ],
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: siteUrl,
+    },
+  ],
+};
+
 export default async function HomePage() {
   const topBanner = await getTopBannerSettings();
 
@@ -96,6 +139,14 @@ export default async function HomePage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homePageSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <HomePageClient topBanner={topBanner} />
     </>
