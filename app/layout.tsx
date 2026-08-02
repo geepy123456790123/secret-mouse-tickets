@@ -9,10 +9,10 @@ const siteName = "Secret Mouse Tickets";
 const defaultDescription =
   "Secret Mouse Tickets helps Walt Disney World visitors find Disney Group and Convention discount ticket offers that match eligible visit dates.";
 const shareImage = {
-  url: "/secret-mouse-tickets-og-facebook.png",
-  width: 1200,
-  height: 628,
-  alt: "Secret Mouse Tickets - Disney World ticket offers matched to your visit",
+  url: "/secret-mouse-tickets-meta-feed.png",
+  width: 1731,
+  height: 909,
+  alt: "Secret Mouse Tickets - hidden Disney ticket offers open to everyone",
 };
 
 const fredoka = Fredoka({

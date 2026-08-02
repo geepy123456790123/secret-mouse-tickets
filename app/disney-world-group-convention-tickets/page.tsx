@@ -8,7 +8,7 @@ const pageUrl = `${siteUrl}/disney-world-group-convention-tickets`;
 const pageDescription =
   "Understand Disney World Group and Convention discount tickets, how Secret Mouse Tickets finds matching offers, and why guests use these sale pages to save on eligible Disney tickets.";
 const shareImage = {
-  url: "/secret-mouse-tickets-og-facebook.png",
+  url: "/secret-mouse-tickets-meta-feed.png",
   width: 1200,
   height: 628,
   alt: "Secret Mouse Tickets - Disney World ticket offers matched to your visit",

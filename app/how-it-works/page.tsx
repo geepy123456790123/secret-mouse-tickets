@@ -8,7 +8,7 @@ const pageUrl = `${siteUrl}/how-it-works`;
 const pageDescription =
   "Learn how Secret Mouse Tickets checks your Walt Disney World visit dates, matches eligible Disney Group and Convention ticket offers, and delivers your purchase link.";
 const shareImage = {
-  url: "/secret-mouse-tickets-og-facebook.png",
+  url: "/secret-mouse-tickets-meta-feed.png",
   width: 1200,
   height: 628,
   alt: "Secret Mouse Tickets - Disney World ticket offers matched to your visit",
