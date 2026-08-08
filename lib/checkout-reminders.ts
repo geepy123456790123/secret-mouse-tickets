@@ -150,10 +150,10 @@ async function processReminderStage({
 
   for (const order of orders) {
     try {
-      let couponCode = order.coupon_code;
+      let couponCode = stage === "24h" ? CHECKOUT_REMINDER_COUPON_CODE : order.coupon_code;
       let amountCents = order.amount_cents;
 
-      if (order.amount_cents > comebackAmountCents) {
+      if (stage === "24h" && order.amount_cents > comebackAmountCents) {
         couponCode = CHECKOUT_REMINDER_COUPON_CODE;
         amountCents = comebackAmountCents;
 
@@ -171,7 +171,7 @@ async function processReminderStage({
         checkoutUrl,
         event: order,
         themeParkDays: order.theme_park_days,
-        couponCode: CHECKOUT_REMINDER_COUPON_CODE,
+        couponCode: stage === "24h" ? CHECKOUT_REMINDER_COUPON_CODE : undefined,
         stage,
       });
       const emailResult = await sendEmail({

@@ -108,6 +108,7 @@ export function SquarePaymentForm({
   const [paypalReady, setPaypalReady] = useState(false);
   const [couponMessage, setCouponMessage] = useState("");
   const [message, setMessage] = useState("");
+  const [cardholderName, setCardholderName] = useState("");
 
   useEffect(() => {
     if (amountCents <= 0) {
@@ -342,6 +343,10 @@ export function SquarePaymentForm({
   }
 
   async function payByCard() {
+    if (amountCents > 0 && !cardholderName.trim()) {
+      setMessage("Please enter the name on the card.");
+      return;
+    }
     setStatus("paying");
     setMessage("");
 
@@ -353,6 +358,7 @@ export function SquarePaymentForm({
           amount: (amountCents / 100).toFixed(2),
           billingContact: {
             email: recipientEmail,
+            givenName: cardholderName.trim(),
           },
           currencyCode: "USD",
           intent: "CHARGE",
@@ -531,6 +537,18 @@ export function SquarePaymentForm({
 
           {applicationId && locationId ? (
             <div className="mt-4 rounded-[16px] border-[3px] border-[#120f17] bg-white p-3.5 sm:mt-5 sm:rounded-[18px] sm:p-4">
+              <label className="mb-3 grid gap-2 text-sm font-bold">
+                Name on card
+                <input
+                  value={cardholderName}
+                  onChange={(event) => setCardholderName(event.target.value)}
+                  className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-white px-3 text-base font-semibold"
+                  placeholder="Full name"
+                  autoComplete="cc-name"
+                  disabled={isWorking}
+                  required
+                />
+              </label>
               {!hasExpressPayments && !paypalClientId && (
                 <p className="mb-3 text-sm font-black uppercase text-[#5d45b5]">Pay by card</p>
               )}
