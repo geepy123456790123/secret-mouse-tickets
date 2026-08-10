@@ -510,7 +510,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-7xl px-5 pb-16 pt-0 lg:px-8 lg:pb-20">
+      <section className="-mt-6 mx-auto w-full max-w-7xl px-5 pb-16 pt-0 lg:-mt-10 lg:px-8 lg:pb-20">
         <div className="mx-auto max-w-3xl text-center">
           <p className="inline-flex rounded-full border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2 text-sm font-black text-[#120f17] shadow-[4px_4px_0_#120f17]">
             200+ families have used Secret Mouse Tickets to save an average of $240 on their
