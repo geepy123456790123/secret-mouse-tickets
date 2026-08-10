@@ -236,8 +236,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
           className="absolute inset-0 h-full w-full object-cover opacity-30"
           src="/secret-mouse-tickets-hero.mp4"
         />
-        <div className="absolute inset-0 bg-[#d8c6ff]/35" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(216,198,255,0.08)_0%,rgba(216,198,255,0.22)_55%,rgba(216,198,255,0.9)_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(216,198,255,0.04)_0%,rgba(216,198,255,0.18)_42%,rgba(216,198,255,0.72)_78%,rgba(216,198,255,0.96)_100%)]" />
       </div>
       {topBanner.enabled ? (
         <div className="relative z-10 mx-auto flex w-full max-w-7xl justify-center px-5 pt-5 lg:px-8">
