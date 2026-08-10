@@ -225,9 +225,22 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
   }
 
   return (
-    <main className="brand-page min-h-screen text-[#120f17]">
+    <main className="brand-page relative isolate min-h-screen text-[#120f17]">
+      <div className="pointer-events-none absolute left-0 right-0 top-0 -z-10 aspect-video overflow-hidden" aria-hidden="true">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          className="absolute inset-0 h-full w-full object-cover opacity-30"
+          src="/secret-mouse-tickets-hero.mp4"
+        />
+        <div className="absolute inset-0 bg-[#d8c6ff]/35" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(216,198,255,0.08)_0%,rgba(216,198,255,0.22)_55%,rgba(216,198,255,0.9)_100%)]" />
+      </div>
       {topBanner.enabled ? (
-        <div className="mx-auto flex w-full max-w-7xl justify-center px-5 pt-5 lg:px-8">
+        <div className="relative z-10 mx-auto flex w-full max-w-7xl justify-center px-5 pt-5 lg:px-8">
           <div
             className="w-fit rounded-[18px] border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2.5 text-center text-lg font-black shadow-[5px_5px_0_#120f17] sm:px-6 sm:text-xl"
             style={{ color: topBanner.textColor }}
@@ -239,17 +252,21 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
         </div>
       ) : null}
 
-      <section className="mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-5 py-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-start lg:px-8">
+      <section className="relative z-10 min-h-screen w-full overflow-hidden">
+
+        <div className="relative mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-5 py-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-start lg:px-8">
         <div className="flex flex-col items-center justify-center gap-3 px-1 pb-4 pt-1 text-center sm:px-4 lg:self-start lg:justify-start lg:pb-0 lg:pt-6">
-          <Image
-            src="/secret-mouse-tickets-logo.png"
-            alt="Secret Mouse Tickets"
-            width={705}
-            height={607}
-            unoptimized
-            priority
-            className="h-auto w-full max-w-[320px] object-contain sm:max-w-[340px]"
-          />
+          <div className="w-full sm:max-w-[340px]">
+            <Image
+              src="/secret-mouse-tickets-logo.png"
+              alt="Secret Mouse Tickets"
+              width={705}
+              height={607}
+              unoptimized
+              priority
+              className="h-auto w-full object-contain"
+            />
+          </div>
 
           <div className="max-w-xl space-y-3 lg:-mt-2">
             <h1 className="text-2xl font-bold leading-tight text-[#120f17] sm:text-3xl">
@@ -272,7 +289,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
 
         </div>
 
-        <div className="grid content-start gap-5">
+        <div className="relative grid content-start gap-5">
           <form
             onSubmit={submitForm}
             className="cartoon-panel rounded-[24px] bg-white p-5 sm:p-6"
@@ -392,8 +409,9 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
           {result?.outcome === "matched" && (
             <section
               ref={matchCardRef}
-              className="rounded-[24px] border-4 border-[#120f17] bg-[#efe8ff] p-5 shadow-[8px_8px_0_#120f17]"
+              className="relative overflow-hidden rounded-[24px] border-4 border-[#120f17] bg-[#efe8ff] p-5 shadow-[8px_8px_0_#120f17]"
             >
+              <div className="relative z-10">
               <p className="inline-flex items-center gap-2 rounded-full border-[3px] border-[#120f17] bg-white px-3 py-2 text-sm font-bold text-[#5d45b5]">
                 <BadgeCheck size={17} aria-hidden="true" />
                 Match found
@@ -453,6 +471,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
               <p className="mt-3 text-center text-xs font-bold leading-5 text-[#3e304d]">
                 One-time fee. No subscription. Secure payment through Square or PayPal.
               </p>
+              </div>
             </section>
           )}
 
@@ -487,6 +506,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
             </Link>
             .
           </p>
+        </div>
         </div>
       </section>
 

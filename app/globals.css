@@ -91,6 +91,9 @@ select:focus-visible {
   box-shadow: 6px 6px 0 var(--brand-black);
 }
 
+@media (prefers-reduced-motion: reduce) {
+}
+
 @media (max-width: 640px) {
   .cartoon-panel {
     box-shadow: 6px 6px 0 var(--brand-black);
