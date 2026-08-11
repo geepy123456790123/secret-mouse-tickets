@@ -233,7 +233,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
           muted
           playsInline
           preload="metadata"
-          className="absolute inset-0 h-full w-full object-cover opacity-30"
+          className="absolute inset-0 h-full w-full object-cover object-[center_top] opacity-30 sm:object-center"
           src="/secret-mouse-tickets-hero.mp4"
         />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(216,198,255,0.04)_0%,rgba(216,198,255,0.18)_42%,rgba(216,198,255,0.72)_78%,rgba(216,198,255,0.96)_100%)]" />
