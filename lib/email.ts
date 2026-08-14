@@ -24,6 +24,58 @@ type TrustpilotReviewEmailInput = {
   reviewUrl: string;
 };
 
+type SaleAlertEmailInput = {
+  recipientEmail: string;
+  confirmationNumber: string;
+  orderId: string;
+  amountCents: number;
+  paymentProvider: string;
+  eventName: string;
+  eventPageUrl: string;
+  themeParkDays: number;
+  couponCode?: string | null;
+};
+
+export function buildSaleAlertEmail(input: SaleAlertEmailInput) {
+  const amount = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(input.amountCents / 100);
+  const couponLine = input.couponCode ? `Coupon: ${input.couponCode}\n` : "";
+  const bodyText = `A Secret Mouse Tickets sale was completed.
+
+Confirmation #: ${input.confirmationNumber}
+Order ID: ${input.orderId}
+Customer email: ${input.recipientEmail}
+Amount paid: ${amount}
+Payment provider: ${input.paymentProvider}
+Matched offer: ${input.eventName}
+Ticket days: ${input.themeParkDays}
+${couponLine}Event page: ${input.eventPageUrl}`;
+
+  const html = `<div style="font-family:Arial,sans-serif;color:#120f17">
+    <h1>Secret Mouse Tickets sale completed</h1>
+    <p>A customer completed a purchase.</p>
+    <table style="border-collapse:collapse">
+      <tr><td style="padding:6px 18px 6px 0"><strong>Confirmation #</strong></td><td>${escapeHtml(input.confirmationNumber)}</td></tr>
+      <tr><td style="padding:6px 18px 6px 0"><strong>Order ID</strong></td><td>${escapeHtml(input.orderId)}</td></tr>
+      <tr><td style="padding:6px 18px 6px 0"><strong>Customer email</strong></td><td>${escapeHtml(input.recipientEmail)}</td></tr>
+      <tr><td style="padding:6px 18px 6px 0"><strong>Amount paid</strong></td><td>${escapeHtml(amount)}</td></tr>
+      <tr><td style="padding:6px 18px 6px 0"><strong>Payment provider</strong></td><td>${escapeHtml(input.paymentProvider)}</td></tr>
+      <tr><td style="padding:6px 18px 6px 0"><strong>Matched offer</strong></td><td>${escapeHtml(input.eventName)}</td></tr>
+      <tr><td style="padding:6px 18px 6px 0"><strong>Ticket days</strong></td><td>${input.themeParkDays}</td></tr>
+      ${input.couponCode ? `<tr><td style="padding:6px 18px 6px 0"><strong>Coupon</strong></td><td>${escapeHtml(input.couponCode)}</td></tr>` : ""}
+    </table>
+    <p><a href="${escapeHtml(input.eventPageUrl)}">Open matched event page</a></p>
+  </div>`;
+
+  return {
+    subject: `Sale completed: ${input.confirmationNumber}`,
+    bodyText,
+    html,
+  };
+}
+
 export function buildConfirmationEmail(input: ConfirmationEmailInput) {
   const multiDayBonusText =
     input.themeParkDays > 1

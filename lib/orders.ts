@@ -1,5 +1,6 @@
+import { env } from "cloudflare:workers";
 import { getRawDb } from "@/db";
-import { buildConfirmationEmail, sendEmail } from "@/lib/email";
+import { buildConfirmationEmail, buildSaleAlertEmail, sendEmail } from "@/lib/email";
 import type { EventRecord } from "@/lib/eligibility";
 
 type Db = ReturnType<typeof getRawDb>;
@@ -140,6 +141,49 @@ export async function markOrderPaidAndSendConfirmation({
       emailResult.status
     )
     .run();
+
+  // Keep the sale alert independent from the customer confirmation. A provider
+  // outage must not turn an otherwise successful payment into a failed checkout.
+  try {
+    const runtime = env as typeof env & {
+      SALE_ALERT_EMAIL?: string;
+    };
+    const alertRecipient = runtime.SALE_ALERT_EMAIL?.trim() || "hello@secretmousetickets.com";
+    const alert = buildSaleAlertEmail({
+      recipientEmail: details.recipient_email,
+      confirmationNumber,
+      orderId,
+      amountCents: details.amount_cents,
+      paymentProvider: paymentProvider ?? "unknown",
+      eventName: details.info_banner_first,
+      eventPageUrl: details.event_page_url,
+      themeParkDays: details.theme_park_days,
+      couponCode: details.coupon_code,
+    });
+    const alertResult = await sendEmail({
+      to: alertRecipient,
+      subject: alert.subject,
+      text: alert.bodyText,
+      html: alert.html,
+    });
+
+    await db
+      .prepare(
+        "INSERT INTO email_logs (order_id, recipient_email, template, subject, body_text, provider_message_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)"
+      )
+      .bind(
+        orderId,
+        alertRecipient,
+        "sale_alert",
+        alert.subject,
+        alert.bodyText,
+        alertResult.providerMessageId,
+        alertResult.status
+      )
+      .run();
+  } catch (error) {
+    console.error("Sale alert email failed", error);
+  }
 
   return {
     ok: true as const,
