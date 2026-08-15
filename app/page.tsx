@@ -48,7 +48,7 @@ const faqSchema = {
       name: "Is this a scam?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "No. We never sell tickets or take your Disney payment information. We match your travel dates to a real Disney Group and Convention sale page, then you buy directly from Disney using Disney's own checkout.",
+        text: "Secret Mouse Tickets is a matching service. We help you find Disney Group and Convention ticket sale pages that fit your travel dates, and your actual park tickets are purchased directly through Disney's own checkout. We don't process your Disney ticket order or ask for your Disney payment information.",
       },
     },
     {
