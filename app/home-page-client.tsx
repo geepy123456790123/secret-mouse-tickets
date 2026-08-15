@@ -236,8 +236,8 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
           className="absolute inset-0 h-full w-full object-cover object-[center_top] opacity-35 sm:object-center"
           src="/secret-mouse-tickets-hero.mp4"
         />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(216,198,255,0.02)_0%,rgba(216,198,255,0.16)_40%,rgba(216,198,255,0.72)_78%,rgba(216,198,255,0.98)_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18px_18px,rgba(255,255,255,0.62)_0_2px,transparent_3px)] bg-[length:36px_36px] [mask-image:linear-gradient(180deg,transparent_0%,rgba(0,0,0,0.12)_36%,rgba(0,0,0,0.7)_78%,#000_100%)] [-webkit-mask-image:linear-gradient(180deg,transparent_0%,rgba(0,0,0,0.12)_36%,rgba(0,0,0,0.7)_78%,#000_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(216,198,255,0.02)_0%,rgba(216,198,255,0.14)_38%,rgba(216,198,255,0.5)_72%,rgba(216,198,255,0.72)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18px_18px,rgba(255,255,255,0.62)_0_2px,transparent_3px)] bg-[length:36px_36px] [mask-image:linear-gradient(180deg,transparent_0%,rgba(0,0,0,0.08)_32%,rgba(0,0,0,0.2)_68%,rgba(0,0,0,0.35)_100%)] [-webkit-mask-image:linear-gradient(180deg,transparent_0%,rgba(0,0,0,0.08)_32%,rgba(0,0,0,0.2)_68%,rgba(0,0,0,0.35)_100%)]" />
       </div>
       {topBanner.enabled ? (
         <div className="relative z-10 mx-auto flex w-full max-w-7xl justify-center px-5 pt-5 lg:px-8">
