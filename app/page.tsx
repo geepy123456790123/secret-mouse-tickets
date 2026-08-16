@@ -45,7 +45,7 @@ const faqSchema = {
   mainEntity: [
     {
       "@type": "Question",
-      name: "Is this a scam?",
+      name: "How do you find these deals?",
       acceptedAnswer: {
         "@type": "Answer",
         text: "Secret Mouse Tickets is a matching service. We help you find Disney Group and Convention ticket sale pages that fit your travel dates, and your actual park tickets are purchased directly through Disney's own checkout. We don't process your Disney ticket order or ask for your Disney payment information.",

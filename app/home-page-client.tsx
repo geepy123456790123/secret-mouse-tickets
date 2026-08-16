@@ -237,7 +237,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
           src="/secret-mouse-tickets-hero.mp4"
         />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(223,208,255,0.02)_0%,rgba(223,208,255,0.16)_36%,rgba(216,198,255,0.62)_74%,#d8c6ff_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18px_18px,rgba(255,255,255,0.62)_0_2px,transparent_3px)] bg-[length:36px_36px] [mask-image:linear-gradient(180deg,transparen[...]
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18px_18px,rgba(255,255,255,0.62)_0_2px,transparent_3px)] bg-[length:36px_36px] [mask-image:linear-gradient(180deg,transparent_0%,rgba(0,0,0,0.25)_35%,rgba(0,0,0,0.75)_70%,black_100%)]" />
       </div>
       {topBanner.enabled ? (
         <div className="relative z-10 mx-auto flex w-full max-w-7xl justify-center px-5 pt-5 lg:px-8">
@@ -280,7 +280,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
             </p>
           </div>
 
-          <div className="rounded-[18px] border-[3px] border-[#120f17] bg-[#fff7de] px-5 py-4 text-center text-base font-black leading-7 text-[#120f17] shadow-[4px_4px_0_#120f17] sm:text-lg sm:le[...]
+          <div className="rounded-[18px] border-[3px] border-[#120f17] bg-[#fff7de] px-5 py-4 text-center text-base font-black leading-7 text-[#120f17] shadow-[4px_4px_0_#120f17] sm:text-lg sm:leading-8">
             <p>
               We guarantee you&apos;ll save money using Secret Mouse Tickets over Disney&apos;s
               regular park ticket prices - even after our fee - or your money back.
@@ -384,7 +384,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
             <button
               type="submit"
               disabled={status === "checking"}
-              className="mt-5 inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-[16px] border-4 border-[#120f17] bg-[#ffbd38] px-5 text-lg font-bold text-[#120f17] shadow-[5px[...]
+              className="mt-5 inline-flex h-[52px] w-full items-center justify-center gap-2 rounded-[16px] border-4 border-[#120f17] bg-[#ffbd38] px-5 text-lg font-bold text-[#120f17] shadow-[5px_5px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[7px_7px_0_#120f17] disabled:cursor-not-allowed disabled:opacity-70"
             >
               <Search size={20} aria-hidden="true" />
               {status === "checking" ? "Checking dates..." : "Check My Dates"}
@@ -462,7 +462,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
                   type="button"
                   onClick={startCheckout}
                   disabled={status === "checkout"}
-                  className="inline-flex h-12 items-center justify-center gap-2 self-end rounded-[16px] border-4 border-[#120f17] bg-[#8f72f2] px-5 font-bold text-white shadow-[5px_5px_0_#120f17][...]
+                  className="inline-flex h-12 items-center justify-center gap-2 self-end rounded-[16px] border-4 border-[#120f17] bg-[#8f72f2] px-5 font-bold text-white shadow-[5px_5px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[7px_7px_0_#120f17] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   <ExternalLink size={18} aria-hidden="true" />
                   {status === "checkout" ? "Opening..." : "Unlock My Disney Discount Link - $39"}
@@ -551,5 +551,247 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
 
               <div className="ml-8 flex items-center gap-4">
                 <span
-                  className={`inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-4 border-[#120f17] ${testimonial.bg} text-xl font-black text-white shadow-[4px_4px_0_#[...]`
-  },
+                  className={`inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full border-4 border-[#120f17] ${testimonial.bg} text-xl font-black text-white shadow-[4px_4px_0_#120f17]`}
+                >
+                  {testimonial.initials}
+                </span>
+                <div>
+                  <h3 className="text-xl font-black text-[#5d45b5]">{testimonial.name}</h3>
+                  <p className="text-sm font-bold text-[#6a6170]">Secret Mouse Tickets customer</p>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-7xl px-5 pb-8 lg:px-8 lg:pb-12">
+        <div className="cartoon-panel rounded-[24px] bg-white p-5 sm:p-6">
+          <div className="max-w-3xl">
+            <p className="text-sm font-bold uppercase text-[#5d45b5]">FAQ</p>
+            <h2 className="mt-2 text-2xl font-bold leading-tight text-[#120f17]">
+              Common questions about how this works.
+            </h2>
+          </div>
+
+          <div className="mt-6 grid gap-3">
+            {faqItems.map((item, index) => (
+              <details
+                key={item.question}
+                open={index === 0}
+                className="group rounded-[18px] border-[3px] border-[#120f17] bg-[#fffaf0] px-4 py-3"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-base font-black text-[#120f17] marker:content-none">
+                  <span>{item.question}</span>
+                  <ChevronDown
+                    size={20}
+                    strokeWidth={3}
+                    className="shrink-0 transition-transform group-open:rotate-180"
+                    aria-hidden="true"
+                  />
+                </summary>
+                <p className="mt-2 text-sm font-semibold leading-6 text-[#3e304d]">
+                  {item.answer}
+                </p>
+              </details>
+            ))}
+          </div>
+
+          <div className="mt-5 flex flex-wrap justify-center gap-x-6 gap-y-3 border-t-[3px] border-[#120f17] pt-5 text-sm font-black text-[#5d45b5]">
+            <Link
+              href="/how-it-works"
+              className="underline decoration-2 underline-offset-4"
+            >
+              How Secret Mouse Tickets Works
+            </Link>
+            <Link
+              href="/disney-world-group-convention-tickets"
+              className="underline decoration-2 underline-offset-4"
+            >
+              Group &amp; Convention Tickets Explained
+            </Link>
+          </div>
+        </div>
+      </section>
+      <div className="hidden sm:block">
+        <SiteFooter compact className="max-w-[calc(100%-2.5rem)]" />
+      </div>
+      <SupportChat />
+    </main>
+  );
+}
+
+function TicketOfferExamples({ preview }: { preview: TicketOfferPreview }) {
+  return (
+    <div className="mt-4 rounded-[18px] border-[3px] border-[#120f17] bg-[#fff7de] p-4">
+      <div className="flex items-start gap-3">
+        <Sparkles className="mt-0.5 shrink-0 text-[#5d45b5]" size={21} aria-hidden="true" />
+        <div>
+          <h3 className="text-lg font-black leading-6 text-[#120f17]">
+            Here&apos;s the special Disney ticket pricing available through your matched link
+          </h3>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        {preview.offers.slice(0, 3).map((offer) => (
+          <div
+            key={`${offer.productName}-${offer.priceCents}`}
+            className="flex min-h-[88px] flex-col rounded-[14px] border-[3px] border-[#120f17] bg-white px-3 py-3"
+          >
+            <p className="text-sm font-black leading-5 text-[#120f17]">
+              {formatOfferProductName(offer.productName)}
+            </p>
+            <p className="mt-2 text-xl font-black leading-7 text-[#5d45b5]">
+              {formatOfferPrice(offer.priceCents, offer.currency, offer.priceBasis)}
+            </p>
+          </div>
+        ))}
+        <div className="flex min-h-[88px] flex-col rounded-[14px] border-[3px] border-[#120f17] bg-white px-3 py-3">
+          <p className="text-sm font-black leading-5 text-[#120f17]">Bonus Disney Magic</p>
+          <p className="mt-2 text-base font-black leading-5 text-[#5d45b5]">
+            Multi-day tickets include a free Water Park Fun &amp; More pass.
+          </p>
+        </div>
+      </div>
+
+      <p className="mt-3 text-xs font-bold leading-5 text-[#3e304d]">
+        Prices shown are current examples from this matched Disney Group &amp; Convention ticket
+        page. You&apos;re not required to attend a convention or belong to a group to use these
+        tickets. Prices and availability can change. Pricing checked{" "}
+        {new Intl.DateTimeFormat("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        }).format(new Date(preview.collectedAt))}
+        .
+      </p>
+    </div>
+  );
+}
+
+function formatOfferProductName(productName: string) {
+  return productName
+    .replace(/modal;?type=onesource/gi, "")
+    .replace(/modalitytype=onesource/gi, "")
+    .replace(/type=onesource/gi, "")
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function formatOfferPrice(
+  priceCents: number,
+  currency: string,
+  priceBasis: "from" | "per_day" | "per_ticket"
+) {
+  const price = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+  }).format(priceCents / 100);
+  const suffix =
+    priceBasis === "per_day" ? "/Day" : priceBasis === "per_ticket" ? "/Ticket" : "";
+  return `From ${price}${suffix}`;
+}
+
+function CompactBenefit({
+  icon,
+  iconBackground,
+  text,
+}: {
+  icon: ReactNode;
+  iconBackground: string;
+  text: string;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <span
+        className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[3px] border-[#120f17] ${iconBackground}`}
+      >
+        {icon}
+      </span>
+      <p className="text-sm font-black leading-6 text-[#3e304d]">{text}</p>
+    </div>
+  );
+}
+
+function MatchStep({ number, text }: { number: string; text: string }) {
+  return (
+    <div className="flex items-start gap-3 rounded-[16px] border-[3px] border-[#120f17] bg-white p-3">
+      <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#8f72f2] text-sm font-black text-white">
+        {number}
+      </span>
+      <p className="text-sm font-bold leading-5 text-[#3e304d]">{text}</p>
+    </div>
+  );
+}
+
+function getAttribution(): Attribution {
+  if (typeof window === "undefined") {
+    return {
+      visitId: null,
+      sessionId: null,
+      visitorId: null,
+      utmSource: null,
+      utmMedium: null,
+      utmCampaign: null,
+      utmContent: null,
+      utmTerm: null,
+      landingPage: null,
+      referrer: null,
+      referrerDomain: null,
+      gclid: null,
+      fbclid: null,
+      msclkid: null,
+    };
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const referrer = normalizeAttributionValue(document.referrer);
+
+  return {
+    visitId: getPersistentId("smt_visit_id", window.sessionStorage),
+    sessionId: getPersistentId("smt_session_id", window.sessionStorage),
+    visitorId: getPersistentId("smt_visitor_id", window.localStorage),
+    utmSource: normalizeAttributionValue(params.get("utm_source")),
+    utmMedium: normalizeAttributionValue(params.get("utm_medium")),
+    utmCampaign: normalizeAttributionValue(params.get("utm_campaign")),
+    utmContent: normalizeAttributionValue(params.get("utm_content")),
+    utmTerm: normalizeAttributionValue(params.get("utm_term")),
+    gclid: normalizeAttributionValue(params.get("gclid")),
+    fbclid: normalizeAttributionValue(params.get("fbclid")),
+    msclkid: normalizeAttributionValue(params.get("msclkid")),
+    landingPage: normalizeAttributionValue(`${window.location.pathname}${window.location.search}`),
+    referrer,
+    referrerDomain: getReferrerDomain(referrer),
+  };
+}
+
+function normalizeAttributionValue(value: string | null) {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed.slice(0, 500) : null;
+}
+
+function getPersistentId(key: string, storage: Storage) {
+  const existing = storage.getItem(key);
+  if (existing) {
+    return existing;
+  }
+
+  const next = crypto.randomUUID();
+  storage.setItem(key, next);
+  return next;
+}
+
+function getReferrerDomain(referrer: string | null) {
+  if (!referrer) {
+    return null;
+  }
+
+  try {
+    return normalizeAttributionValue(new URL(referrer).hostname.replace(/^www\./, ""));
+  } catch {
+    return null;
+  }
+}
