@@ -93,7 +93,7 @@ const testimonials = [
 
 const faqItems = [
   {
-    question: "How do you find these deals?",
+    question: "How do I know these ticket offers are legitimate?",
     answer:
       "Secret Mouse Tickets is a matching service. We help you find Disney Group & Convention ticket sale pages that fit your travel dates, and your actual park tickets are purchased directly through Disney's own checkout. We don't process your Disney ticket order or ask for your Disney payment information.",
   },
