@@ -100,7 +100,7 @@ const faqItems = [
   {
     question: "Why isn't this offer on Disney's main ticket page?",
     answer:
-      "Disney runs these Group & Convention sale pages separately from the ticket page most guests see. They're tied to specific conventions and events, not hidden, just not linked from where most families start.",
+      "Disney runs these Group & Convention sale pages separately from the ticket page most guests see. They're tied to specific conventions and events – not exactly hidden, just not linked from where most families start.",
   },
   {
     question: "Will this affect my park reservations or get my tickets canceled?",

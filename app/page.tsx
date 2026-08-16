@@ -56,7 +56,7 @@ const faqSchema = {
       name: "Why isn't this offer on Disney's main ticket page?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Disney runs these Group and Convention sale pages separately from the ticket page most guests see. They're tied to specific conventions and events, not hidden, just not linked from where most families start.",
+        text: "Disney runs these Group and Convention sale pages separately from the ticket page most guests see. They're tied to specific conventions and events – not exactly hidden, just not linked from where most families start.",
       },
     },
     {
