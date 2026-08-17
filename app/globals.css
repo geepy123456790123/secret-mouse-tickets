@@ -84,7 +84,10 @@ select:focus-visible {
 .brand-page::before {
   position: absolute;
   z-index: -1;
-  inset: 0;
+  top: 620px;
+  right: 0;
+  bottom: 0;
+  left: 0;
   pointer-events: none;
   content: "";
   background: radial-gradient(circle at 18px 18px, rgba(255, 255, 255, 0.62) 0 2px, transparent 3px);
@@ -111,5 +114,11 @@ select:focus-visible {
 
   .cartoon-panel-soft {
     box-shadow: 4px 4px 0 var(--brand-black);
+  }
+}
+
+@media (min-width: 640px) {
+  .brand-page::before {
+    top: 56.25vw;
   }
 }
