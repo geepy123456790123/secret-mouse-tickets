@@ -89,8 +89,6 @@ select:focus-visible {
   content: "";
   background: radial-gradient(circle at 18px 18px, rgba(255, 255, 255, 0.62) 0 2px, transparent 3px);
   background-size: 36px 36px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.35) 42%, rgba(0, 0, 0, 0.9) 82%, #000 100%);
-  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.35) 42%, rgba(0, 0, 0, 0.9) 82%, #000 100%);
 }
 
 .cartoon-panel {
