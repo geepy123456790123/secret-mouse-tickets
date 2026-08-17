@@ -237,7 +237,13 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
           src="/secret-mouse-tickets-hero.mp4"
         />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(223,208,255,0.02)_0%,rgba(223,208,255,0.16)_36%,rgba(216,198,255,0.62)_74%,#d8c6ff_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18px_18px,rgba(255,255,255,0.62)_0_2px,transparent_3px)] bg-[length:36px_36px] [mask-image:linear-gradient(180deg,transparent_0%,transparent_50%,rgba(0,0,0,0.18)_64%,rgba(0,0,0,0.58)_84%,black_100%)]" />
+        <div
+          className="absolute inset-0 bg-[radial-gradient(circle_at_18px_18px,rgba(255,255,255,0.62)_0_2px,transparent_3px)] bg-[length:36px_36px]"
+          style={{
+            maskImage: "linear-gradient(180deg, transparent 0%, transparent 50%, rgba(0,0,0,0.18) 64%, rgba(0,0,0,0.58) 84%, #000 100%)",
+            WebkitMaskImage: "linear-gradient(180deg, transparent 0%, transparent 50%, rgba(0,0,0,0.18) 64%, rgba(0,0,0,0.58) 84%, #000 100%)",
+          }}
+        />
       </div>
       {topBanner.enabled ? (
         <div className="relative z-10 mx-auto flex w-full max-w-7xl justify-center px-5 pt-5 lg:px-8">
