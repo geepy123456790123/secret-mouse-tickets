@@ -4,6 +4,13 @@ import { collectBrowserlessTicketPrices } from "./browserless-ticket-price-colle
 const EXCLUDED_BROCHURE_SRC =
   "https://258ade6f769e5102661c-d0ee5722296a6e07a9b11bb4054abd10.ssl.cf2.rackcdn.com/thumbs/yBcDUZZON5KjxryAb3o2uizUnHfloBHeBrochure.png";
 
+const PRICING_REFRESH_SCOPE_NORMAL = "normal";
+const PRICING_REFRESH_SCOPE_MISSING_STALE_FAILED = "missing-stale-failed";
+const PRICING_REFRESH_SCOPES = new Set([
+  PRICING_REFRESH_SCOPE_NORMAL,
+  PRICING_REFRESH_SCOPE_MISSING_STALE_FAILED,
+]);
+
 const MONTHS = new Map(
   Object.entries({
     jan: 0,
@@ -41,10 +48,15 @@ async function main() {
   const endpoint = process.env.INGEST_ENDPOINT;
   const existingPrices = endpoint ? await loadExistingPriceState(endpoint) : new Map();
   const priceCollectionLimiter = createPriceCollectionLimiter(process.env.EVENT_PRICE_COLLECTION_LIMIT);
+  const priceRefreshScope = normalizePriceRefreshScope(process.env.TICKET_PRICE_REFRESH_SCOPE);
+  const forcePriceRefresh = isEnabled(process.env.FORCE_TICKET_PRICE_REFRESH);
   let nextIndex = 0;
   let completed = 0;
 
   console.log(`Discovered ${urls.length} candidate URLs; processing ${concurrency} at a time.`);
+  if (priceRefreshScope !== PRICING_REFRESH_SCOPE_NORMAL) {
+    console.log(`Ticket pricing refresh scope: ${priceRefreshScope}`);
+  }
 
   async function worker() {
     while (nextIndex < urls.length) {
@@ -80,7 +92,8 @@ async function main() {
         const priceCollection = await collectTicketPrices(
           event,
           existingPrices.get(event.eventPageUrl),
-          priceCollectionLimiter
+          priceCollectionLimiter,
+          { forcePriceRefresh, priceRefreshScope }
         );
         events.push({ ...event, ...priceCollection });
       } catch (error) {
@@ -173,6 +186,22 @@ async function main() {
 function normalizeConcurrency(value) {
   const parsed = Number.parseInt(value ?? "", 10);
   return Number.isInteger(parsed) ? Math.min(Math.max(parsed, 1), 5) : 1;
+}
+
+function normalizePriceRefreshScope(value) {
+  const normalized = String(value ?? "").trim().toLowerCase();
+  if (!normalized) {
+    return PRICING_REFRESH_SCOPE_NORMAL;
+  }
+
+  if (PRICING_REFRESH_SCOPES.has(normalized)) {
+    return normalized;
+  }
+
+  console.warn(
+    `Unknown TICKET_PRICE_REFRESH_SCOPE "${value}". Falling back to ${PRICING_REFRESH_SCOPE_NORMAL}.`
+  );
+  return PRICING_REFRESH_SCOPE_NORMAL;
 }
 
 function createPriceCollectionLimiter(value) {
@@ -403,21 +432,31 @@ function extractTicketCampaignCode(ticketBookingUrl) {
   return url.searchParams.get("CMP") ?? url.searchParams.get("cmp");
 }
 
-async function collectTicketPrices(event, existingPriceState, priceCollectionLimiter) {
+async function collectTicketPrices(event, existingPriceState, priceCollectionLimiter, options = {}) {
   const endpoint = process.env.TICKET_PRICE_COLLECTOR_ENDPOINT;
   const browserlessToken = process.env.BROWSERLESS_API_TOKEN;
+  const forcePriceRefresh = Boolean(options.forcePriceRefresh);
+  const priceRefreshScope = options.priceRefreshScope ?? PRICING_REFRESH_SCOPE_NORMAL;
 
   if ((!endpoint && !browserlessToken) || !event.ticketBookingUrl) {
     return emptyPriceCollection("not_configured");
   }
 
-  const reusablePriceCollection = getReusablePriceCollection(
-    event,
-    existingPriceState,
-    isEnabled(process.env.FORCE_TICKET_PRICE_REFRESH)
-  );
-  if (reusablePriceCollection) {
-    return reusablePriceCollection;
+  if (
+    priceRefreshScope === PRICING_REFRESH_SCOPE_MISSING_STALE_FAILED &&
+    !shouldAttemptScopedPriceRefresh(event, existingPriceState)
+  ) {
+    const reusablePriceCollection = getReusablePriceCollection(event, existingPriceState, false);
+    if (reusablePriceCollection) {
+      return reusablePriceCollection;
+    }
+  }
+
+  if (priceRefreshScope === PRICING_REFRESH_SCOPE_NORMAL) {
+    const reusablePriceCollection = getReusablePriceCollection(event, existingPriceState, forcePriceRefresh);
+    if (reusablePriceCollection) {
+      return reusablePriceCollection;
+    }
   }
 
   if (!priceCollectionLimiter.tryReserve(event.eventPageUrl)) {
@@ -473,6 +512,29 @@ async function collectTicketPrices(event, existingPriceState, priceCollectionLim
       ticketPriceError: String(error instanceof Error ? error.message : error).slice(0, 2000),
     };
   }
+}
+
+function shouldAttemptScopedPriceRefresh(event, existingPriceState) {
+  if (!event.ticketBookingUrl) {
+    return false;
+  }
+
+  if (!existingPriceState || existingPriceState.ticketBookingUrl !== event.ticketBookingUrl) {
+    return true;
+  }
+
+  const status = existingPriceState.ticketPriceStatus;
+  const collectedAt = existingPriceState.ticketPricesCollectedAt;
+
+  if (status === "collected" || status === "empty") {
+    return !isWithinDays(collectedAt, 14);
+  }
+
+  if (status === "failed" || status === "not_configured") {
+    return true;
+  }
+
+  return true;
 }
 
 function getReusablePriceCollection(event, existingPriceState, forceRefresh = false) {

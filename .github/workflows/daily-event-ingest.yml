@@ -19,6 +19,14 @@ on:
         required: false
         default: false
         type: boolean
+      pricing_refresh_scope:
+        description: "Which events should get Browserless ticket pricing attempts"
+        required: false
+        default: normal
+        type: choice
+        options:
+          - normal
+          - missing-stale-failed
 
 concurrency:
   group: daily-event-ingest
@@ -52,6 +60,7 @@ jobs:
           EVENT_URLS: ${{ inputs.event_urls }}
           EVENT_PRICE_COLLECTION_LIMIT: ${{ inputs.price_collection_limit }}
           FORCE_TICKET_PRICE_REFRESH: ${{ inputs.force_price_refresh }}
+          TICKET_PRICE_REFRESH_SCOPE: ${{ inputs.pricing_refresh_scope }}
         run: |
           BASE_URL="${SITE_BASE_URL:-https://secretmousetickets.com}"
           if [[ "$BASE_URL" == *".chatgpt.site"* ]]; then
