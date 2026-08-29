@@ -227,14 +227,10 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
   return (
     <main className="brand-page relative isolate min-h-screen text-[#120f17]">
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-0 h-[620px] overflow-hidden sm:aspect-video sm:h-auto" aria-hidden="true">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="metadata"
+        <img
+          alt=""
           className="absolute inset-0 h-full w-full object-cover object-[center_top] opacity-35 sm:object-center"
-          src="/secret-mouse-tickets-hero.mp4"
+          src="/secret-mouse-tickets-hero.jpg"
         />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(223,208,255,0.02)_0%,rgba(223,208,255,0.16)_36%,rgba(216,198,255,0.62)_74%,#d8c6ff_100%)]" />
         <div
