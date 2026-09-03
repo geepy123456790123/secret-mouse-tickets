@@ -232,7 +232,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
           className="absolute inset-0 h-full w-full object-cover object-[center_top] opacity-35 sm:object-center"
           src="/secret-mouse-tickets-hero.jpg"
         />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(223,208,255,0.02)_0%,rgba(223,208,255,0.16)_36%,rgba(216,198,255,0.62)_74%,#d8c6ff_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(223,208,255,0)_0%,rgba(223,208,255,0.08)_36%,rgba(216,198,255,0.56)_74%,#d8c6ff_100%)]" />
         <div
           className="absolute inset-0 bg-[radial-gradient(circle_at_18px_18px,rgba(255,255,255,0.62)_0_2px,transparent_3px)] bg-[length:36px_36px]"
           style={{
