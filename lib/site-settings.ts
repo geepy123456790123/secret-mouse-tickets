@@ -54,42 +54,47 @@ function normalizeEnabled(value: string | null | undefined, fallback: boolean) {
 }
 
 export async function getTopBannerSettings(): Promise<TopBannerSettings> {
-  await ensureDatabase();
+  try {
+    await ensureDatabase();
 
-  const rows = await getRawDb()
-    .prepare(
-      `SELECT key, value FROM site_settings WHERE key IN (?, ?, ?, ?, ?, ?)`
-    )
-    .bind(
-      TOP_BANNER_SETTING_KEYS.enabled,
-      TOP_BANNER_SETTING_KEYS.prefix,
-      TOP_BANNER_SETTING_KEYS.highlight,
-      TOP_BANNER_SETTING_KEYS.suffix,
-      TOP_BANNER_SETTING_KEYS.textColor,
-      TOP_BANNER_SETTING_KEYS.highlightColor
-    )
-    .all<SiteSettingRow>();
+    const rows = await getRawDb()
+      .prepare(
+        `SELECT key, value FROM site_settings WHERE key IN (?, ?, ?, ?, ?, ?)`
+      )
+      .bind(
+        TOP_BANNER_SETTING_KEYS.enabled,
+        TOP_BANNER_SETTING_KEYS.prefix,
+        TOP_BANNER_SETTING_KEYS.highlight,
+        TOP_BANNER_SETTING_KEYS.suffix,
+        TOP_BANNER_SETTING_KEYS.textColor,
+        TOP_BANNER_SETTING_KEYS.highlightColor
+      )
+      .all<SiteSettingRow>();
 
-  const values = new Map((rows.results ?? []).map((row) => [row.key, row.value]));
+    const values = new Map((rows.results ?? []).map((row) => [row.key, row.value]));
 
-  return {
-    enabled: normalizeEnabled(
-      values.get(TOP_BANNER_SETTING_KEYS.enabled),
-      DEFAULT_TOP_BANNER_SETTINGS.enabled
-    ),
-    prefix: values.get(TOP_BANNER_SETTING_KEYS.prefix) ?? DEFAULT_TOP_BANNER_SETTINGS.prefix,
-    highlight:
-      values.get(TOP_BANNER_SETTING_KEYS.highlight) ?? DEFAULT_TOP_BANNER_SETTINGS.highlight,
-    suffix: values.get(TOP_BANNER_SETTING_KEYS.suffix) ?? DEFAULT_TOP_BANNER_SETTINGS.suffix,
-    textColor: normalizeColor(
-      values.get(TOP_BANNER_SETTING_KEYS.textColor),
-      DEFAULT_TOP_BANNER_SETTINGS.textColor
-    ),
-    highlightColor: normalizeColor(
-      values.get(TOP_BANNER_SETTING_KEYS.highlightColor),
-      DEFAULT_TOP_BANNER_SETTINGS.highlightColor
-    ),
-  };
+    return {
+      enabled: normalizeEnabled(
+        values.get(TOP_BANNER_SETTING_KEYS.enabled),
+        DEFAULT_TOP_BANNER_SETTINGS.enabled
+      ),
+      prefix: values.get(TOP_BANNER_SETTING_KEYS.prefix) ?? DEFAULT_TOP_BANNER_SETTINGS.prefix,
+      highlight:
+        values.get(TOP_BANNER_SETTING_KEYS.highlight) ?? DEFAULT_TOP_BANNER_SETTINGS.highlight,
+      suffix: values.get(TOP_BANNER_SETTING_KEYS.suffix) ?? DEFAULT_TOP_BANNER_SETTINGS.suffix,
+      textColor: normalizeColor(
+        values.get(TOP_BANNER_SETTING_KEYS.textColor),
+        DEFAULT_TOP_BANNER_SETTINGS.textColor
+      ),
+      highlightColor: normalizeColor(
+        values.get(TOP_BANNER_SETTING_KEYS.highlightColor),
+        DEFAULT_TOP_BANNER_SETTINGS.highlightColor
+      ),
+    };
+  } catch (error) {
+    console.error("Unable to load top banner settings", error);
+    return DEFAULT_TOP_BANNER_SETTINGS;
+  }
 }
 
 export async function saveTopBannerSettings(
