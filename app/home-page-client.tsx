@@ -273,7 +273,11 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
           <div className="max-w-xl space-y-3 lg:-mt-2">
             <h1 className="text-2xl font-bold leading-tight text-[#120f17] sm:text-3xl">
               We find Group &amp; Convention ticket offers that match your travel dates so you can
-              save BIG on your Walt Disney World trip.
+              save{" "}
+              <span className="inline-block -rotate-2 rounded-[0.55rem] border-[3px] border-[#120f17] bg-[#ffc247] px-2 py-0.5 text-[#120f17] shadow-[3px_4px_0_rgba(18,15,23,0.35)] sm:px-3">
+                BIG
+              </span>{" "}
+              on your Walt Disney World trip.
             </h1>
             <p className="text-lg font-medium leading-8 text-[#3e304d]">
               A typical family of 4 buying park tickets for 5 days can save over $300 on tickets
