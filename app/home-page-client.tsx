@@ -396,7 +396,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
               {status === "checking" ? "Checking dates..." : "Check My Dates"}
             </button>
             <p className="mt-3 text-center text-sm font-bold leading-6 text-[#3e304d]">
-              Free to check. You&apos;ll see our fee before you pay anything.
+              Free to check. You&apos;ll see our fee before you pay anything, and you&apos;ll only ever pay if we find an eligible Disney ticket offer for your dates.
             </p>
           </form>
 
@@ -495,7 +495,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
             <CompactBenefit
               icon={<BadgeCheck size={18} aria-hidden="true" />}
               iconBackground="bg-[#fff7de]"
-              text="Buy your actual park tickets directly from Disney."
+              text="Buy your actual park tickets directly from Disney. We never handle your Disney payment, and we don't issue or resell tickets."
             />
           </section>
 
