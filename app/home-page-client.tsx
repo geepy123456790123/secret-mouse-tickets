@@ -572,7 +572,7 @@ function TicketOfferExamples({ preview }: { preview: TicketOfferPreview }) {
         <div className="flex min-h-[88px] flex-col rounded-[14px] border-[3px] border-[#120f17] bg-white px-3 py-3">
           <p className="text-sm font-black leading-5 text-[#120f17]">Offer details</p>
           <p className="mt-2 text-base font-black leading-5 text-[#5d45b5]">
-            Check Disney&apos;s offer for included extras and restrictions.
+            Multi-day tickets include a bonus water parks &amp; more pass
           </p>
         </div>
       </div>
