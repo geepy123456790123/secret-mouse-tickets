@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { AdminHeader } from "@/components/admin-header";
+import "./admin-theme.css";
 
 export const metadata: Metadata = {
   robots: {
@@ -12,5 +14,10 @@ export default function AdminLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return children;
+  return (
+    <div className="admin-theme">
+      <AdminHeader />
+      {children}
+    </div>
+  );
 }

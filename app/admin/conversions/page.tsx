@@ -466,7 +466,7 @@ export function AdminConversionsDashboard({
 
       <form
         onSubmit={loadDashboard}
-        className="cartoon-panel grid gap-4 rounded-[24px] bg-white p-5 sm:grid-cols-[180px_180px_auto] sm:items-end sm:p-6"
+        className="admin-date-filter cartoon-panel grid gap-4 rounded-[24px] bg-white p-5 sm:grid-cols-[180px_180px_auto] sm:items-end sm:p-6"
       >
           <label className="grid gap-2 text-sm font-bold">
             Start Date
@@ -811,7 +811,7 @@ export function AdminConversionsDashboard({
             <>
               {bannerSettings.enabled ? (
                 <div
-                  className="w-fit max-w-full rounded-[18px] border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2.5 text-center text-lg font-black shadow-[5px_5px_0_#120f17] sm:px-6 sm:text-xl"
+                  className="admin-banner-preview w-fit max-w-full rounded-[18px] border-[3px] border-[#120f17] bg-[#ffbd38] px-4 py-2.5 text-center text-lg font-black shadow-[5px_5px_0_#120f17] sm:px-6 sm:text-xl"
                   style={{ color: bannerSettings.textColor }}
                 >
                   {bannerSettings.prefix}{" "}
@@ -964,6 +964,7 @@ export function AdminConversionsDashboard({
         <button
           type="button"
           onClick={() => setCouponOpen((current) => !current)}
+          aria-expanded={couponOpen}
           className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
         >
           <div>
@@ -1213,7 +1214,7 @@ function MetricCard({
   bg: string;
 }) {
   return (
-    <div className={`cartoon-panel grid gap-3 rounded-[22px] ${bg} p-5`}>
+    <div className={`admin-metric cartoon-panel grid gap-3 rounded-[22px] ${bg} p-5`}>
       <div className="flex items-center justify-between gap-3">
         <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border-[3px] border-[#120f17] bg-white">
           {icon}
@@ -1236,7 +1237,7 @@ function Panel({
   children: ReactNode;
 }) {
   return (
-    <section className="cartoon-panel overflow-hidden rounded-[24px] bg-white">
+    <section className="admin-data-panel cartoon-panel overflow-hidden rounded-[24px] bg-white">
       <div className="border-b-4 border-[#120f17] bg-[#d8c6ff] px-5 py-4">
         <h2 className="text-xl font-black">{title}</h2>
         <p className="mt-1 text-sm font-bold text-[#3e304d]">{subtitle}</p>

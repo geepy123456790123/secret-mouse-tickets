@@ -98,8 +98,8 @@ export function AdminScrapePanel({ showHeader = true }: AdminScrapePanelProps) {
         </div>
       )}
 
-      <form onSubmit={runScrape} className="grid gap-5">
-          <div className="grid gap-4 sm:grid-cols-2">
+      <form onSubmit={runScrape} className="admin-scrape-form grid gap-5">
+          <div className="admin-scrape-fields grid gap-4 sm:grid-cols-2">
             <label className="grid gap-2 text-sm font-bold">
               Start Page
               <input
