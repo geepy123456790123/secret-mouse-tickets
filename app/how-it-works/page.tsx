@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Search, Ticket } from "lucide-react";
+import { MarketingHeader } from "@/components/marketing-header";
 import { SiteFooter } from "@/components/site-footer";
 
 const siteUrl = "https://secretmousetickets.com";
@@ -78,7 +79,8 @@ const breadcrumbSchema = {
 
 export default function HowItWorksPage() {
   return (
-    <main className="brand-page min-h-screen text-[#120f17]">
+    <main className="brand-page polished-page article-redesign min-h-screen">
+      <MarketingHeader />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
@@ -92,13 +94,12 @@ export default function HowItWorksPage() {
           <div className="grid gap-3">
             <p className="text-sm font-bold uppercase text-[#5d45b5]">How It Works</p>
             <h1 className="text-3xl font-bold leading-tight sm:text-4xl">
-              How Secret Mouse Tickets works
+              Your dates. Your offer. Your Disney trip.
             </h1>
             <p className="text-base font-semibold leading-7 text-[#3e304d]">
-              Secret Mouse Tickets helps guests find Disney Group and Convention discount ticket
-              offers that match their Walt Disney World visit dates. When an eligible offer is
-              available, you purchase access from us and buy your actual Disney tickets directly
-              from Disney.
+              Check your travel dates for free. If we find a matching Disney Group &amp; Convention
+              ticket offer, you can get the sale-page link for a one-time $39 fee.
+              You then choose and buy your park tickets separately, directly from Disney.
             </p>
           </div>
 
@@ -111,8 +112,8 @@ export default function HowItWorksPage() {
             />
             <StepCard
               icon={<CheckCircle2 size={20} aria-hidden="true" />}
-              title="2. We check current matching offers"
-              body="We compare your dates against active Walt Disney World discount sale pages that match our eligibility rules."
+              title="2. Get your matched link"
+              body="Review your date match, then choose whether to pay $39 for delivery of the Disney sale-page link."
               bg="bg-[#d8c6ff]"
             />
             <StepCard
@@ -138,23 +139,27 @@ export default function HowItWorksPage() {
 
           <ContentSection title="Do you need to attend a convention or belong to a group?">
             <p>
-              No. Secret Mouse Tickets focuses on Disney Group and Convention ticket offers that can
-              still be valuable for eligible public purchase through the linked sale pages. You do
-              not need to attend a convention or be part of a formal group to use an eligible offer
-              we match to your dates.
+              Purchase requirements vary by offer. Disney sets each sale page’s eligibility rules,
+              valid dates, and restrictions. Review those requirements before purchasing; a date
+              match does not confirm that you meet every condition of the offer.
             </p>
           </ContentSection>
 
           <ContentSection title="Why the trip size matters">
             <p>
-              The site is designed around visits where the Disney discount is likely to outweigh our
-              fee. That is why Secret Mouse Tickets only offers checkout when the trip details are
-              large enough to make financial sense.
+              We use your park days and guest count to check whether your trip meets our minimum
+              matching criteria. This is a trip-size check, not a calculation of your final savings.
             </p>
             <p>
-              In practice, that usually means at least three ticket-days total, such as one guest
+              That means at least three ticket-days total, such as one guest
               for three park days, three guests for one park day, or two guests for two park days.
             </p>
+          </ContentSection>
+
+          <ContentSection title="Check park reservations before you buy">
+            <p>Disney lists Sport and Convention tickets among the types that require park reservations.
+              Check availability for your parks and dates before purchasing. Our matching service does not reserve admission.</p>
+            <a href="https://disneyworld.disney.go.com/experience-updates/park-reservations/?redirect=false" className="underline underline-offset-4">Read Disney&apos;s reservation guidance</a>
           </ContentSection>
 
           <ContentSection title="What happens after purchase">
@@ -171,10 +176,10 @@ export default function HowItWorksPage() {
 
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/"
+              href="/#check-dates"
               className="inline-flex items-center justify-center rounded-[16px] border-4 border-[#120f17] bg-[#ffbd38] px-5 py-3 font-bold text-[#120f17] shadow-[5px_5px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[7px_7px_0_#120f17]"
             >
-              Check My Dates
+              Check my dates — free
             </Link>
             <Link
               href="/disney-world-group-convention-tickets"

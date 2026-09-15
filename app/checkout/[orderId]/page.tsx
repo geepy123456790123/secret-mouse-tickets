@@ -81,7 +81,7 @@ export default async function CheckoutPage({
   );
 
   return (
-    <main className="brand-page min-h-screen px-3 pt-[calc(env(safe-area-inset-top)+1rem)] pb-[calc(env(safe-area-inset-bottom)+5.5rem)] text-[#120f17] sm:px-5 sm:py-8">
+    <main className="brand-page polished-page checkout-redesign min-h-screen px-3 pt-[calc(env(safe-area-inset-top)+1rem)] pb-[calc(env(safe-area-inset-bottom)+5.5rem)] text-[#120f17] sm:px-5 sm:py-8">
       <CheckoutEventTracker
         eventType={isPaid ? "purchase" : "begin_checkout"}
         orderId={order.order_id}
@@ -100,7 +100,7 @@ export default async function CheckoutPage({
             height={607}
             unoptimized
             priority
-            className="h-auto w-28 object-contain sm:w-44"
+            className="mx-auto h-auto w-28 object-contain sm:w-44"
           />
           <div className="grid gap-1.5 sm:gap-2">
             <p className="text-sm font-bold uppercase text-[#5d45b5]">
@@ -140,7 +140,7 @@ export default async function CheckoutPage({
               )}
               {!isPaid ? (
                 <p className="mt-1 text-sm font-bold text-[#3e304d]">
-                  No subscription or recurring charge.
+                  One-time matching fee. Disney park tickets are purchased separately.
                 </p>
               ) : null}
             </div>
@@ -158,7 +158,7 @@ export default async function CheckoutPage({
               <span className="font-black text-[#120f17]">{formatDate(order.valid_start_date)}</span>{" "}
               through{" "}
               <span className="font-black text-[#120f17]">{formatDate(order.valid_end_date)}</span>.
-              Multi-day tickets also include an extra Water Park Fun &amp; More Visit pass.
+              Check the Disney sale page for included extras, eligibility, and park reservation requirements.
             </p>
           </div>
 
@@ -180,7 +180,7 @@ export default async function CheckoutPage({
               />
               <CheckoutStep
                 icon={<ShieldCheck size={19} aria-hidden="true" />}
-                text="If you don't save versus Disney's regular ticket price after our fee, we'll refund you."
+                text="Our refund policy covers an inaccessible link or a purchase where you do not come out ahead after our fee."
               />
             </div>
           ) : (

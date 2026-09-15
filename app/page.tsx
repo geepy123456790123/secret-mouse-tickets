@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
+import { homeFaqItems } from "@/lib/homepage-copy";
 import { HomePageClient } from "./home-page-client";
 import { getTopBannerSettings } from "@/lib/site-settings";
 
 const siteUrl = "https://secretmousetickets.com";
 const pageDescription =
-  "Find Walt Disney World Group and Convention discount ticket offers for your visit dates. Check Disney World ticket eligibility, then buy your actual tickets directly from Disney.";
+  "Check your dates for Disney Group and Convention ticket offers for free. A matched link costs $39; park tickets are purchased separately from Disney.";
 const shareImage = {
   url: "/secret-mouse-tickets-meta-feed.png",
   width: 1731,
   height: 909,
-  alt: "Secret Mouse Tickets - hidden Disney ticket offers open to everyone",
+  alt: "Secret Mouse Tickets - Disney ticket offers matched to your dates",
 };
 
 export const metadata: Metadata = {
@@ -42,56 +43,11 @@ export const metadata: Metadata = {
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  mainEntity: [
-    {
-      "@type": "Question",
-      name: "How do I know these ticket offers are legitimate?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Secret Mouse Tickets is a matching service. We help you find Disney Group and Convention ticket sale pages that fit your travel dates, and your actual park tickets are purchased directly through Disney's own checkout. We don't process your Disney ticket order or ask for your Disney payment information.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Why isn't this offer on Disney's main ticket page?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "Disney runs these Group and Convention sale pages separately from the ticket page most guests see. They're tied to specific conventions and events – not exactly hidden, just not linked from where most families start.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Will this affect my park reservations or get my tickets canceled?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "No. Your tickets are standard Disney tickets, bought through Disney's own checkout and covered by Disney's own terms. We never hold or issue your tickets at any point.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "What am I actually paying Secret Mouse Tickets for?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "The matching and delivery step. We check your travel dates against active Disney Group and Convention offers and send you the correct sale page link if one matches. Disney sets the ticket price, and you complete the purchase on Disney's site.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "Do I need to attend a convention or belong to a group?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "No. These sale pages allow qualifying public purchase. You don't need to register for a conference or belong to an organization.",
-      },
-    },
-    {
-      "@type": "Question",
-      name: "What if my dates don't match an offer, or I don't actually come out ahead?",
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: "If nothing matches your dates, you're not charged. If we do find a match and you still don't come out ahead of Disney's regular price after our fee, contact us and we'll make it right under our guarantee.",
-      },
-    },
-  ],
+  mainEntity: homeFaqItems.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: { "@type": "Answer", text: item.answer },
+  })),
 };
 
 const homePageSchema = {

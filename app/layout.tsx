@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { Fredoka } from "next/font/google";
+import { Fredoka, Manrope, Inter } from "next/font/google";
 import { env } from "cloudflare:workers";
 import "./globals.css";
+import "./marketing-redesign.css";
 import { MarketingScripts } from "@/components/marketing-scripts";
 
 const siteUrl = "https://secretmousetickets.com";
@@ -12,8 +13,11 @@ const shareImage = {
   url: "/secret-mouse-tickets-meta-feed.png",
   width: 1731,
   height: 909,
-  alt: "Secret Mouse Tickets - hidden Disney ticket offers open to everyone",
+  alt: "Secret Mouse Tickets - Disney ticket offers matched to your dates",
 };
+
+const manrope = Manrope({ variable: "--font-manrope", subsets: ["latin"], display: "swap" });
+const inter = Inter({ variable: "--font-inter", subsets: ["latin"], display: "swap" });
 
 const fredoka = Fredoka({
   variable: "--font-fredoka",
@@ -183,7 +187,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
         />
       </head>
-      <body className={`${fredoka.variable} antialiased`}>
+      <body className={`${fredoka.variable} ${manrope.variable} ${inter.variable} antialiased`}>
         <MarketingScripts googleAdsTagId={googleAdsTagId} metaPixelId={metaPixelId} />
         {children}
       </body>

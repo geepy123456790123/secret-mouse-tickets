@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { MarketingHeader } from "@/components/marketing-header";
 import { SiteFooter } from "@/components/site-footer";
 
 export const metadata: Metadata = {
@@ -15,7 +16,8 @@ const effectiveDate = "July 3, 2026";
 
 export default function TermsOfServicePage() {
   return (
-    <main className="brand-page min-h-screen text-[#120f17]">
+    <main className="brand-page polished-page article-redesign min-h-screen">
+      <MarketingHeader />
       <section className="mx-auto w-full max-w-4xl px-5 pb-8 pt-6 lg:px-8 lg:pt-10">
         <div className="cartoon-panel grid gap-6 rounded-[24px] bg-white p-5 sm:p-7">
           <div className="grid gap-3">

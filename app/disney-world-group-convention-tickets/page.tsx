@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, BadgeDollarSign, Info, Ticket } from "lucide-react";
+import { MarketingHeader } from "@/components/marketing-header";
 import { SiteFooter } from "@/components/site-footer";
 
 const siteUrl = "https://secretmousetickets.com";
@@ -66,7 +67,7 @@ const faqSchema = {
       name: "Do guests need to attend a convention to use these ticket offers?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "No. Secret Mouse Tickets focuses on Disney Group and Convention ticket pages that can be used for qualifying public purchase when the dates line up.",
+        text: "Eligibility varies by offer. Review the Disney sale page’s purchase requirements, valid dates, and restrictions before buying; a date match alone does not confirm every requirement.",
       },
     },
     {
@@ -101,7 +102,8 @@ const breadcrumbSchema = {
 
 export default function DisneyWorldGroupConventionTicketsPage() {
   return (
-    <main className="brand-page min-h-screen text-[#120f17]">
+    <main className="brand-page polished-page article-redesign min-h-screen">
+      <MarketingHeader />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
@@ -121,7 +123,7 @@ export default function DisneyWorldGroupConventionTicketsPage() {
               Disney Group And Convention Tickets
             </p>
             <h1 className="text-3xl font-bold leading-tight sm:text-4xl">
-              What Disney World Group and Convention discount tickets are
+              Understand the offer before you book.
             </h1>
             <p className="text-base font-semibold leading-7 text-[#3e304d]">
               Walt Disney World sometimes offers special ticket sale pages tied to group and
@@ -163,8 +165,8 @@ export default function DisneyWorldGroupConventionTicketsPage() {
             <p>
               Secret Mouse Tickets does the date-matching work. When you enter your Walt Disney
               World visit details, we compare them against currently active sale-page windows. If a
-              matching offer exists and your trip is large enough to make sense financially, we show
-              you the option to purchase access.
+              matching offer exists and your trip meets our minimum trip-size criteria, we show
+              you the option to get the matched link for a one-time $39 service fee. Park tickets cost extra.
             </p>
             <p>
               After purchase, we email you the matching Disney sale-page link. You then complete
@@ -174,11 +176,16 @@ export default function DisneyWorldGroupConventionTicketsPage() {
 
           <ContentSection title="Do guests need to be part of a convention?">
             <p>
-              Not for the offers Secret Mouse Tickets is built around. We focus on Disney Group and
-              Convention ticket pages that can still be used for qualifying public purchase when the
-              dates line up. You don&apos;t need to attend a convention or belong to a formal group to
-              use an eligible link we provide.
+              Each offer has its own purchase requirements. Disney controls eligibility, and some
+              offers may be restricted to a particular group or event. Read the sale page’s terms
+              before buying. A match to your travel dates does not establish eligibility on its own.
             </p>
+          </ContentSection>
+
+          <ContentSection title="Will you need park reservations?">
+            <p>Disney lists Sport and Convention tickets among the types that require theme park
+              reservations. Check reservation availability and the rules for the ticket you choose before buying.</p>
+            <a href="https://disneyworld.disney.go.com/experience-updates/park-reservations/?redirect=false" className="underline underline-offset-4">Check Disney&apos;s reservation guidance</a>
           </ContentSection>
 
           <ContentSection title="What perks can be included">
@@ -201,10 +208,10 @@ export default function DisneyWorldGroupConventionTicketsPage() {
 
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/"
+              href="/#check-dates"
               className="inline-flex items-center justify-center rounded-[16px] border-4 border-[#120f17] bg-[#ffbd38] px-5 py-3 font-bold text-[#120f17] shadow-[5px_5px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[7px_7px_0_#120f17]"
             >
-              Check My Dates
+              Check my dates — free
             </Link>
             <Link
               href="/how-it-works"
