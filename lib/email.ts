@@ -1,4 +1,5 @@
 import { env } from "cloudflare:workers";
+import { emailBodyStyle, emailButton, emailGuarantee, emailPanel, renderCustomerEmail } from "./email-design";
 import { formatDate } from "./dates";
 import type { EventRecord } from "./eligibility";
 
@@ -79,7 +80,7 @@ ${couponLine}Event page: ${input.eventPageUrl}`;
 export function buildConfirmationEmail(input: ConfirmationEmailInput) {
   const multiDayBonusText =
     input.themeParkDays > 1
-      ? "\n\nBonus: Multi-day Disney tickets purchased through this sale page include an extra Water Park Fun & More Visit pass."
+      ? "\n\nAdditional Disney Magic: Multi-day tickets include an extra Disney experience."
       : "";
 
   const bodyText = `Secret Mouse Tickets Confirmation #: ${input.confirmationNumber}
@@ -97,34 +98,22 @@ If you have any questions about your order, reply to this email or contact hello
 Secret Mouse Tickets
 www.secretmousetickets.com`;
 
-  const html = `<div style="background:#f5edff;padding:24px;font-family:Arial,sans-serif;color:#120f17">
-    <div style="max-width:640px;margin:0 auto;background:#ffffff;border:4px solid #120f17;border-radius:20px;box-shadow:8px 8px 0 #120f17;overflow:hidden">
-      <div style="padding:28px 28px 8px">
-        <img src="${input.origin}/secret-mouse-tickets-logo.png" alt="Secret Mouse Tickets" width="180" style="display:block;height:auto;margin-bottom:20px" />
-        <div style="display:inline-block;background:#efe8ff;border:3px solid #120f17;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:0.02em;color:#5d45b5;text-transform:uppercase">Confirmation</div>
-        <h1 style="margin:16px 0 10px;font-size:28px;line-height:1.15">Your order is confirmed</h1>
-        <p style="margin:0 0 20px;font-size:16px;line-height:1.6"><strong>Secret Mouse Tickets Confirmation #:</strong> ${escapeHtml(input.confirmationNumber)}</p>
-      </div>
-      <div style="padding:0 28px 28px">
-        <div style="border:3px solid #120f17;border-radius:18px;background:#fff7de;padding:18px 18px 16px;margin-bottom:18px">
-          <p style="margin:0 0 14px;font-size:16px;line-height:1.7">Thank you for your purchase. Your Secret Mouse Tickets order is confirmed.</p>
-          <p style="margin:0;font-size:16px;line-height:1.7">Use the Disney Group &amp; Convention discount ticket sale link below to purchase your actual theme park tickets directly from Disney.</p>
-        </div>
-        <div style="border:3px solid #120f17;border-radius:18px;background:#efe8ff;padding:18px;margin-bottom:18px">
-          <p style="margin:0 0 8px;font-size:13px;font-weight:700;text-transform:uppercase;color:#5d45b5">Disney ticket link</p>
-          <p style="margin:0 0 14px;font-size:15px;line-height:1.7;word-break:break-word"><a href="${escapeHtml(input.event.event_page_url)}" style="color:#5d45b5;text-decoration:underline">${escapeHtml(input.event.event_page_url)}</a></p>
-          <p style="margin:0;font-size:15px;line-height:1.7">Valid from <strong>${formatDate(input.event.valid_start_date)}</strong> through <strong>${formatDate(input.event.valid_end_date)}</strong>.</p>
-          ${
-            input.themeParkDays > 1
-              ? '<p style="margin:12px 0 0;font-size:15px;line-height:1.7"><strong>Bonus:</strong> Multi-day Disney tickets purchased through this sale page include an extra Water Park Fun &amp; More Visit pass.</p>'
-              : ""
-          }
-        </div>
-        <p style="margin:0;font-size:15px;line-height:1.7">Questions about your order? Reply to this email or contact <a href="mailto:hello@secretmousetickets.com" style="color:#5d45b5;text-decoration:underline">hello@secretmousetickets.com</a>.</p>
-        <p style="margin:18px 0 0;font-size:14px;line-height:1.7;color:#6a6170">Secret Mouse Tickets is an independent service and isn't affiliated with Disney.</p>
-      </div>
-    </div>
-  </div>`;
+  const html = renderCustomerEmail({
+    origin: input.origin,
+    preheader: "Your order is confirmed. Your Disney ticket purchase link is inside.",
+    eyebrow: "Order confirmation",
+    heading: "Your next stop: Disney.",
+    intro: "Thanks for choosing Secret Mouse Tickets. Your order is confirmed, and your matched Disney ticket link is ready.",
+    content: `
+      <p style="margin:0 0 24px;font-size:13px;line-height:1.6;color:#696271">Confirmation <strong style="color:#292038">${escapeHtml(input.confirmationNumber)}</strong></p>
+      ${emailPanel("Your Disney ticket link", `<p style="margin:0 0 12px;font-size:16px;line-height:1.7;color:#292038">Use your matched sale page to choose and buy your park tickets directly from Disney.</p><p style="margin:0;font-size:14px;line-height:1.7;color:#696271">Valid from <strong>${formatDate(input.event.valid_start_date)}</strong> through <strong>${formatDate(input.event.valid_end_date)}</strong>.</p>`)}
+      ${emailButton(input.event.event_page_url, "View my Disney ticket offer")}
+      <p style="margin:0 0 20px;font-size:12px;line-height:1.7;color:#696271">You can also open your link here:<br><a href="${escapeHtml(input.event.event_page_url)}" style="color:#6748ad;text-decoration:underline;word-break:break-all;overflow-wrap:anywhere">${escapeHtml(input.event.event_page_url)}</a></p>
+      ${input.themeParkDays > 1 ? emailPanel("Additional Disney Magic", '<p style="margin:0;font-size:15px;line-height:1.7;color:#292038">Multi-day tickets include an extra Disney experience.</p>', true) : ""}
+      <p style="${emailBodyStyle}">Your park tickets are purchased separately from Disney. If you need help with your link, reply to this email and we'll help you out.</p>
+      ${emailGuarantee(input.origin)}
+    `,
+  });
 
   return {
     subject: "Secret Mouse Tickets Confirmation",
@@ -136,7 +125,7 @@ www.secretmousetickets.com`;
 export function buildCheckoutReminderEmail(input: CheckoutReminderEmailInput) {
   const multiDayBonusText =
     input.themeParkDays > 1
-      ? "\n\nMulti-day Disney tickets purchased through the matching offer also include an extra Water Park Fun & More Visit pass."
+      ? "\n\nAdditional Disney Magic: Multi-day tickets include an extra Disney experience."
       : "";
 
   const stageCopy =
@@ -148,7 +137,7 @@ export function buildCheckoutReminderEmail(input: CheckoutReminderEmailInput) {
           intro:
             "Your dates still match an eligible Secret Mouse Tickets offer, and your checkout is still waiting.",
           bodyLead:
-            "If you're still comparing options, now is a good time to finish checkout and lock in the discounted Disney ticket link for your trip.",
+            "When you're ready, finish checkout and we'll email your matched Disney ticket purchase link.",
           cta: "Finish checkout",
         }
       : {
@@ -156,7 +145,7 @@ export function buildCheckoutReminderEmail(input: CheckoutReminderEmailInput) {
           eyebrow: "Finish checkout",
           heading: "Your Disney ticket match is ready",
           intro:
-            "We found a match for your Walt Disney World dates, but you never completed checkout.",
+            "We found an offer for your Walt Disney World dates. Your checkout is saved, so you can pick up where you left off.",
           bodyLead:
             "Complete your purchase and we'll send your matching Disney Group & Convention discount ticket link right away.",
           cta: "Return to checkout",
@@ -164,7 +153,7 @@ export function buildCheckoutReminderEmail(input: CheckoutReminderEmailInput) {
 
   const couponText = input.couponCode
     ? `To help you finish checkout, use coupon code ${input.couponCode} for 25% off our fee.`
-    : "Your matching checkout link is still available if you would like to complete your purchase.";
+    : "Your matching checkout link is still available if you'd like to complete your purchase.";
 
   const bodyText = `Still planning your Disney trip?
 
@@ -183,34 +172,22 @@ Secret Mouse Tickets
 hello@secretmousetickets.com
 www.secretmousetickets.com`;
 
-  const html = `<div style="background:#f5edff;padding:24px;font-family:Arial,sans-serif;color:#120f17">
-    <div style="max-width:640px;margin:0 auto;background:#ffffff;border:4px solid #120f17;border-radius:20px;box-shadow:8px 8px 0 #120f17;overflow:hidden">
-      <div style="padding:28px 28px 8px">
-        <div style="display:inline-block;background:#fff7de;border:3px solid #120f17;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:0.02em;color:#5d45b5;text-transform:uppercase">${stageCopy.eyebrow}</div>
-        <h1 style="margin:16px 0 10px;font-size:28px;line-height:1.15">${stageCopy.heading}</h1>
-        <p style="margin:0 0 20px;font-size:16px;line-height:1.6">${stageCopy.intro}</p>
-      </div>
-      <div style="padding:0 28px 28px">
-        <div style="border:3px solid #120f17;border-radius:18px;background:#efe8ff;padding:18px;margin-bottom:18px">
-          <p style="margin:0 0 8px;font-size:13px;font-weight:700;text-transform:uppercase;color:#5d45b5">Matched offer</p>
-          <p style="margin:0;font-size:18px;line-height:1.5;font-weight:700">${escapeHtml(input.event.info_banner_first)}</p>
-        </div>
-        ${input.couponCode ? `<div style="border:3px solid #120f17;border-radius:18px;background:#fff7de;padding:18px;margin-bottom:18px">
-          <p style="margin:0 0 8px;font-size:13px;font-weight:700;text-transform:uppercase;color:#5d45b5">Applied coupon</p>
-          <p style="margin:0;font-size:28px;line-height:1.1;font-weight:800">${escapeHtml(input.couponCode)}</p>
-        </div>` : ""}
-        <p style="margin:0 0 16px;font-size:15px;line-height:1.7">${stageCopy.bodyLead}</p>
-        <p style="margin:0 0 18px"><a href="${escapeHtml(input.checkoutUrl)}" style="display:inline-block;background:#ffbd38;border:3px solid #120f17;border-radius:16px;padding:14px 18px;font-size:16px;font-weight:800;color:#120f17;text-decoration:none">${stageCopy.cta}</a></p>
-        <p style="margin:0 0 14px;font-size:15px;line-height:1.7">Tickets purchased through the matching Disney offer are valid from <strong>${formatDate(input.event.valid_start_date)}</strong> through <strong>${formatDate(input.event.valid_end_date)}</strong>.</p>
-        ${
-          input.themeParkDays > 1
-            ? '<p style="margin:0 0 14px;font-size:15px;line-height:1.7">Multi-day Disney tickets purchased through the matching offer also include an extra Water Park Fun &amp; More Visit pass.</p>'
-            : ""
-        }
-        <p style="margin:0;font-size:15px;line-height:1.7">Questions? Contact <a href="mailto:hello@secretmousetickets.com" style="color:#5d45b5;text-decoration:underline">hello@secretmousetickets.com</a>.</p>
-      </div>
-    </div>
-  </div>`;
+  const html = renderCustomerEmail({
+    origin: new URL(input.checkoutUrl).origin,
+    preheader: input.couponCode ? `Your Disney ticket match is waiting. Use ${input.couponCode} for 25% off our fee.` : "Your Disney ticket match is ready whenever you are.",
+    eyebrow: stageCopy.eyebrow,
+    heading: stageCopy.heading,
+    intro: stageCopy.intro,
+    content: `
+      ${emailPanel("Your matched offer", `<p style="margin:0 0 10px;font-size:18px;font-weight:700;line-height:1.5;color:#292038">${escapeHtml(input.event.info_banner_first)}</p><p style="margin:0;font-size:14px;line-height:1.7;color:#696271">Ticket dates: ${formatDate(input.event.valid_start_date)} &ndash; ${formatDate(input.event.valid_end_date)}</p>`)}
+      ${input.couponCode ? emailPanel("A little extra savings", `<p style="margin:0 0 8px;font-size:22px;line-height:1.3;font-weight:700;color:#292038">25% off our matching fee</p><p style="margin:0;font-size:15px;line-height:1.7;color:#696271">Use code <strong style="color:#6748ad">${escapeHtml(input.couponCode)}</strong> at checkout.</p>`, true) : ""}
+      <p style="${emailBodyStyle}">${escapeHtml(stageCopy.bodyLead)}</p>
+      ${emailButton(input.checkoutUrl, stageCopy.cta)}
+      <p style="margin:0 0 20px;text-align:center;font-size:12px;line-height:1.7;color:#696271">One-time matching fee. No subscription.<br>Park tickets are purchased separately from Disney.</p>
+      ${input.themeParkDays > 1 ? emailPanel("Additional Disney Magic", '<p style="margin:0;font-size:15px;line-height:1.7;color:#292038">Multi-day tickets include an extra Disney experience.</p>') : ""}
+      ${emailGuarantee(new URL(input.checkoutUrl).origin)}
+    `,
+  });
 
   return {
     subject: stageCopy.subject,
@@ -235,22 +212,17 @@ hello@secretmousetickets.com
 Secret Mouse Tickets
 www.secretmousetickets.com`;
 
-  const html = `<div style="background:#f5edff;padding:24px;font-family:Arial,sans-serif;color:#120f17">
-    <div style="max-width:640px;margin:0 auto;background:#ffffff;border:4px solid #120f17;border-radius:20px;box-shadow:8px 8px 0 #120f17;overflow:hidden">
-      <div style="padding:28px 28px 8px">
-        <div style="display:inline-block;background:#efe8ff;border:3px solid #120f17;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700;letter-spacing:0.02em;color:#5d45b5;text-transform:uppercase">Quick favor</div>
-        <h1 style="margin:16px 0 10px;font-size:28px;line-height:1.15">How did we do?</h1>
-        <p style="margin:0 0 20px;font-size:16px;line-height:1.6">If Secret Mouse Tickets helped with your Disney trip, we'd really appreciate a quick Trustpilot review.</p>
-      </div>
-      <div style="padding:0 28px 28px">
-        <div style="border:3px solid #120f17;border-radius:18px;background:#fff7de;padding:18px;margin-bottom:18px">
-          <p style="margin:0;font-size:16px;line-height:1.7">Your feedback helps other families feel more confident about checking their dates and deciding whether Secret Mouse Tickets is a fit for their trip.</p>
-        </div>
-        <p style="margin:0 0 18px"><a href="${escapeHtml(input.reviewUrl)}" style="display:inline-block;background:#ffbd38;border:3px solid #120f17;border-radius:16px;padding:14px 18px;font-size:16px;font-weight:800;color:#120f17;text-decoration:none">Leave a Trustpilot review</a></p>
-        <p style="margin:0;font-size:15px;line-height:1.7">Need anything else with your order? Email <a href="mailto:hello@secretmousetickets.com" style="color:#5d45b5;text-decoration:underline">hello@secretmousetickets.com</a>.</p>
-      </div>
-    </div>
-  </div>`;
+  const html = renderCustomerEmail({
+    preheader: "A quick review helps other families plan their Disney trip.",
+    eyebrow: "A quick favor",
+    heading: "How did we do?",
+    intro: "Thanks again for choosing Secret Mouse Tickets. We'd love to hear about your experience.",
+    content: `
+      <p style="${emailBodyStyle}">Your feedback helps other families feel confident about checking their dates before they buy.</p>
+      ${emailButton(input.reviewUrl, "Share my experience")}
+      <p style="margin:0;font-size:13px;line-height:1.7;color:#696271">Need help with your order? Email <a href="mailto:hello@secretmousetickets.com" style="color:#6748ad;text-decoration:underline">hello@secretmousetickets.com</a> and we'll help you out.</p>
+    `,
+  });
 
   return {
     subject: "How was your Secret Mouse Tickets experience?",
