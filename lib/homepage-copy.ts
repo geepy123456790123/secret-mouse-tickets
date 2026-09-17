@@ -1,6 +1,7 @@
+import { PRICE_LABEL } from "@/lib/pricing";
 export const homeFaqItems = [
   {
-    question: "What does the $39 fee cover?",
+    question: `What does the ${PRICE_LABEL} fee cover?`,
     answer: "The one-time fee covers finding and emailing your matched Disney sale-page link. It does not include park tickets. You buy those separately from Disney. Checking your dates is free, and you choose whether to continue when a match is found.",
   },
   {
@@ -20,7 +21,7 @@ export const homeFaqItems = [
     answer: "There is no charge. You can check another set of travel dates. Offers and availability change, so a match may not be available for every trip.",
   },
   {
-    question: "What if I need help with my link or savings?",
-    answer: "Email hello@secretmousetickets.com with your order confirmation number. Our refund policy covers an inaccessible paid-for link or a purchase where you do not come out ahead after our service fee. See our Terms of Service for the full policy.",
+    question: "What is your money-back guarantee?",
+    answer: "If you do not come out ahead after our service fee, we will refund that fee. Our refund policy also covers an inaccessible paid-for link. Email hello@secretmousetickets.com with your order confirmation number to request a refund. See our Terms of Service for the full policy.",
   },
 ] as const;

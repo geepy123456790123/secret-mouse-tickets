@@ -1022,7 +1022,7 @@ export function AdminConversionsDashboard({
                     }))
                   }
                   className="h-11 rounded-[12px] border-[3px] border-[#120f17] bg-white px-3 font-semibold"
-                  placeholder="9.75"
+                  placeholder="7.25"
                 />
               </label>
               <label className="grid gap-2 text-sm font-bold">

@@ -1,9 +1,11 @@
 "use client";
 
+import { PRICE_LABEL } from "@/lib/pricing";
 import Image from "next/image";
 import Link from "next/link";
 import {
   BadgeCheck,
+  ShieldCheck,
   ChevronDown,
   ExternalLink,
   Mail,
@@ -79,7 +81,7 @@ const testimonials = [
     name: "Jason P.",
     initials: "JP",
     amount: "$312",
-    text: "I had no idea these group and convention rates were out there. Our dates matched, the fee was $39, and our Disney ticket savings were over $300.",
+    text: "I had no idea these group and convention rates were out there. Our dates matched, and our Disney ticket savings were over $300.",
     bg: "bg-[#8f72f2]",
   },
   {
@@ -218,8 +220,14 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
             </p>
           </div>
           <div className="hero-price">
-            <strong>$39 <span>one-time matching fee</span></strong>
+            <strong>{PRICE_LABEL} <span>one-time matching fee</span></strong>
             <p>Only if you find a match and choose to continue. Disney tickets are purchased separately.</p>
+          </div>
+          <div className="savings-guarantee">
+            <ShieldCheck size={25} aria-hidden="true" />
+            <div><strong>Save more than our fee. Guaranteed.</strong>
+              <p>If you don&apos;t come out ahead after our service fee, we&apos;ll refund it. <Link href="/terms-of-service">See guarantee details</Link>.</p>
+            </div>
           </div>
           <div className="hero-photo">
             <Image src="/secret-mouse-tickets-hero.jpg" alt="A family enjoying a sunny day on Main Street at Walt Disney World" width={1536} height={1024} unoptimized priority />
@@ -330,7 +338,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
               {status === "checking" ? "Checking dates..." : "Check my dates — free"}
             </button>
             <p className="mt-3 text-center text-sm font-bold leading-6 text-[#3e304d]">
-              If you match, choose whether to get your Disney purchase link for $39. No subscription.
+              If you match, choose whether to get your Disney purchase link for {PRICE_LABEL}. No subscription.
             </p>
           </form>
 
@@ -383,11 +391,15 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
               )}
 
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                <MatchStep number="1" text="Pay our one-time $39 matching fee." />
+                <MatchStep number="1" text={`Pay our one-time ${PRICE_LABEL} matching fee.`} />
                 <MatchStep number="2" text="Receive your matched Disney sale-page link by email." />
                 <MatchStep number="3" text="Buy your park tickets directly from Disney." />
               </div>
 
+              <div className="savings-guarantee savings-guarantee-compact">
+                <ShieldCheck size={23} aria-hidden="true" />
+                <div><strong>Your savings are guaranteed.</strong><p>Come out ahead after our fee, or get your service fee back. <Link href="/terms-of-service">See details</Link>.</p></div>
+              </div>
               <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
                 <label className="grid gap-2 text-sm font-bold">
                   Coupon Code
@@ -405,7 +417,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
                   className="inline-flex h-12 items-center justify-center gap-2 self-end rounded-[16px] border-4 border-[#120f17] bg-[#8f72f2] px-5 font-bold text-white shadow-[5px_5px_0_#120f17] transition hover:-translate-y-0.5 hover:shadow-[7px_7px_0_#120f17] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   <ExternalLink size={18} aria-hidden="true" />
-                  {status === "checkout" ? "Opening..." : "Get my Disney link — $39"}
+                  {status === "checkout" ? "Opening..." : `Get my Disney link — ${PRICE_LABEL}`}
                 </button>
               </div>
               <p className="mt-3 text-center text-xs font-bold leading-5 text-[#3e304d]">
@@ -432,7 +444,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
           <div className="section-heading"><p className="section-label">A simpler way to plan</p><h2>From your dates to Disney&apos;s checkout.</h2></div>
           <div className="how-steps">
             <div><span className="step-number">01</span><h3>Check your dates</h3><p>Enter your travel dates and party details. We check active ticket offer windows.</p></div>
-            <div><span className="step-number">02</span><h3>Get your matched link</h3><p>If you find a match, pay a one-time $39 service fee to receive the Disney sale-page link.</p></div>
+            <div><span className="step-number">02</span><h3>Get your matched link</h3><p>If you find a match, pay a one-time {PRICE_LABEL} service fee to receive the Disney sale-page link.</p></div>
             <div><span className="step-number">03</span><h3>Buy directly from Disney</h3><p>Review Disney&apos;s prices and offer terms, then purchase your park tickets on Disney&apos;s site.</p></div>
           </div>
         </div>

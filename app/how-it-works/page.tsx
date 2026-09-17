@@ -1,3 +1,4 @@
+import { PRICE_LABEL } from "@/lib/pricing";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Search, Ticket } from "lucide-react";
@@ -98,7 +99,7 @@ export default function HowItWorksPage() {
             </h1>
             <p className="text-base font-semibold leading-7 text-[#3e304d]">
               Check your travel dates for free. If we find a matching Disney Group &amp; Convention
-              ticket offer, you can get the sale-page link for a one-time $39 fee.
+              ticket offer, you can get the sale-page link for a one-time {PRICE_LABEL} fee.
               You then choose and buy your park tickets separately, directly from Disney.
             </p>
           </div>
@@ -113,7 +114,7 @@ export default function HowItWorksPage() {
             <StepCard
               icon={<CheckCircle2 size={20} aria-hidden="true" />}
               title="2. Get your matched link"
-              body="Review your date match, then choose whether to pay $39 for delivery of the Disney sale-page link."
+              body={`Review your date match, then choose whether to pay ${PRICE_LABEL} for delivery of the Disney sale-page link.`}
               bg="bg-[#d8c6ff]"
             />
             <StepCard

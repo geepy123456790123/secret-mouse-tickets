@@ -1,3 +1,4 @@
+import { PRICE_DOLLARS } from "@/lib/pricing";
 import type { Metadata } from "next";
 import { Fredoka, Manrope, Inter } from "next/font/google";
 import { env } from "cloudflare:workers";
@@ -151,7 +152,7 @@ const serviceSchema = {
     "Secret Mouse Tickets checks Walt Disney World visit dates against active Disney Group and Convention discount ticket sale pages. When a match is available, customers can purchase access to the matching Disney sale-page link and buy actual tickets directly from Disney.",
   offers: {
     "@type": "Offer",
-    price: "39",
+    price: String(PRICE_DOLLARS),
     priceCurrency: "USD",
     availability: "https://schema.org/InStock",
     url: siteUrl,

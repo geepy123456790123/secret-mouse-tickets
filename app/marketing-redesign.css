@@ -228,3 +228,11 @@
 @media (prefers-reduced-motion: reduce) {
   .polished-page *, .polished-page *::before, .polished-page *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
 }
+
+/* Savings assurance stays beside the fee and the matched checkout action. */
+.polished-page .savings-guarantee { display: flex; align-items: flex-start; gap: 12px; margin-top: 22px; padding: 17px 18px; border: 1px solid #d9cde9; border-radius: 12px; background: #f2edf8; }
+.savings-guarantee > svg { color: #6748ad; flex-shrink: 0; margin-top: 2px; }
+.savings-guarantee strong { display: block; color: #292038; font-size: 15px; font-weight: 650; line-height: 1.4; }
+.polished-page .savings-guarantee p { margin-top: 5px; font-size: 12px; line-height: 1.65; color: #696271; }
+.savings-guarantee a { text-decoration: underline; text-underline-offset: 3px; color: #6748ad; }
+.polished-page .savings-guarantee-compact { background: #fff; }

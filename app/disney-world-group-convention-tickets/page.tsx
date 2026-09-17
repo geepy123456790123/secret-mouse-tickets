@@ -1,3 +1,4 @@
+import { PRICE_LABEL } from "@/lib/pricing";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, BadgeDollarSign, Info, Ticket } from "lucide-react";
@@ -166,7 +167,7 @@ export default function DisneyWorldGroupConventionTicketsPage() {
               Secret Mouse Tickets does the date-matching work. When you enter your Walt Disney
               World visit details, we compare them against currently active sale-page windows. If a
               matching offer exists and your trip meets our minimum trip-size criteria, we show
-              you the option to get the matched link for a one-time $39 service fee. Park tickets cost extra.
+              you the option to get the matched link for a one-time {PRICE_LABEL} service fee. Park tickets cost extra.
             </p>
             <p>
               After purchase, we email you the matching Disney sale-page link. You then complete

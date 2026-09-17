@@ -1,6 +1,7 @@
-import { getRawDb } from "@/db";
+import type { getRawDb } from "@/db";
 
-export const PRICE_CENTS = 3900;
+import { PRICE_CENTS } from "./pricing";
+export { PRICE_CENTS } from "./pricing";
 
 export async function priceForCoupon(
   db: ReturnType<typeof getRawDb>,

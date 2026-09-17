@@ -1,6 +1,8 @@
 import { env } from "cloudflare:workers";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./schema";
+import { PRICE_CENTS, QUARTER_OFF_CENTS } from "@/lib/pricing";
+import { migrateServiceFee } from "@/lib/price-migration";
 
 let setupPromise: Promise<void> | null = null;
 
@@ -46,7 +48,7 @@ async function createSchema() {
       "CREATE TABLE IF NOT EXISTS coupons (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT NOT NULL UNIQUE, discount_cents INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1, max_redemptions INTEGER, redemption_count INTEGER NOT NULL DEFAULT 0, expires_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)"
     ),
     db.prepare(
-      "CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, lead_id TEXT NOT NULL, event_id INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'pending', amount_cents INTEGER NOT NULL DEFAULT 3900, currency TEXT NOT NULL DEFAULT 'USD', confirmation_number TEXT, coupon_code TEXT, payment_provider TEXT, square_payment_link_id TEXT, square_order_id TEXT, square_payment_id TEXT, square_payment_status TEXT, paypal_order_id TEXT, paypal_capture_id TEXT, paypal_payment_status TEXT, checkout_url TEXT, checkout_reminder_sent_at TEXT, checkout_reminder_followup_sent_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, paid_at TEXT)"
+      "CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY, lead_id TEXT NOT NULL, event_id INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'pending', amount_cents INTEGER NOT NULL DEFAULT 2900, currency TEXT NOT NULL DEFAULT 'USD', confirmation_number TEXT, coupon_code TEXT, payment_provider TEXT, square_payment_link_id TEXT, square_order_id TEXT, square_payment_id TEXT, square_payment_status TEXT, paypal_order_id TEXT, paypal_capture_id TEXT, paypal_payment_status TEXT, checkout_url TEXT, checkout_reminder_sent_at TEXT, checkout_reminder_followup_sent_at TEXT, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, paid_at TEXT)"
     ),
     db.prepare(
       "CREATE INDEX IF NOT EXISTS orders_paid_at_idx ON orders (paid_at)"
@@ -165,16 +167,18 @@ async function createSchema() {
     }
   }
 
+  await migrateServiceFee(db, env as typeof env & { SQUARE_ACCESS_TOKEN?: string; SQUARE_ENVIRONMENT?: string });
+
   const seededCoupons = [
-    ["SUMMERDEAL25", 975],
-    ["COMEBACK25", 975],
-    ["TEST00", 3900],
+    ["SUMMERDEAL25", QUARTER_OFF_CENTS],
+    ["COMEBACK25", QUARTER_OFF_CENTS],
+    ["TEST00", PRICE_CENTS],
   ] as const;
 
   for (const [code, discountCents] of seededCoupons) {
     await db
       .prepare(
-        "INSERT INTO coupons (code, discount_cents, active, max_redemptions, expires_at) VALUES (?, ?, 1, NULL, NULL) ON CONFLICT(code) DO UPDATE SET discount_cents = excluded.discount_cents, active = 1, max_redemptions = NULL, expires_at = NULL"
+        "INSERT INTO coupons (code, discount_cents, active, max_redemptions, expires_at) VALUES (?, ?, 1, NULL, NULL) ON CONFLICT(code) DO NOTHING"
       )
       .bind(code, discountCents)
       .run();

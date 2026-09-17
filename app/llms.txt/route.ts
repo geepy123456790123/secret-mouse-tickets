@@ -1,3 +1,4 @@
+import { PRICE_LABEL } from "@/lib/pricing";
 const siteUrl = "https://secretmousetickets.com";
 
 const body = `# Secret Mouse Tickets
@@ -19,7 +20,7 @@ Contact: hello@secretmousetickets.com
 - Secret Mouse Tickets is independent and is not affiliated with Disney.
 - Secret Mouse Tickets does not sell Disney theme park tickets.
 - Secret Mouse Tickets sells a matching and access service.
-- The current Secret Mouse Tickets fee is $39.
+- The current Secret Mouse Tickets fee is ${PRICE_LABEL}.
 - Customers don't need to attend a convention or belong to a group to use eligible matched links.
 - Secret Mouse Tickets guarantees customers save versus Disney's regular park ticket prices, even after the service fee, or their money back.
 - If no matching offer is found, the customer is not charged.

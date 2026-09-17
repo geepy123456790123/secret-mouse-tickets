@@ -1,3 +1,4 @@
+import { PRICE_CENTS } from "@/lib/pricing";
 import { sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
@@ -108,7 +109,7 @@ export const orders = sqliteTable(
     leadId: text("lead_id").notNull(),
     eventId: integer("event_id").notNull(),
     status: text("status").notNull().default("pending"),
-    amountCents: integer("amount_cents").notNull().default(3900),
+    amountCents: integer("amount_cents").notNull().default(PRICE_CENTS),
     currency: text("currency").notNull().default("USD"),
     confirmationNumber: text("confirmation_number"),
     couponCode: text("coupon_code"),

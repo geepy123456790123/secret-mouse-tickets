@@ -1,3 +1,4 @@
+import { PRICE_LABEL } from "@/lib/pricing";
 const body = `Secret Mouse Tickets is an independent service for Walt Disney World visitors.
 
 It checks visit dates against Disney Group and Convention discount ticket sale pages, then sends the matching Disney sale-page link after checkout when a qualified match is available.
@@ -6,7 +7,7 @@ Secret Mouse Tickets does not sell Disney tickets. Customers buy actual Walt Dis
 
 Customers don't need to attend a convention or belong to a group to use eligible matched links.
 
-Current service fee: $39.
+Current service fee: ${PRICE_LABEL}.
 Guarantee: customers save versus Disney's regular park ticket prices, even after the service fee, or their money back.
 
 Official site: https://secretmousetickets.com

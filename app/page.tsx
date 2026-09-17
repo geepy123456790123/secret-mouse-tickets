@@ -1,3 +1,4 @@
+import { PRICE_LABEL } from "@/lib/pricing";
 import type { Metadata } from "next";
 import { homeFaqItems } from "@/lib/homepage-copy";
 import { HomePageClient } from "./home-page-client";
@@ -5,7 +6,7 @@ import { getTopBannerSettings } from "@/lib/site-settings";
 
 const siteUrl = "https://secretmousetickets.com";
 const pageDescription =
-  "Check your dates for Disney Group and Convention ticket offers for free. A matched link costs $39; park tickets are purchased separately from Disney.";
+  `Check your dates for Disney Group and Convention ticket offers for free. A matched link costs ${PRICE_LABEL}; park tickets are purchased separately from Disney.`;
 const shareImage = {
   url: "/secret-mouse-tickets-meta-feed.png",
   width: 1731,
