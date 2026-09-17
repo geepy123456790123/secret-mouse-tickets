@@ -215,7 +215,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
           <div className="hero-copy">
             <h1>More Disney magic.<br /><span>Less ticket guesswork.</span></h1>
             <p className="hero-description">
-              Find Disney Group &amp; Convention ticket offers for your travel dates.
+              Save up to 20% off Disney&apos;s normal ticket prices with Group &amp; Convention offers matched to your dates.
               Check for free, then buy your park tickets directly from Disney.
             </p>
           </div>
