@@ -61,7 +61,7 @@ type Attribution = {
 };
 
 type PartnerLanding = {
-  creatorName: string;
+  welcomeText: string;
   handle: string;
   couponCode: string;
   discountLabel: string;
@@ -227,7 +227,7 @@ export function HomePageClient({
         <div className="hero-story">
           {partnerLanding ? (
             <div className="partner-welcome">
-              <p>Welcome, {partnerLanding.creatorName} followers</p>
+              <p>{partnerLanding.welcomeText}</p>
               <strong>
                 Use code {partnerLanding.couponCode} for {partnerLanding.discountLabel}.
               </strong>
