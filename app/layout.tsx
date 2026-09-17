@@ -1,3 +1,4 @@
+import { socialTitle, socialDescription, shareImage } from "@/lib/social-preview";
 import { PRICE_DOLLARS } from "@/lib/pricing";
 import type { Metadata } from "next";
 import { Fredoka, Manrope, Inter } from "next/font/google";
@@ -10,12 +11,6 @@ const siteUrl = "https://secretmousetickets.com";
 const siteName = "Secret Mouse Tickets";
 const defaultDescription =
   "Secret Mouse Tickets helps Walt Disney World visitors find Disney Group and Convention discount ticket offers that match eligible visit dates.";
-const shareImage = {
-  url: "/secret-mouse-tickets-meta-feed.png",
-  width: 1731,
-  height: 909,
-  alt: "Secret Mouse Tickets - Disney ticket offers matched to your dates",
-};
 
 const manrope = Manrope({ variable: "--font-manrope", subsets: ["latin"], display: "swap" });
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"], display: "swap" });
@@ -55,16 +50,16 @@ export const metadata: Metadata = {
     type: "website",
     url: siteUrl,
     siteName,
-    title: siteName,
-    description: defaultDescription,
+    title: socialTitle,
+    description: socialDescription,
     images: [shareImage],
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: siteName,
-    description: defaultDescription,
-    images: [shareImage.url],
+    title: socialTitle,
+    description: socialDescription,
+    images: [{ url: shareImage.url, alt: shareImage.alt }],
   },
   icons: {
     icon: [

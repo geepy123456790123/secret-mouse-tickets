@@ -1,3 +1,4 @@
+import { shareImage } from "@/lib/social-preview";
 import { PRICE_LABEL } from "@/lib/pricing";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -9,12 +10,6 @@ const siteUrl = "https://secretmousetickets.com";
 const pageUrl = `${siteUrl}/disney-world-group-convention-tickets`;
 const pageDescription =
   "Understand Disney World Group and Convention discount tickets, how Secret Mouse Tickets finds matching offers, and why guests use these sale pages to save on eligible Disney tickets.";
-const shareImage = {
-  url: "/secret-mouse-tickets-meta-feed.png",
-  width: 1200,
-  height: 628,
-  alt: "Secret Mouse Tickets - Disney World ticket offers matched to your visit",
-};
 
 export const metadata: Metadata = {
   title: "Disney World Group And Convention Tickets",
@@ -32,7 +27,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Disney World Group And Convention Tickets",
     description: pageDescription,
-    images: [shareImage.url],
+    images: [{ url: shareImage.url, alt: shareImage.alt }],
   },
 };
 
