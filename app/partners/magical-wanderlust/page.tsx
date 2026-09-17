@@ -34,9 +34,9 @@ export default async function MagicalWanderlustPartnerPage() {
 
   return (
     <HomePageClient
-      topBanner={topBanner}
+      topBanner={{ ...topBanner, enabled: false }}
       partnerLanding={{
-        creatorName: "Maria",
+        welcomeText: "Welcome, Magical Wanderlust fans!",
         handle: "@magical_wanderlust",
         couponCode,
         discountLabel: "25% off our matching fee",
