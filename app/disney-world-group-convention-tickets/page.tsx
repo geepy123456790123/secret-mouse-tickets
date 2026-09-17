@@ -68,7 +68,7 @@ const faqSchema = {
       name: "Do guests need to attend a convention to use these ticket offers?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Eligibility varies by offer. Review the Disney sale page’s purchase requirements, valid dates, and restrictions before buying; a date match alone does not confirm every requirement.",
+        text: "Eligibility varies by offer. Review the Disney sale page’s purchase requirements, valid dates, and restrictions before buying; a date match alone doesn't confirm every requirement.",
       },
     },
     {
@@ -179,7 +179,7 @@ export default function DisneyWorldGroupConventionTicketsPage() {
             <p>
               Each offer has its own purchase requirements. Disney controls eligibility, and some
               offers may be restricted to a particular group or event. Read the sale page’s terms
-              before buying. A match to your travel dates does not establish eligibility on its own.
+              before buying. A match to your travel dates doesn&apos;t establish eligibility on its own.
             </p>
           </ContentSection>
 

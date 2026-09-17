@@ -126,7 +126,7 @@ export function SquarePaymentForm({
         await loadSquareScript(environment);
 
         if (!window.Square) {
-          throw new Error("Square payment form did not load.");
+          throw new Error("Square payment form didn't load.");
         }
 
         const payments = window.Square.payments(applicationId, locationId);
@@ -229,7 +229,7 @@ export function SquarePaymentForm({
         await loadPayPalScript(paypalClientId as string, paypalEnvironment);
 
         if (!window.paypal) {
-          throw new Error("PayPal Checkout did not load.");
+          throw new Error("PayPal Checkout didn't load.");
         }
 
         const buttons = window.paypal.Buttons({

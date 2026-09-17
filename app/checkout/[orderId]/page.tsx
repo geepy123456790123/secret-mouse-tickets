@@ -180,7 +180,7 @@ export default async function CheckoutPage({
               />
               <CheckoutStep
                 icon={<ShieldCheck size={19} aria-hidden="true" />}
-                text="Our refund policy covers an inaccessible link or a purchase where you do not come out ahead after our fee."
+                text="Our refund policy covers an inaccessible link or a purchase where you don't come out ahead after our fee."
               />
             </div>
           ) : (

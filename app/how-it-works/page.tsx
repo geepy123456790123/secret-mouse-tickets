@@ -125,9 +125,9 @@ export default function HowItWorksPage() {
             />
           </section>
 
-          <ContentSection title="What you are buying">
+          <ContentSection title="What you're buying">
             <p>
-              Secret Mouse Tickets does not sell Disney theme park tickets directly. Our service is
+              Secret Mouse Tickets doesn&apos;t sell Disney theme park tickets directly. Our service is
               the matching and delivery step: we identify whether your visit dates line up with an
               eligible Disney Group and Convention discount ticket offer and, when they do, we send
               you the qualifying Disney sale-page link after purchase.
@@ -142,7 +142,7 @@ export default function HowItWorksPage() {
             <p>
               Purchase requirements vary by offer. Disney sets each sale page’s eligibility rules,
               valid dates, and restrictions. Review those requirements before purchasing; a date
-              match does not confirm that you meet every condition of the offer.
+              match doesn&apos;t confirm that you meet every condition of the offer.
             </p>
           </ContentSection>
 
@@ -159,7 +159,7 @@ export default function HowItWorksPage() {
 
           <ContentSection title="Check park reservations before you buy">
             <p>Disney lists Sport and Convention tickets among the types that require park reservations.
-              Check availability for your parks and dates before purchasing. Our matching service does not reserve admission.</p>
+              Check availability for your parks and dates before purchasing. Our matching service doesn&apos;t reserve admission.</p>
             <a href="https://disneyworld.disney.go.com/experience-updates/park-reservations/?redirect=false" className="underline underline-offset-4">Read Disney&apos;s reservation guidance</a>
           </ContentSection>
 

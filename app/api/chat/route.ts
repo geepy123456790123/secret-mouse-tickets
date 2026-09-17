@@ -59,7 +59,7 @@ Core facts:
 - Hotel discounts are not part of the current offer.
 
 Style:
-- Keep answers warm, concise, and practical.
+- Keep answers warm, concise, and practical. Use natural contractions, such as "don't", "you're", and "we'll".
 - Use 2-4 short sentences.
 - If the visitor asks something outside this scope, briefly say you can help with Secret Mouse Tickets questions and offer to open a support ticket.`;
 
@@ -267,14 +267,14 @@ function getMissingFields(intent: SupportIntent, details: SupportDetails) {
       missing.push("order confirmation number if you have it");
     }
     if (!/\bvisit|date|ticket|price|saved|save|ahead|fee|cost\b/i.test(details.description)) {
-      missing.push("a short note explaining why you did not come out ahead");
+      missing.push("a short note explaining why you didn't come out ahead");
     }
   } else if (intent === "access") {
     if (!details.orderReference) {
       missing.push("order confirmation number if you have it");
     }
     if (!/\baccess|link|page|email|checkout|error|issue|problem|work\b/i.test(details.description)) {
-      missing.push("a short description of what is not working");
+      missing.push("a short description of what isn't working");
     }
   } else if (details.description.length < 20) {
     missing.push("a short description of the issue");
@@ -294,9 +294,9 @@ function buildMissingDetailsReply(intent: SupportIntent, missingFields: string[]
   const missingList = joinHumanList(missingFields);
   const intentSpecific =
     intent === "refund"
-      ? "Please send your full name, the best email for follow-up, your order confirmation number if you have it, and a quick note explaining why you did not come out ahead after our fee."
+      ? "Please send your full name, the best email for follow-up, your order confirmation number if you have it, and a quick note explaining why you didn't come out ahead after our fee."
       : intent === "access"
-        ? "Please send your full name, the best email for follow-up, your order confirmation number if you have it, and a short description of what is not working."
+        ? "Please send your full name, the best email for follow-up, your order confirmation number if you have it, and a short description of what isn't working."
         : "Please send your full name, the best email for follow-up, and a short description of the issue.";
 
   return `${prefix} I still need ${missingList}. ${intentSpecific}`;
@@ -310,11 +310,11 @@ function getFaqReply(input: string) {
   }
 
   if (/\bwhat am i buying|what do i get|what is this\b/.test(text)) {
-    return "You are buying Secret Mouse Tickets access to a Disney Group & Convention discount ticket sale page that matches your Walt Disney World visit dates, when one is available. After checkout, we email you the link, and you purchase your actual theme park tickets directly from Disney.";
+    return "You're buying Secret Mouse Tickets access to a Disney Group & Convention discount ticket sale page that matches your Walt Disney World visit dates, when one is available. After checkout, we email you the link, and you purchase your actual theme park tickets directly from Disney.";
   }
 
   if (/\baffiliated|disney partner|official disney\b/.test(text)) {
-    return "Secret Mouse Tickets is an independent service and is not affiliated with Disney. We help customers find eligible Disney Group & Convention ticket offers that are not broadly advertised to the public.";
+    return "Secret Mouse Tickets is an independent service and isn't affiliated with Disney. We help customers find eligible Disney Group & Convention ticket offers that aren't broadly advertised to the public.";
   }
 
   if (/\bcheck my dates|how do i check|qualify|eligib/.test(text)) {
@@ -326,7 +326,7 @@ function getFaqReply(input: string) {
   }
 
   if (/\brefund|money back|guarantee|come out ahead|save money\b/.test(text)) {
-    return "Because Disney uses dynamic pricing, we cannot promise an exact savings amount in advance. If you don't come out ahead versus Disney's non-discounted price for the same tickets after our fee, or if you cannot access the paid link, we will review it for a refund.";
+    return "Because Disney uses dynamic pricing, we can't promise an exact savings amount in advance. If you don't come out ahead versus Disney's non-discounted price for the same tickets after our fee, or if you can't access the paid link, we'll review it for a refund.";
   }
 
   if (/\bwater park|fun & more|bonus\b/.test(text)) {
@@ -334,7 +334,7 @@ function getFaqReply(input: string) {
   }
 
   if (/\bhotel\b/.test(text)) {
-    return "Hotel discounts are not part of the current Secret Mouse Tickets offer. Right now the service is focused on eligible Walt Disney World ticket discounts.";
+    return "Hotel discounts aren't part of the current Secret Mouse Tickets offer. Right now the service is focused on eligible Walt Disney World ticket discounts.";
   }
 
   return "";

@@ -121,7 +121,7 @@ www.secretmousetickets.com`;
           }
         </div>
         <p style="margin:0;font-size:15px;line-height:1.7">Questions about your order? Reply to this email or contact <a href="mailto:hello@secretmousetickets.com" style="color:#5d45b5;text-decoration:underline">hello@secretmousetickets.com</a>.</p>
-        <p style="margin:18px 0 0;font-size:14px;line-height:1.7;color:#6a6170">Secret Mouse Tickets is an independent service and is not affiliated with Disney.</p>
+        <p style="margin:18px 0 0;font-size:14px;line-height:1.7;color:#6a6170">Secret Mouse Tickets is an independent service and isn't affiliated with Disney.</p>
       </div>
     </div>
   </div>`;
