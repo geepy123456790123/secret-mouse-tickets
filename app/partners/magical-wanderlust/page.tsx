@@ -45,7 +45,7 @@ export default async function MagicalWanderlustPartnerPage() {
         welcomeText: "Welcome, Magical Wanderlust fans!",
         handle: "@magical_wanderlust",
         couponCode,
-        discountLabel: "25% off our matching fee",
+        discountLabel: "25% off our fee",
       }}
     />
   );
