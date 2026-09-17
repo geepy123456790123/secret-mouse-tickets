@@ -1,3 +1,4 @@
+import { shareImage } from "@/lib/social-preview";
 import type { Metadata } from "next";
 import { HomePageClient } from "@/app/home-page-client";
 import { getTopBannerSettings } from "@/lib/site-settings";
@@ -18,20 +19,13 @@ export const metadata: Metadata = {
     title: "Disney World Ticket Savings for magical_wanderlust Followers",
     description: pageDescription,
     url: `${siteUrl}${path}`,
-    images: [
-      {
-        url: "/secret-mouse-tickets-meta-feed.png",
-        width: 1731,
-        height: 909,
-        alt: "Secret Mouse Tickets - Disney ticket offers matched to your dates",
-      },
-    ],
+    images: [shareImage],
   },
   twitter: {
     card: "summary_large_image",
     title: "Disney World Ticket Savings for magical_wanderlust Followers",
     description: pageDescription,
-    images: ["/secret-mouse-tickets-meta-feed.png"],
+    images: [{ url: shareImage.url, alt: shareImage.alt }],
   },
 };
 
