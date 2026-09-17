@@ -60,6 +60,13 @@ type Attribution = {
   msclkid: string | null;
 };
 
+type PartnerLanding = {
+  creatorName: string;
+  handle: string;
+  couponCode: string;
+  discountLabel: string;
+};
+
 const defaultForm = {
   visitStartDate: "2026-09-15",
   visitEndDate: "2026-09-18",
@@ -93,12 +100,18 @@ const testimonials = [
   },
 ];
 
-export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) {
+export function HomePageClient({
+  topBanner,
+  partnerLanding,
+}: {
+  topBanner: TopBannerSettings;
+  partnerLanding?: PartnerLanding;
+}) {
   const [form, setForm] = useState(defaultForm);
   const [result, setResult] = useState<EligibilityResult | null>(null);
   const [status, setStatus] = useState<"idle" | "checking" | "checkout">("idle");
   const [error, setError] = useState("");
-  const [couponCode, setCouponCode] = useState("");
+  const [couponCode, setCouponCode] = useState(partnerLanding?.couponCode ?? "");
   const matchCardRef = useRef<HTMLElement | null>(null);
 
   const totalGuests = useMemo(
@@ -107,7 +120,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
   );
 
   useEffect(() => {
-    const attribution = getAttribution();
+    const attribution = getAttribution(partnerLanding);
     if (!attribution.visitId) {
       return;
     }
@@ -118,7 +131,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
       body: JSON.stringify(attribution),
       keepalive: true,
     }).catch(() => undefined);
-  }, []);
+  }, [partnerLanding]);
 
   useEffect(() => {
     if (result?.outcome !== "matched") return;
@@ -155,7 +168,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
     const response = await fetch("/api/eligibility", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, attribution: getAttribution() }),
+      body: JSON.stringify({ ...form, attribution: getAttribution(partnerLanding) }),
     });
 
     const payload = (await response.json()) as EligibilityResult & { error?: string };
@@ -212,6 +225,15 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
       <section className="home-hero">
         <div className="hero-grid">
         <div className="hero-story">
+          {partnerLanding ? (
+            <div className="partner-welcome">
+              <p>Welcome, {partnerLanding.creatorName} followers</p>
+              <strong>
+                Use code {partnerLanding.couponCode} for {partnerLanding.discountLabel}.
+              </strong>
+              <span>{partnerLanding.handle} sent you here to check your Disney World dates for free.</span>
+            </div>
+          ) : null}
           <div className="hero-copy">
             <h1>More Disney magic.<br /><span>Less ticket guesswork.</span></h1>
             <p className="hero-description">
@@ -407,7 +429,7 @@ export function HomePageClient({ topBanner }: { topBanner: TopBannerSettings }) 
                     value={couponCode}
                     onChange={(event) => setCouponCode(event.target.value)}
                     className="h-12 rounded-[14px] border-[3px] border-[#120f17] bg-white px-3 text-base font-semibold uppercase"
-                    placeholder="Optional"
+                    placeholder={partnerLanding?.couponCode ?? "Optional"}
                   />
                 </label>
                 <button
@@ -660,7 +682,7 @@ function MatchStep({ number, text }: { number: string; text: string }) {
   );
 }
 
-function getAttribution(): Attribution {
+function getAttribution(partnerLanding?: PartnerLanding): Attribution {
   if (typeof window === "undefined") {
     return {
       visitId: null,
@@ -682,20 +704,24 @@ function getAttribution(): Attribution {
 
   const params = new URLSearchParams(window.location.search);
   const referrer = normalizeAttributionValue(document.referrer);
+  const landingPage = normalizeAttributionValue(`${window.location.pathname}${window.location.search}`);
+  const partnerSlug = partnerLanding?.handle.replace(/^@/, "").toLowerCase();
 
   return {
     visitId: getPersistentId("smt_visit_id", window.sessionStorage),
     sessionId: getPersistentId("smt_session_id", window.sessionStorage),
     visitorId: getPersistentId("smt_visitor_id", window.localStorage),
-    utmSource: normalizeAttributionValue(params.get("utm_source")),
-    utmMedium: normalizeAttributionValue(params.get("utm_medium")),
-    utmCampaign: normalizeAttributionValue(params.get("utm_campaign")),
-    utmContent: normalizeAttributionValue(params.get("utm_content")),
+    utmSource: normalizeAttributionValue(params.get("utm_source")) ?? (partnerLanding ? "instagram" : null),
+    utmMedium: normalizeAttributionValue(params.get("utm_medium")) ?? (partnerLanding ? "influencer" : null),
+    utmCampaign:
+      normalizeAttributionValue(params.get("utm_campaign")) ??
+      (partnerSlug ? `partner_${partnerSlug}` : null),
+    utmContent: normalizeAttributionValue(params.get("utm_content")) ?? partnerSlug ?? null,
     utmTerm: normalizeAttributionValue(params.get("utm_term")),
     gclid: normalizeAttributionValue(params.get("gclid")),
     fbclid: normalizeAttributionValue(params.get("fbclid")),
     msclkid: normalizeAttributionValue(params.get("msclkid")),
-    landingPage: normalizeAttributionValue(`${window.location.pathname}${window.location.search}`),
+    landingPage,
     referrer,
     referrerDomain: getReferrerDomain(referrer),
   };

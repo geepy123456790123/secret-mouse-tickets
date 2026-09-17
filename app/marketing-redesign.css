@@ -70,6 +70,35 @@
 .home-hero { padding: 25px 0 56px; }
 .hero-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: clamp(36px, 5vw, 76px); }
 .hero-story { min-width: 0; padding-top: 14px; }
+.partner-welcome {
+  display: grid;
+  gap: 6px;
+  max-width: 42rem;
+  margin-bottom: 18px;
+  border: 3px solid #120f17;
+  border-radius: 20px;
+  background: #fff7de;
+  box-shadow: 5px 5px 0 #120f17;
+  padding: 16px 18px;
+  color: #120f17;
+}
+.partner-welcome p {
+  margin: 0;
+  color: #5d45b5;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.partner-welcome strong {
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  line-height: 1.2;
+}
+.partner-welcome span {
+  color: #3e304d;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
 .hero-copy h1 { font-size: clamp(42px, 4.15vw, 60px); line-height: 1.08; letter-spacing: -.055em; max-width: 560px; }
 .hero-copy h1 span { color: var(--purple); }
 .hero-description { max-width: 500px; margin-top: 23px; color: var(--muted); font-size: 17px; line-height: 1.75; }
