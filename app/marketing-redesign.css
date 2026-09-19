@@ -116,6 +116,8 @@
 .checker-intro { margin: 8px 0 25px; font-size: 12px; color: var(--muted); }
 .checker-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 17px 16px; }
 .checker-fields label { min-width: 0; font-size: 12px; font-weight: 550; gap: 7px; color: #534a60; }
+.polished-page .checker-fields input[type="email"] { font-size: 13px; padding-right: 10px; }
+.polished-page .checker-fields input[type="email"]::placeholder { font-size: 12px; }
 .date-checker button[type="submit"], .matched-offer button, .primary-link {
   border: 1px solid transparent; border-radius: 10px; background: var(--purple); color: #fff;
   height: 52px; font-size: 14px; font-weight: 600; letter-spacing: 0;
@@ -249,6 +251,8 @@
 }
 @media (max-width: 600px) {
   .marketing-header nav a:first-child { display: none; }
+  .checker-fields label:has(input[type="date"]),
+  .checker-fields label:has(input[type="email"]) { grid-column: 1 / -1; }
 }
 @media (max-width: 760px) {
   .home-redesign > .fixed { position: relative; right: auto; bottom: auto; align-items: center; padding: 0 16px 24px; }
