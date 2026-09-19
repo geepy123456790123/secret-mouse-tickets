@@ -116,6 +116,19 @@
 .checker-intro { margin: 8px 0 25px; font-size: 12px; color: var(--muted); }
 .checker-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 17px 16px; }
 .checker-fields label { min-width: 0; font-size: 12px; font-weight: 550; gap: 7px; color: #534a60; }
+.polished-page .checker-fields input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.polished-page .checker-fields input[type="date"]::-webkit-date-and-time-value {
+  min-width: 0;
+  text-align: left;
+  font: inherit;
+}
 .polished-page .checker-fields input[type="email"] { font-size: 13px; padding-right: 10px; }
 .polished-page .checker-fields input[type="email"]::placeholder { font-size: 12px; }
 .date-checker button[type="submit"], .matched-offer button, .primary-link {
